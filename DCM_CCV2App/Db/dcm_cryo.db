@@ -1,0 +1,191 @@
+# Minimal PV set for Cryo Cooler simulator bring-up (mirrors DCM_CCV2App/Db)
+
+record(mbbi, "BL:DCM:CRYO:STATE:MAIN") {
+    field(ZRST, "OFF")
+    field(ONST, "INIT")
+    field(TWST, "PRECOOL")
+    field(THST, "RUN")
+    field(FRST, "HOLD")
+    field(FVST, "WARMUP")
+    field(SXST, "SAFE_SHUTDOWN")
+    field(SVST, "ALARM")
+    alias("BL:DCM:CRYO:STATE:CURRENT")
+}
+
+record(stringin, "BL:DCM:CRYO:STATE:TEXT") {
+    field(VAL, "OFF")
+}
+
+record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
+    field(ZRST, "NONE")
+    field(ONST, "START")
+    field(TWST, "STOP")
+    field(THST, "HOLD")
+    field(FRST, "RESUME")
+    field(FVST, "EMERGENCY_STOP")
+    field(SXST, "RESET")
+    field(SVST, "WARMUP")
+}
+
+record(ai,  "BL:DCM:CRYO:TEMP:COLDHEAD") {
+    field(EGU,  "K")
+    field(PREC, "2")
+}
+record(ai,  "BL:DCM:CRYO:TEMP:T5") {
+    field(EGU,  "K")
+    field(PREC, "2")
+}
+record(ai,  "BL:DCM:CRYO:TEMP:T6") {
+    field(EGU,  "K")
+    field(PREC, "2")
+}
+record(ao,  "BL:DCM:CRYO:TEMP:SETPOINT") {
+    field(EGU,  "K")
+    field(PREC, "2")
+    field(DRVH, "300")
+    field(DRVL, "4")
+}
+
+record(ai,  "BL:DCM:CRYO:PRESS:PT1") {
+    field(EGU,  "bar")
+    field(PREC, "2")
+}
+record(ai,  "BL:DCM:CRYO:PRESS:PT3") {
+    field(EGU,  "bar")
+    field(PREC, "2")
+}
+record(ai,  "BL:DCM:CRYO:FLOW:FT18") {
+    field(EGU,  "L/min")
+    field(PREC, "2")
+}
+
+record(calcout, "BL:DCM:CRYO:ALARM:ACTIVE") {
+    field(CALC, "A>0")
+}
+record(bo,  "BL:DCM:CRYO:ALARM:ACK_ALL") {
+    field(ZNAM, "Idle")
+    field(ONAM, "AckAll")
+}
+
+# Minimal devices for GUI binding
+record(bi,  "BL:DCM:CRYO:COMP:RUNNING") {
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+}
+record(stringin, "BL:DCM:CRYO:COMP:STATUS") {
+    field(VAL, "OFF")
+}
+
+record(bo,  "BL:DCM:CRYO:VALVE:V9:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bi,  "BL:DCM:CRYO:VALVE:V9:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+
+record(bi,  "BL:DCM:CRYO:PUMP:RUNNING") {
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+}
+record(bo,  "BL:DCM:CRYO:PUMP:CMD") {
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+}
+
+record(bi,  "BL:DCM:CRYO:HEATER:RUNNING") {
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+}
+record(bo,  "BL:DCM:CRYO:HEATER:CMD") {
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+}
+record(ao,  "BL:DCM:CRYO:HEATER:POWER") {
+    field(EGU,  "%")
+    field(PREC, "1")
+    field(DRVL, "0")
+    field(DRVH, "100")
+}
+
+record(bi,  "BL:DCM:CRYO:SAFETY:INTERLOCK") {
+    field(ZNAM, "OK")
+    field(ONAM, "TRIP")
+}
+
+# Trend/time base
+record(ai,  "BL:DCM:CRYO:TIME") {
+    field(EGU,  "s")
+    field(PREC, "1")
+}
+
+# Level transmitters
+record(ai,  "BL:DCM:CRYO:LEVEL:LT19") {
+    field(EGU,  "%")
+    field(PREC, "1")
+}
+record(ai,  "BL:DCM:CRYO:LEVEL:LT23") {
+    field(EGU,  "%")
+    field(PREC, "1")
+}
+
+# Additional valves used by GUI
+record(bo,  "BL:DCM:CRYO:VALVE:V15:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bi,  "BL:DCM:CRYO:VALVE:V15:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bo,  "BL:DCM:CRYO:VALVE:V17:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bi,  "BL:DCM:CRYO:VALVE:V17:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bo,  "BL:DCM:CRYO:VALVE:V19:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bi,  "BL:DCM:CRYO:VALVE:V19:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+
+# Alarm severity summary used by GUI color rules
+record(mbbi, "BL:DCM:CRYO:ALARM:MAX_SEVERITY") {
+    field(ZRST, "NO_ALARM")   # 0
+    field(ONST, "MINOR")      # 1
+    field(TWST, "MAJOR")      # 2
+    field(THST, "INVALID")    # 3
+}
+
+# Historical arrays for plotting (XYPlot expects arrays)
+record(waveform, "BL:DCM:CRYO:HIST:TIME") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:TEMP:COLDHEAD") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:TEMP:T5") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:TEMP:T6") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT1") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT3") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}

@@ -1,0 +1,7 @@
+pyepics>=3.5
+p4p>=4.2
+pytest>=8.0
+hypothesis>=6.100
+rich
+pyyaml>=6.0
+numpy>=1.24

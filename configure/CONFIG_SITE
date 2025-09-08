@@ -16,6 +16,12 @@
 #   continue building even if conflicts are found.
 CHECK_RELEASE = YES
 
+# Build option: enable SNL (EPICS Sequencer) integration
+# Default OFF to allow building without sequencer module.
+# Set to YES when SNCSEQ is installed and points to the module root
+# containing 'dbd/seq.dbd' and 'bin/$(EPICS_HOST_ARCH)/sncseq'.
+USE_SNL = YES
+
 # Set this when you only want to compile this application
 #   for a subset of the cross-compiled target architectures
 #   that Base is built for.

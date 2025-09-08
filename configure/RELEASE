@@ -30,6 +30,10 @@
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE = /usr/local/epics/EPICS_R7.0/base
+SUPPORT=/usr/local/epics/EPICS_R7.0/modules/synApps/support
+
+# If using the sequencer, point SNCSEQ at its top directory:
+SNCSEQ=$(SUPPORT)/sequencer-mirror-R2-2-9
 
 # Set RULES here if you want to use build rules from somewhere
 # other than EPICS_BASE:

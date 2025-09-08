@@ -12,7 +12,7 @@ dbLoadDatabase "dbd/DCM_CCV2.dbd"
 DCM_CCV2_registerRecordDeviceDriver pdbbase
 
 ## Load record instances
-#dbLoadRecords("db/DCM_CCV2.db","user=root")
+dbLoadRecords("db/dcm_cryo.db")
 
 #drvAsynIPPortConfigure("portName", "hostInfo", 0, 0, 0)
 cd "${TOP}/iocBoot/${IOC}"

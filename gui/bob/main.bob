@@ -79,7 +79,7 @@ DCM Cryo Cooler 메인 대시보드
     
     <widget type="led" version="2.0.0">
       <name>TopRunLED</name>
-      <pv_name>$(P)STATE:RUNNING</pv_name>
+      <pv_name>$(P)COMP:RUNNING</pv_name>
       <x>305</x>
       <y>2</y>
       <width>18</width>
@@ -143,7 +143,7 @@ DCM Cryo Cooler 메인 대시보드
     <!-- 상태 LED -->
     <widget type="led" version="2.0.0">
       <name>StatusLED</name>
-      <pv_name>$(P)STATE:RUNNING</pv_name>
+      <pv_name>$(P)COMP:RUNNING</pv_name>
       <x>140</x>
       <y>45</y>
       <width>20</width>
@@ -184,30 +184,12 @@ DCM Cryo Cooler 메인 대시보드
     </widget>
     
     <!-- 운전 시간 -->
-    <widget type="label" version="2.0.0">
-      <name>RuntimeLabel</name>
-      <text>운전 시간:</text>
-      <x>10</x>
-      <y>80</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>Runtime</name>
-      <pv_name>$(P)STATUS:RUNTIME</pv_name>
-      <x>100</x>
-      <y>80</y>
-      <width>100</width>
-      <height>20</height>
-      <format>1</format>
-      <tooltip>시스템 누적 운전 시간</tooltip>
-    </widget>
+    <!-- Runtime PV 미구현으로 표시 항목 제거 -->
     
     <!-- LN2 공급 상태 -->
     <widget type="label" version="2.0.0">
-      <name>LN2Label</name>
-      <text>LN2 공급:</text>
+      <name>PumpLabelTop</name>
+      <text>펌프:</text>
       <x>10</x>
       <y>110</y>
       <width>80</width>
@@ -215,19 +197,19 @@ DCM Cryo Cooler 메인 대시보드
     </widget>
     
     <widget type="led" version="2.0.0">
-      <name>LN2LED</name>
-      <pv_name>$(P)LN2:SUPPLY_OK</pv_name>
+      <name>PumpLEDTop</name>
+      <pv_name>$(P)PUMP:RUNNING</pv_name>
       <x>100</x>
       <y>110</y>
       <width>20</width>
       <height>20</height>
       <off_color>
-        <color red="255" green="0" blue="0"/>
+        <color red="128" green="128" blue="128"/>
       </off_color>
       <on_color>
         <color red="0" green="255" blue="0"/>
       </on_color>
-      <tooltip>LN2 공급 정상 여부</tooltip>
+      <tooltip>펌프 운전 상태</tooltip>
     </widget>
     
     <!-- 압축기 상태 -->
@@ -310,7 +292,7 @@ DCM Cryo Cooler 메인 대시보드
       <rules>
         <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
           <exp bool_exp="pv0==0">
-            <pv name="pv0">$(P)STATE:RUNNING</pv>
+            <pv name="pv0">$(P)COMP:RUNNING</pv>
           </exp>
         </rule>
       </rules>
@@ -342,7 +324,7 @@ DCM Cryo Cooler 메인 대시보드
       <rules>
         <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
           <exp bool_exp="pv0==1">
-            <pv name="pv0">$(P)STATE:RUNNING</pv>
+            <pv name="pv0">$(P)COMP:RUNNING</pv>
           </exp>
         </rule>
       </rules>
@@ -373,7 +355,7 @@ DCM Cryo Cooler 메인 대시보드
       <rules>
         <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
           <exp bool_exp="pv0==1">
-            <pv name="pv0">$(P)STATE:RUNNING</pv>
+            <pv name="pv0">$(P)COMP:RUNNING</pv>
           </exp>
         </rule>
       </rules>
@@ -404,7 +386,7 @@ DCM Cryo Cooler 메인 대시보드
       <rules>
         <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
           <exp bool_exp="pv0==0">
-            <pv name="pv0">$(P)STATE:RUNNING</pv>
+            <pv name="pv0">$(P)COMP:RUNNING</pv>
           </exp>
         </rule>
       </rules>
@@ -436,7 +418,7 @@ DCM Cryo Cooler 메인 대시보드
       <rules>
         <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
           <exp bool_exp="pv0==0">
-            <pv name="pv0">$(P)STATE:RUNNING</pv>
+            <pv name="pv0">$(P)COMP:RUNNING</pv>
           </exp>
         </rule>
       </rules>
@@ -472,7 +454,7 @@ DCM Cryo Cooler 메인 대시보드
       <name>AckButton</name>
       <actions>
         <action type="write_pv">
-          <pv_name>$(P)ALARM:ACK</pv_name>
+          <pv_name>$(P)ALARM:ACK_ALL</pv_name>
           <value>1</value>
           <description>알람 확인</description>
         </action>
@@ -683,34 +665,16 @@ DCM Cryo Cooler 메인 대시보드
     <!-- LN2 레벨 -->
     <widget type="label" version="2.0.0">
       <name>LN2Label</name>
-      <text>LN2 레벨:</text>
+      <!-- 레벨 PV 미구현: 해당 블럭 제거 -->
       <x>260</x>
       <y>90</y>
       <width>80</width>
       <height>20</height>
     </widget>
     
-    <widget type="textupdate" version="2.0.0">
-      <name>LN2Level</name>
-      <pv_name>$(P)LEVEL:LT19</pv_name>
-      <x>350</x>
-      <y>90</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>1</precision>
-      <format>1</format>
-      <tooltip>LN2 레벨 (%)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
+    <!-- 제거됨: LN2 레벨 표시 -->
     
-    <widget type="label" version="2.0.0">
-      <name>LN2Unit</name>
-      <text>%</text>
-      <x>435</x>
-      <y>90</y>
-      <width>30</width>
-      <height>20</height>
-    </widget>
+    <!-- 제거됨: LN2 레벨 단위 -->
     
     <!-- 유량 -->
     <widget type="label" version="2.0.0">
@@ -745,71 +709,13 @@ DCM Cryo Cooler 메인 대시보드
     </widget>
     
     <!-- 냉각 파워 -->
-    <widget type="label" version="2.0.0">
-      <name>PowerLabel</name>
-      <text>냉각 파워:</text>
-      <x>260</x>
-      <y>115</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>CoolingPower</name>
-      <pv_name>$(P)STATUS:COOLING_POWER</pv_name>
-      <x>350</x>
-      <y>115</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>1</precision>
-      <format>1</format>
-      <tooltip>냉각 파워 (W)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>PowerUnit</name>
-      <text>W</text>
-      <x>435</x>
-      <y>115</y>
-      <width>30</width>
-      <height>20</height>
-    </widget>
+    <!-- 제거됨: 냉각 파워 표시 (PV 미구현) -->
     
     <!-- 효율 -->
-    <widget type="label" version="2.0.0">
-      <name>EfficiencyLabel</name>
-      <text>시스템 효율:</text>
-      <x>10</x>
-      <y>140</y>
-      <width>120</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>Efficiency</name>
-      <pv_name>$(P)STATUS:EFFICIENCY</pv_name>
-      <x>140</x>
-      <y>140</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>1</precision>
-      <format>1</format>
-      <tooltip>시스템 효율 (%)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>EfficiencyUnit</name>
-      <text>%</text>
-      <x>225</x>
-      <y>140</y>
-      <width>20</width>
-      <height>20</height>
-    </widget>
+    <!-- 제거됨: 시스템 효율 표시 (PV 미구현) -->
   </widget>
   
-  <!-- 트렌드 차트 -->
+  <!-- 온도 XYPlot (TIME PV 기반, 10분 범위) -->
   <widget type="xyplot" version="2.0.0">
     <name>TrendChart</name>
     <title>온도 트렌드</title>
@@ -824,11 +730,11 @@ DCM Cryo Cooler 메인 대시보드
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
     </title_font>
     <x_axis>
-      <title>시간</title>
+      <title>시간 (s)</title>
       <autoscale>true</autoscale>
       <log_scale>false</log_scale>
       <minimum>0.0</minimum>
-      <maximum>100.0</maximum>
+      <maximum>600.0</maximum>
       <show_grid>true</show_grid>
       <title_font>
         <font name="Default" family="Liberation Sans" style="REGULAR" size="12.0"/>
@@ -858,8 +764,8 @@ DCM Cryo Cooler 메인 대시보드
     <traces>
       <trace>
         <name>Cold Head</name>
-        <x_pv>$(P)TIME</x_pv>
-        <y_pv>$(P)TEMP:COLDHEAD</y_pv>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:TEMP:COLDHEAD</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -874,8 +780,8 @@ DCM Cryo Cooler 메인 대시보드
       </trace>
       <trace>
         <name>T5</name>
-        <x_pv>$(P)TIME</x_pv>
-        <y_pv>$(P)TEMP:T5</y_pv>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:TEMP:T5</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -890,8 +796,8 @@ DCM Cryo Cooler 메인 대시보드
       </trace>
       <trace>
         <name>T6</name>
-        <x_pv>$(P)TIME</x_pv>
-        <y_pv>$(P)TEMP:T6</y_pv>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:TEMP:T6</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -907,7 +813,7 @@ DCM Cryo Cooler 메인 대시보드
     </traces>
   </widget>
   
-  <!-- 압력 트렌드 차트 -->
+  <!-- 압력 XYPlot (TIME PV 기반, 10분 범위) -->
   <widget type="xyplot" version="2.0.0">
     <name>PressureTrendChart</name>
     <title>압력 트렌드</title>
@@ -922,11 +828,11 @@ DCM Cryo Cooler 메인 대시보드
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
     </title_font>
     <x_axis>
-      <title>시간</title>
+      <title>시간 (s)</title>
       <autoscale>true</autoscale>
       <log_scale>false</log_scale>
       <minimum>0.0</minimum>
-      <maximum>100.0</maximum>
+      <maximum>600.0</maximum>
       <show_grid>true</show_grid>
       <title_font>
         <font name="Default" family="Liberation Sans" style="REGULAR" size="12.0"/>
@@ -956,8 +862,8 @@ DCM Cryo Cooler 메인 대시보드
     <traces>
       <trace>
         <name>PT1</name>
-        <x_pv>$(P)TIME</x_pv>
-        <y_pv>$(P)PRESS:PT1</y_pv>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:PRESS:PT1</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -972,8 +878,8 @@ DCM Cryo Cooler 메인 대시보드
       </trace>
       <trace>
         <name>PT3</name>
-        <x_pv>$(P)TIME</x_pv>
-        <y_pv>$(P)PRESS:PT3</y_pv>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:PRESS:PT3</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>

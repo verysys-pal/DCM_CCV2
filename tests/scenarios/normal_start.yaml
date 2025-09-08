@@ -1,0 +1,7 @@
+steps:
+  - set: { pv: BL:DCM:CRYO:TEMP:SETPOINT, value: 80 }
+  - set: { pv: BL:DCM:CRYO:CMD:MAIN, value: 1 }   # START
+  - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 2, timeout: 30 }   # PRECOOL
+  - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 3, timeout: 300 }  # RUN
+  - assert: { pv: BL:DCM:CRYO:TEMP:COLDHEAD, max: 90 }
+

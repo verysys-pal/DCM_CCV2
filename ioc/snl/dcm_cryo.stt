@@ -1,0 +1,46 @@
+program dcm_cryo
+
+option +r;   /* reentrant */
+option -c;   /* no asynchronous pvGet by default */
+
+/*
+ * Minimal SNL skeleton:
+ * - Mirrors STATE:MAIN (mbbi) to STATE:TEXT (stringin) for GUI convenience
+ * - Observes CMD:MAIN (mbbo) but does not drive actions here (Python bridge does)
+ *
+ * This file is a placeholder to enable future migration of state logic
+ * from Python to SNL if desired.
+ */
+
+ss mirror_state {
+    state init {
+        when() {
+            /* nothing */
+        } state run
+    }
+
+    state run {
+        /* PV declarations */
+        int state_val;
+        char state_txt[32];
+        assign state_val to "BL:DCM:CRYO:STATE:MAIN";
+        assign state_txt to "BL:DCM:CRYO:STATE:TEXT";
+        monitor state_val;
+
+        when() {
+            pvGet(state_val);
+            switch (state_val) {
+                case 0: strcpy(state_txt, "OFF"); break;
+                case 1: strcpy(state_txt, "INIT"); break;
+                case 2: strcpy(state_txt, "PRECOOL"); break;
+                case 3: strcpy(state_txt, "RUN"); break;
+                case 4: strcpy(state_txt, "HOLD"); break;
+                case 5: strcpy(state_txt, "WARMUP"); break;
+                case 6: strcpy(state_txt, "SAFE_SHUTDOWN"); break;
+                case 7: strcpy(state_txt, "ALARM"); break;
+                default: strcpy(state_txt, "UNKNOWN"); break;
+            }
+            pvPut(state_txt);
+        } state run
+    }
+}
