@@ -1,0 +1,1057 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+DCM Cryo Cooler 알람 및 진단 화면
+한국어 알람 메시지 및 진단 정보 표시
+-->
+  <display version="2.0.0">
+    <macros>
+      <macro>
+        <name>P</name>
+        <value>BL:DCM:CRYO:</value>
+      </macro>
+    </macros>
+  <name>DCM 크라이오쿨러 알람 및 진단</name>
+  <width>1400</width>
+  <height>900</height>
+  <background_color>
+    <color red="240" green="240" blue="240"/>
+  </background_color>
+  
+  <!-- 제목 -->
+  <widget type="label" version="2.0.0">
+    <name>Title</name>
+    <text>DCM 크라이오쿨러 알람 및 진단 시스템</text>
+    <x>20</x>
+    <y>10</y>
+    <width>500</width>
+    <height>40</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="18.0"/>
+    </font>
+    <foreground_color>
+      <color red="0" green="0" blue="128"/>
+    </foreground_color>
+  </widget>
+  
+  <!-- 현재 알람 상태 -->
+  <widget type="group" version="2.0.0">
+    <name>CurrentAlarmStatus</name>
+    <x>20</x>
+    <y>60</y>
+    <width>1360</width>
+    <height>80</height>
+    <style>3</style>
+    <transparent>false</transparent>
+    <background_color>
+      <color red="255" green="255" blue="255"/>
+    </background_color>
+    <border_color>
+      <color red="128" green="128" blue="128"/>
+    </border_color>
+    
+    <widget type="label" version="2.0.0">
+      <name>CurrentAlarmTitle</name>
+      <text>현재 알람 상태</text>
+      <x>10</x>
+      <y>10</y>
+      <width>150</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      </font>
+    </widget>
+    
+    <!-- 활성 알람 수 -->
+    <widget type="label" version="2.0.0">
+      <name>ActiveAlarmLabel</name>
+      <text>활성 알람:</text>
+      <x>200</x>
+      <y>15</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ActiveAlarmCount</name>
+      <pv_name>$(P)ALARM:ACTIVE_COUNT</pv_name>
+      <x>290</x>
+      <y>15</y>
+      <width>50</width>
+      <height>20</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
+      </font>
+      <foreground_color>
+        <color red="255" green="0" blue="0"/>
+      </foreground_color>
+      <format>0</format>
+      <rules>
+        <rule name="ActiveCountColor" prop_id="foreground_color">
+          <exp>pv0 &gt; 0 ? color(255,0,0) : color(0,128,0)</exp>
+          <pv trig="true">$(P)ALARM:ACTIVE_COUNT</pv>
+        </rule>
+      </rules>
+    </widget>
+    
+    <!-- 미확인 알람 수 -->
+    <widget type="label" version="2.0.0">
+      <name>UnackAlarmLabel</name>
+      <text>미확인 알람:</text>
+      <x>360</x>
+      <y>15</y>
+      <width>90</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>UnackAlarmCount</name>
+      <pv_name>$(P)ALARM:UNACK_COUNT</pv_name>
+      <x>460</x>
+      <y>15</y>
+      <width>50</width>
+      <height>20</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
+      </font>
+      <foreground_color>
+        <color red="255" green="165" blue="0"/>
+      </foreground_color>
+      <format>0</format>
+      <rules>
+        <rule name="UnackCountColor" prop_id="foreground_color">
+          <exp>pv0 &gt; 0 ? color(255,165,0) : color(0,128,0)</exp>
+          <pv trig="true">$(P)ALARM:UNACK_COUNT</pv>
+        </rule>
+      </rules>
+    </widget>
+    
+    <!-- 최고 심각도 -->
+    <widget type="label" version="2.0.0">
+      <name>MaxSeverityLabel</name>
+      <text>최고 심각도:</text>
+      <x>530</x>
+      <y>15</y>
+      <width>90</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>MaxSeverity</name>
+      <pv_name>$(P)ALARM:MAX_SEVERITY</pv_name>
+      <x>630</x>
+      <y>15</y>
+      <width>80</width>
+      <height>20</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
+      </font>
+      <format>6</format>
+      <rules>
+        <rule name="SeverityBgColor" prop_id="background_color">
+          <exp>pv0 &gt;= 3 ? color(255,0,0) : (pv0 &gt;= 2 ? color(255,165,0) : (pv0 &gt;= 1 ? color(255,255,0) : color(200,255,200)))</exp>
+          <pv trig="true">$(P)ALARM:MAX_SEVERITY</pv>
+        </rule>
+      </rules>
+    </widget>
+    
+    <!-- 전체 확인 버튼 -->
+    <widget type="action_button" version="3.0.0">
+      <name>AckAllButton</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:ACK_ALL</pv_name>
+          <value>1</value>
+          <description>모든 알람 확인</description>
+          <confirm_message>모든 알람을 확인하시겠습니까?</confirm_message>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:ACK_ALL</pv_name>
+          <value>0</value>
+          <description>버튼 펄스 복귀</description>
+        </action>
+      </actions>
+      <text>모든 알람 확인</text>
+      <x>750</x>
+      <y>10</y>
+      <width>120</width>
+      <height>30</height>
+      <background_color>
+        <color red="255" green="255" blue="0"/>
+      </background_color>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
+      </font>
+      <tooltip>활성 알람이 있을 때 모두 확인합니다</tooltip>
+      <rules>
+        <rule name="EnableAckAllWhenActive" prop_id="enabled" out_exp="true">
+          <exp bool_exp="pv0&gt;0">
+            <pv name="pv0">$(P)ALARM:ACTIVE_COUNT</pv>
+          </exp>
+        </rule>
+      </rules>
+    </widget>
+    
+    <!-- 알람 음소거 버튼 -->
+    <widget type="action_button" version="3.0.0">
+      <name>SilenceButton</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:SILENCE</pv_name>
+          <value>1</value>
+          <description>알람 음소거</description>
+          <confirm_message>현재 알람을 일시적으로 음소거할까요?</confirm_message>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:SILENCE</pv_name>
+          <value>0</value>
+          <description>버튼 펄스 복귀</description>
+        </action>
+      </actions>
+      <text>음소거</text>
+      <x>880</x>
+      <y>10</y>
+      <width>80</width>
+      <height>30</height>
+      <background_color>
+        <color red="200" green="200" blue="200"/>
+      </background_color>
+      <tooltip>알람 소리를 일시적으로 끕니다</tooltip>
+      <rules>
+        <rule name="EnableSilenceWhenActive" prop_id="enabled" out_exp="true">
+          <exp bool_exp="pv0&gt;0">
+            <pv name="pv0">$(P)ALARM:ACTIVE</pv>
+          </exp>
+        </rule>
+      </rules>
+    </widget>
+    
+    <!-- 알람 테스트 버튼 -->
+    <widget type="action_button" version="3.0.0">
+      <name>TestButton</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:TEST</pv_name>
+          <value>1</value>
+          <description>알람 테스트</description>
+          <confirm_message>테스트 알람을 발생시키겠습니까?</confirm_message>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:TEST</pv_name>
+          <value>0</value>
+          <description>버튼 펄스 복귀</description>
+        </action>
+      </actions>
+      <text>알람 테스트</text>
+      <x>970</x>
+      <y>10</y>
+      <width>100</width>
+      <height>30</height>
+      <background_color>
+        <color red="255" green="200" blue="200"/>
+      </background_color>
+      <tooltip>경보 체인을 점검하기 위한 테스트</tooltip>
+    </widget>
+
+    <!-- 알람 활성 LED -->
+    <widget type="label" version="2.0.0">
+      <name>AlarmActiveLabel</name>
+      <text>알람 활성:</text>
+      <x>20</x>
+      <y>45</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>AlarmActiveLED</name>
+      <pv_name>$(P)ALARM:ACTIVE</pv_name>
+      <x>100</x>
+      <y>45</y>
+      <width>20</width>
+      <height>20</height>
+      <off_color>
+        <color red="128" green="128" blue="128"/>
+      </off_color>
+      <on_color>
+        <color red="255" green="0" blue="0"/>
+      </on_color>
+      <tooltip>활성 알람 존재 여부</tooltip>
+    </widget>
+
+    <!-- 인터록 상태 LED -->
+    <widget type="label" version="2.0.0">
+      <name>InterlockLabel</name>
+      <text>인터록:</text>
+      <x>130</x>
+      <y>45</y>
+      <width>60</width>
+      <height>20</height>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>InterlockLED</name>
+      <pv_name>$(P)SAFETY:INTERLOCK</pv_name>
+      <x>190</x>
+      <y>45</y>
+      <width>20</width>
+      <height>20</height>
+      <off_color>
+        <color red="0" green="200" blue="0"/>
+      </off_color>
+      <on_color>
+        <color red="255" green="0" blue="0"/>
+      </on_color>
+      <tooltip>안전 인터록 상태 (ON=차단)</tooltip>
+    </widget>
+    
+    <!-- 시스템 상태 -->
+    <widget type="label" version="2.0.0">
+      <name>SystemStatusLabel</name>
+      <text>시스템 상태:</text>
+      <x>200</x>
+      <y>45</y>
+      <width>90</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>SystemStatus</name>
+      <pv_name>$(P)STATE:CURRENT</pv_name>
+      <x>300</x>
+      <y>45</y>
+      <width>100</width>
+      <height>20</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
+      </font>
+      <format>6</format>
+    </widget>
+    
+    <!-- 마지막 알람 시간 -->
+    <widget type="label" version="2.0.0">
+      <name>LastAlarmLabel</name>
+      <text>마지막 알람:</text>
+      <x>420</x>
+      <y>45</y>
+      <width>90</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>LastAlarmTime</name>
+      <pv_name>$(P)ALARM:LAST_TIME</pv_name>
+      <x>520</x>
+      <y>45</y>
+      <width>150</width>
+      <height>20</height>
+      <format>6</format>
+    </widget>
+    
+    <!-- 마지막 알람 메시지 -->
+    <widget type="label" version="2.0.0">
+      <name>LastAlarmMsgLabel</name>
+      <text>마지막 메시지:</text>
+      <x>680</x>
+      <y>45</y>
+      <width>100</width>
+      <height>20</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>LastAlarmMsg</name>
+      <pv_name>$(P)ALARM:MSG:KOR</pv_name>
+      <x>790</x>
+      <y>45</y>
+      <width>560</width>
+      <height>20</height>
+      <format>6</format>
+      <tooltip>한국어 마지막 알람 메시지</tooltip>
+    </widget>
+  </widget>
+  
+  <!-- 활성 알람 테이블 -->
+  <widget type="group" version="2.0.0">
+    <name>ActiveAlarmTable</name>
+    <x>20</x>
+    <y>160</y>
+    <width>1360</width>
+    <height>300</height>
+    <style>3</style>
+    <transparent>false</transparent>
+    <background_color>
+      <color red="255" green="255" blue="255"/>
+    </background_color>
+    <border_color>
+      <color red="128" green="128" blue="128"/>
+    </border_color>
+    
+    <widget type="label" version="2.0.0">
+      <name>ActiveAlarmTableTitle</name>
+      <text>활성 알람 목록</text>
+      <x>10</x>
+      <y>10</y>
+      <width>150</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      </font>
+    </widget>
+    
+    <!-- 선택 ACK 인덱스 입력 -->
+    <widget type="label" version="2.0.0">
+      <name>AckIndexLabel</name>
+      <text>선택 ACK 인덱스:</text>
+      <x>1020</x>
+      <y>10</y>
+      <width>120</width>
+      <height>20</height>
+      <tooltip>히스토리 인덱스 입력(시스템 정의 기준)</tooltip>
+    </widget>
+    <widget type="textentry" version="2.0.0">
+      <name>AckIndexEntry</name>
+      <pv_name>$(P)ALARM:ACK_INDEX</pv_name>
+      <x>1145</x>
+      <y>10</y>
+      <width>80</width>
+      <height>20</height>
+      <tooltip>해당 인덱스의 알람을 확인합니다</tooltip>
+      <rules>
+        <rule name="EnableAckIndexWhenHistory" prop_id="enabled">
+          <exp>pv0 != "No History"</exp>
+          <pv trig="true">$(P)ALARM:HISTORY_TABLE</pv>
+        </rule>
+      </rules>
+    </widget>
+
+    <!-- 선택 항목 확인 버튼: 선택 인덱스 사용 -->
+    <widget type="action_button" version="3.0.0">
+      <name>AckSelectedButton</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:ACK_SELECTED</pv_name>
+          <value>1</value>
+          <description>선택된 히스토리 인덱스 확인</description>
+          <confirm_message>선택된 항목을 확인하시겠습니까?</confirm_message>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:ACK_SELECTED</pv_name>
+          <value>0</value>
+          <description>버튼 펄스 복귀</description>
+        </action>
+      </actions>
+      <text>선택 확인</text>
+      <x>1230</x>
+      <y>8</y>
+      <width>100</width>
+      <height>28</height>
+      <background_color>
+        <color red="255" green="230" blue="200"/>
+      </background_color>
+      <tooltip>테이블에서 선택한 인덱스를 확인 처리</tooltip>
+      <rules>
+        <rule name="EnableWhenHistoryAndSelection" prop_id="enabled" out_exp="true">
+          <exp bool_exp="(pv0 != 'No History') &amp;&amp; (pv1 &gt;= 0)">
+            <pv name="pv0">$(P)ALARM:HISTORY_TABLE</pv>
+            <pv name="pv1">$(P)ALARM:SELECTED_INDEX</pv>
+          </exp>
+        </rule>
+      </rules>
+    </widget>
+    
+    <widget type="table" version="2.0.0">
+      <name>ActiveAlarms</name>
+      <x>10</x>
+      <y>40</y>
+      <width>1340</width>
+      <height>250</height>
+      <pv_name>$(P)ALARM:ACTIVE_TABLE</pv_name>
+      <columns>
+        <column>
+          <name>시간</name>
+          <width>120</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>심각도</name>
+          <width>80</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>PV 이름</name>
+          <width>200</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>알람 메시지</name>
+          <width>400</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>현재 값</name>
+          <width>100</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>한계값</name>
+          <width>100</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>상태</name>
+          <width>80</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>확인</name>
+          <width>60</width>
+          <editable>true</editable>
+        </column>
+      </columns>
+      <selection_pv>$(P)ALARM:SELECTED_INDEX</selection_pv>
+    </widget>
+  </widget>
+  
+  <!-- 알람 히스토리 -->
+  <widget type="group" version="2.0.0">
+    <name>AlarmHistory</name>
+    <x>20</x>
+    <y>480</y>
+    <width>1360</width>
+    <height>300</height>
+    <style>3</style>
+    <transparent>false</transparent>
+    <background_color>
+      <color red="255" green="255" blue="255"/>
+    </background_color>
+    <border_color>
+      <color red="128" green="128" blue="128"/>
+    </border_color>
+    
+    <widget type="label" version="2.0.0">
+      <name>HistoryTitle</name>
+      <text>알람 히스토리</text>
+      <x>10</x>
+      <y>10</y>
+      <width>150</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      </font>
+    </widget>
+    
+    <!-- 히스토리 필터 -->
+    <widget type="label" version="2.0.0">
+      <name>FilterLabel</name>
+      <text>필터:</text>
+      <x>200</x>
+      <y>15</y>
+      <width>50</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="combo" version="2.0.0">
+      <name>SeverityFilter</name>
+      <pv_name>$(P)ALARM:FILTER_SEVERITY</pv_name>
+      <x>260</x>
+      <y>10</y>
+      <width>100</width>
+      <height>25</height>
+      <items>
+        <item>ALL</item>
+        <item>MINOR</item>
+        <item>MAJOR</item>
+      </items>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>TimeRangeLabel</name>
+      <text>시간 범위:</text>
+      <x>380</x>
+      <y>15</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textentry" version="2.0.0">
+      <name>TimeRangeMinutes</name>
+      <pv_name>$(P)ALARM:FILTER_TIME</pv_name>
+      <x>470</x>
+      <y>10</y>
+      <width>100</width>
+      <height>25</height>
+      <tooltip>분 단위 입력 (예: 60=1시간, 0=전체)</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>TimeRangeUnit</name>
+      <text>분</text>
+      <x>575</x>
+      <y>15</y>
+      <width>20</width>
+      <height>20</height>
+    </widget>
+    
+    <!-- 히스토리 새로고침 버튼 -->
+    <widget type="action_button" version="3.0.0">
+      <name>RefreshButton</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:REFRESH</pv_name>
+          <value>1</value>
+          <description>히스토리 새로고침</description>
+          <confirm_message>히스토리를 새로고침하시겠습니까?</confirm_message>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:REFRESH</pv_name>
+          <value>0</value>
+          <description>버튼 펄스 복귀</description>
+        </action>
+      </actions>
+      <text>새로고침</text>
+      <x>590</x>
+      <y>10</y>
+      <width>80</width>
+      <height>25</height>
+      <background_color>
+        <color red="200" green="255" blue="200"/>
+      </background_color>
+      <tooltip>필터 적용 후 데이터를 다시 불러옵니다</tooltip>
+    </widget>
+    
+    <!-- 히스토리 내보내기 버튼 -->
+    <widget type="action_button" version="3.0.0">
+      <name>ExportButton</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:EXPORT</pv_name>
+          <value>1</value>
+          <description>히스토리 내보내기</description>
+          <confirm_message>현재 필터 조건으로 히스토리를 내보내시겠습니까?</confirm_message>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(P)ALARM:EXPORT</pv_name>
+          <value>0</value>
+          <description>버튼 펄스 복귀</description>
+        </action>
+      </actions>
+      <text>내보내기</text>
+      <x>680</x>
+      <y>10</y>
+      <width>80</width>
+      <height>25</height>
+      <background_color>
+        <color red="255" green="255" blue="200"/>
+      </background_color>
+      <tooltip>현재 필터 조건의 히스토리를 파일로 저장</tooltip>
+      <rules>
+        <rule name="EnableExportWhenHistory" prop_id="enabled">
+          <exp>pv0 != "No History"</exp>
+          <pv trig="true">$(P)ALARM:HISTORY_TABLE</pv>
+        </rule>
+      </rules>
+    </widget>
+
+    <!-- 내보내기 상태 표시 -->
+    <widget type="label" version="2.0.0">
+      <name>ExportStatusLabel</name>
+      <text>내보내기 상태:</text>
+      <x>770</x>
+      <y>15</y>
+      <width>100</width>
+      <height>20</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ExportStatus</name>
+      <pv_name>$(P)ALARM:EXPORT_STATUS</pv_name>
+      <x>870</x>
+      <y>15</y>
+      <width>480</width>
+      <height>20</height>
+      <format>6</format>
+      <tooltip>마지막 내보내기 결과 메시지</tooltip>
+    </widget>
+    
+    <widget type="table" version="2.0.0">
+      <name>AlarmHistoryTable</name>
+      <x>10</x>
+      <y>45</y>
+      <width>1340</width>
+      <height>245</height>
+      <pv_name>$(P)ALARM:HISTORY_TABLE</pv_name>
+      <columns>
+        <column>
+          <name>발생 시간</name>
+          <width>120</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>해제 시간</name>
+          <width>120</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>심각도</name>
+          <width>80</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>PV 이름</name>
+          <width>200</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>알람 메시지</name>
+          <width>400</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>지속 시간</name>
+          <width>100</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>확인자</name>
+          <width>100</width>
+          <editable>false</editable>
+        </column>
+        <column>
+          <name>비고</name>
+          <width>200</width>
+          <editable>false</editable>
+        </column>
+      </columns>
+    </widget>
+  </widget>
+  
+  <!-- 진단 정보 패널 -->
+  <widget type="group" version="2.0.0">
+    <name>DiagnosticPanel</name>
+    <x>20</x>
+    <y>800</y>
+    <width>680</width>
+    <height>80</height>
+    <style>3</style>
+    <transparent>false</transparent>
+    <background_color>
+      <color red="255" green="255" blue="255"/>
+    </background_color>
+    <border_color>
+      <color red="128" green="128" blue="128"/>
+    </border_color>
+    
+    <widget type="label" version="2.0.0">
+      <name>DiagnosticTitle</name>
+      <text>시스템 진단 정보</text>
+      <x>10</x>
+      <y>10</y>
+      <width>150</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      </font>
+    </widget>
+    
+    <!-- 센서 상태 -->
+    <widget type="label" version="2.0.0">
+      <name>SensorStatusLabel</name>
+      <text>센서 상태:</text>
+      <x>20</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>SensorStatus</name>
+      <pv_name>$(P)DIAG:SENSOR_STATUS</pv_name>
+      <x>110</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+      <format>6</format>
+    </widget>
+    
+    <!-- 밸브 상태 -->
+    <widget type="label" version="2.0.0">
+      <name>ValveStatusLabel</name>
+      <text>밸브 상태:</text>
+      <x>210</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>ValveStatus</name>
+      <pv_name>$(P)DIAG:VALVE_STATUS</pv_name>
+      <x>300</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+      <format>6</format>
+    </widget>
+    
+    <!-- 장비 상태 -->
+    <widget type="label" version="2.0.0">
+      <name>EquipmentStatusLabel</name>
+      <text>장비 상태:</text>
+      <x>400</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>EquipmentStatus</name>
+      <pv_name>$(P)DIAG:EQUIPMENT_STATUS</pv_name>
+      <x>490</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+      <format>6</format>
+    </widget>
+    
+    <!-- 통신 상태 -->
+    <widget type="label" version="2.0.0">
+      <name>CommStatusLabel</name>
+      <text>통신 상태:</text>
+      <x>590</x>
+      <y>40</y>
+      <width>80</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="led" version="2.0.0">
+      <name>CommStatusLED</name>
+      <pv_name>$(P)DIAG:COMM_OK</pv_name>
+      <x>680</x>
+      <y>40</y>
+      <width>20</width>
+      <height>20</height>
+      <off_color>
+        <color red="255" green="0" blue="0"/>
+      </off_color>
+      <on_color>
+        <color red="0" green="255" blue="0"/>
+      </on_color>
+    </widget>
+  </widget>
+  
+  <!-- 성능 모니터링 차트 -->
+  <widget type="group" version="2.0.0">
+    <name>PerformanceChart</name>
+    <x>720</x>
+    <y>800</y>
+    <width>660</width>
+    <height>80</height>
+    <style>3</style>
+    <transparent>false</transparent>
+    <background_color>
+      <color red="255" green="255" blue="255"/>
+    </background_color>
+    <border_color>
+      <color red="128" green="128" blue="128"/>
+    </border_color>
+    
+    <widget type="label" version="2.0.0">
+      <name>PerformanceTitle</name>
+      <text>시스템 성능</text>
+      <x>10</x>
+      <y>10</y>
+      <width>100</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      </font>
+    </widget>
+    
+    <!-- CPU 사용률 -->
+    <widget type="label" version="2.0.0">
+      <name>CPULabel</name>
+      <text>CPU:</text>
+      <x>20</x>
+      <y>40</y>
+      <width>40</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="progressbar" version="2.0.0">
+      <name>CPUUsage</name>
+      <pv_name>$(P)DIAG:CPU_USAGE</pv_name>
+      <x>70</x>
+      <y>40</y>
+      <width>100</width>
+      <height>20</height>
+      <minimum>0.0</minimum>
+      <maximum>100.0</maximum>
+      <fill_color>
+        <color red="0" green="255" blue="0"/>
+      </fill_color>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>CPUValue</name>
+      <pv_name>$(P)DIAG:CPU_USAGE</pv_name>
+      <x>180</x>
+      <y>40</y>
+      <width>40</width>
+      <height>20</height>
+      <precision>1</precision>
+      <format>1</format>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>CPUUnit</name>
+      <text>%</text>
+      <x>225</x>
+      <y>40</y>
+      <width>20</width>
+      <height>20</height>
+    </widget>
+    
+    <!-- 메모리 사용률 -->
+    <widget type="label" version="2.0.0">
+      <name>MemoryLabel</name>
+      <text>메모리:</text>
+      <x>260</x>
+      <y>40</y>
+      <width>60</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="progressbar" version="2.0.0">
+      <name>MemoryUsage</name>
+      <pv_name>$(P)DIAG:MEMORY_USAGE</pv_name>
+      <x>330</x>
+      <y>40</y>
+      <width>100</width>
+      <height>20</height>
+      <minimum>0.0</minimum>
+      <maximum>100.0</maximum>
+      <fill_color>
+        <color red="0" green="255" blue="0"/>
+      </fill_color>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>MemoryValue</name>
+      <pv_name>$(P)DIAG:MEMORY_USAGE</pv_name>
+      <x>440</x>
+      <y>40</y>
+      <width>40</width>
+      <height>20</height>
+      <precision>1</precision>
+      <format>1</format>
+    </widget>
+    
+    <widget type="label" version="2.0.0">
+      <name>MemoryUnit</name>
+      <text>%</text>
+      <x>485</x>
+      <y>40</y>
+      <width>20</width>
+      <height>20</height>
+    </widget>
+    
+    <!-- 업타임 -->
+    <widget type="label" version="2.0.0">
+      <name>UptimeLabel</name>
+      <text>업타임:</text>
+      <x>520</x>
+      <y>40</y>
+      <width>60</width>
+      <height>20</height>
+    </widget>
+    
+    <widget type="textupdate" version="2.0.0">
+      <name>Uptime</name>
+      <pv_name>$(P)DIAG:UPTIME</pv_name>
+      <x>590</x>
+      <y>40</y>
+      <width>60</width>
+      <height>20</height>
+      <format>6</format>
+    </widget>
+  </widget>
+  
+  <!-- 네비게이션 버튼 -->
+  <widget type="action_button" version="3.0.0">
+    <name>MainButton</name>
+    <actions>
+      <action type="open_display">
+        <file>main.bob</file>
+        <target>tab</target>
+        <description>메인 대시보드로 돌아가기</description>
+      </action>
+    </actions>
+    <text>메인 대시보드</text>
+    <x>550</x>
+    <y>10</y>
+    <width>120</width>
+    <height>30</height>
+    <background_color>
+      <color red="200" green="200" blue="255"/>
+    </background_color>
+  </widget>
+  
+  <widget type="action_button" version="3.0.0">
+    <name>SynopticButton</name>
+    <actions>
+      <action type="open_display">
+        <file>synoptic.bob</file>
+        <target>tab</target>
+        <description>시놉틱 뷰 열기</description>
+      </action>
+    </actions>
+    <text>시놉틱 뷰</text>
+    <x>680</x>
+    <y>10</y>
+    <width>100</width>
+    <height>30</height>
+    <background_color>
+      <color red="200" green="255" blue="200"/>
+    </background_color>
+  </widget>
+  
+  <!-- 알람 설정 버튼 -->
+  <widget type="action_button" version="3.0.0">
+    <name>AlarmConfigButton</name>
+    <actions>
+      <action type="open_display">
+        <file>alarm_config.bob</file>
+        <target>window</target>
+        <description>알람 설정 창 열기</description>
+      </action>
+    </actions>
+    <text>알람 설정</text>
+    <x>790</x>
+    <y>10</y>
+    <width>100</width>
+    <height>30</height>
+    <background_color>
+      <color red="255" green="255" blue="200"/>
+    </background_color>
+  </widget>
+  
+  <!-- 진단 리포트 버튼 -->
+  <widget type="action_button" version="3.0.0">
+    <name>DiagReportButton</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(P)DIAG:GENERATE_REPORT</pv_name>
+        <value>1</value>
+        <description>진단 리포트 생성</description>
+      </action>
+      <action type="write_pv">
+        <pv_name>$(P)DIAG:GENERATE_REPORT</pv_name>
+        <value>0</value>
+        <description>버튼 펄스 복귀</description>
+      </action>
+    </actions>
+    <text>진단 리포트</text>
+    <x>900</x>
+    <y>10</y>
+    <width>100</width>
+    <height>30</height>
+    <background_color>
+      <color red="200" green="255" blue="255"/>
+    </background_color>
+  </widget>
+  
+</display>
