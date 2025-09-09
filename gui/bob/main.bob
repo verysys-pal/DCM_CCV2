@@ -1,764 +1,674 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-DCM Cryo Cooler 메인 대시보드
-한국어 인터페이스 지원
--->
 <display version="2.0.0">
+  <name>DCM Cryocooler Control System</name>
   <macros>
     <P>BL:DCM:CRYO:</P>
     <SYS>DCM</SYS>
-    <IOC>CCV1</IOC>
+    <IOC>CCV2</IOC>
   </macros>
-  <name>DCM 크라이오쿨러 메인 대시보드</name>
-  <width>1200</width>
-  <height>800</height>
+  <width>1400</width>
+  <height>900</height>
   <background_color>
-    <color red="240" green="240" blue="240"/>
+    <color red="245" green="245" blue="245">
+    </color>
   </background_color>
-  
-  <!-- 제목 -->
+  <widget type="picture" version="2.0.0">
+    <name>Picture_1</name>
+    <file>../assets/Cryocooler_image4.jpg</file>
+    <x>10</x>
+    <y>60</y>
+    <width>850</width>
+    <height>615</height>
+  </widget>
+  <widget type="rectangle" version="2.0.0">
+    <name>HeaderBackground</name>
+    <x>10</x>
+    <width>1370</width>
+    <height>50</height>
+    <line_width>1</line_width>
+    <line_color>
+      <color name="Button_Background" red="210" green="210" blue="210">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Read_Background" red="240" green="240" blue="240">
+      </color>
+    </background_color>
+  </widget>
   <widget type="label" version="2.0.0">
-    <name>Title</name>
-    <text>DCM 크라이오쿨러 제어 시스템</text>
-    <x>20</x>
+    <name>MainTitle</name>
+    <text>Double Crystal Monochromator (DCM) Cryocooler Control System</text>
+    <x>30</x>
     <y>10</y>
-    <width>400</width>
-    <height>40</height>
+    <width>800</width>
+    <height>25</height>
     <font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="18.0"/>
+      <font family="Liberation Sans" style="BOLD" size="16.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>T6Value</name>
+    <pv_name>BL:DCM:CRYO:TEMP:T6</pv_name>
+    <x>770</x>
+    <y>101</y>
+    <width>50</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>PT1Value</name>
+    <pv_name>BL:DCM:CRYO:PRESS:PT1</pv_name>
+    <x>40</x>
+    <y>170</y>
+    <width>60</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>PT3Value</name>
+    <pv_name>BL:DCM:CRYO:PRESS:PT3</pv_name>
+    <x>273</x>
+    <y>363</y>
+    <width>40</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>2</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PT3Label</name>
+    <text>Bar</text>
+    <x>282</x>
+    <y>378</y>
+    <width>30</width>
+    <height>15</height>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>LT19Value</name>
+    <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+    <x>60</x>
+    <y>405</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>LT23Value</name>
+    <pv_name>BL:DCM:CRYO:LEVEL:LT23</pv_name>
+    <x>332</x>
+    <y>288</y>
+    <width>45</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V17Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V17:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>617</x>
+    <y>215</y>
+    <width>30</width>
+    <height>30</height>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>FT18Value</name>
+    <pv_name>BL:DCM:CRYO:FLOW:FT18</pv_name>
+    <x>720</x>
+    <y>368</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>FT18Label</name>
+    <text>L/min</text>
+    <x>720</x>
+    <y>383</y>
+    <width>40</width>
+    <height>15</height>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1</name>
+    <text>Pressure transmitter</text>
+    <x>61</x>
+    <y>142</y>
+    <width>119</width>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>LevelTransmitterLabel</name>
+    <text>Level transmitter</text>
+    <x>560</x>
+    <y>1350</y>
+    <width>150</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
     </font>
     <foreground_color>
-      <color red="0" green="0" blue="128"/>
+      <color red="0" green="0" blue="255">
+      </color>
     </foreground_color>
   </widget>
-
-  <!-- 상단 바: 시스템/IOC, 현재 시간, 상태 LED -->
-  <widget type="group" version="2.0.0">
-    <name>TopBar</name>
-    <x>780</x>
-    <y>10</y>
-    <width>400</width>
-    <height>40</height>
-    <transparent>true</transparent>
-    
-    <widget type="label" version="2.0.0">
-      <name>SysIocLabel</name>
-      <text>시스템: $(SYS)   IOC: $(IOC)</text>
-      <x>0</x>
-      <y>0</y>
-      <width>220</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>TimeLabel</name>
-      <text>현재 시간:</text>
-      <x>0</x>
-      <y>22</y>
-      <width>70</width>
-      <height>18</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>NowTime</name>
-      <pv_name>sim://time</pv_name>
-      <x>75</x>
-      <y>20</y>
-      <width>180</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>RunLabel</name>
-      <text>운전:</text>
-      <x>260</x>
-      <y>0</y>
-      <width>40</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="led" version="2.0.0">
-      <name>TopRunLED</name>
-      <pv_name>$(P)COMP:RUNNING</pv_name>
-      <x>305</x>
-      <y>2</y>
-      <width>18</width>
-      <height>18</height>
-      <off_color>
-        <color red="128" green="128" blue="128"/>
-      </off_color>
-      <on_color>
-        <color red="0" green="255" blue="0"/>
-      </on_color>
-    </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel2</name>
+    <text>Pressure transmitter</text>
+    <x>560</x>
+    <y>1480</y>
+    <width>150</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="0" blue="255">
+      </color>
+    </foreground_color>
   </widget>
-  
-  <!-- 시스템 상태 표시기 -->
-  <widget type="group" version="2.0.0">
-    <name>SystemStatus</name>
-    <x>20</x>
-    <y>60</y>
-    <width>350</width>
-    <height>200</height>
-    <style>3</style>
-    <transparent>false</transparent>
-    <background_color>
-      <color red="255" green="255" blue="255"/>
-    </background_color>
-    <border_color>
-      <color red="128" green="128" blue="128"/>
-    </border_color>
-    
-    <!-- 그룹 제목 -->
-    <widget type="label" version="2.0.0">
-      <name>StatusTitle</name>
-      <text>시스템 상태</text>
-      <x>10</x>
-      <y>10</y>
-      <width>100</width>
-      <height>25</height>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
-      </font>
-    </widget>
-    
-    <!-- 현재 상태 -->
-    <widget type="textupdate" version="2.0.0">
-      <name>CurrentState</name>
-      <pv_name>$(P)STATE:MAIN</pv_name>
-      <x>10</x>
-      <y>40</y>
-      <width>120</width>
-      <height>30</height>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <background_color>
-        <color red="200" green="200" blue="200"/>
-      </background_color>
-      <format>6</format>
-      <tooltip>현재 메인 상태 표시</tooltip>
-    </widget>
-    
-    <!-- 상태 LED -->
-    <widget type="led" version="2.0.0">
-      <name>StatusLED</name>
-      <pv_name>$(P)COMP:RUNNING</pv_name>
-      <x>140</x>
-      <y>45</y>
-      <width>20</width>
-      <height>20</height>
-      <off_color>
-        <color red="128" green="128" blue="128"/>
-      </off_color>
-      <on_color>
-        <color red="0" green="255" blue="0"/>
-      </on_color>
-      <tooltip>운전중 상태</tooltip>
-    </widget>
-    
-    <!-- 알람 상태 -->
-    <widget type="led" version="2.0.0">
-      <name>AlarmLED</name>
-      <pv_name>$(P)ALARM:ACTIVE</pv_name>
-      <x>170</x>
-      <y>45</y>
-      <width>20</width>
-      <height>20</height>
-      <off_color>
-        <color red="128" green="128" blue="128"/>
-      </off_color>
-      <on_color>
-        <color red="255" green="0" blue="0"/>
-      </on_color>
-      <tooltip>알람 활성화 상태</tooltip>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>AlarmLabel</name>
-      <text>알람</text>
-      <x>195</x>
-      <y>45</y>
-      <width>40</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- 운전 시간 -->
-    <!-- Runtime PV 미구현으로 표시 항목 제거 -->
-    
-    <!-- LN2 공급 상태 -->
-    <widget type="label" version="2.0.0">
-      <name>PumpLabelTop</name>
-      <text>펌프:</text>
-      <x>10</x>
-      <y>110</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="led" version="2.0.0">
-      <name>PumpLEDTop</name>
-      <pv_name>$(P)PUMP:RUNNING</pv_name>
-      <x>100</x>
-      <y>110</y>
-      <width>20</width>
-      <height>20</height>
-      <off_color>
-        <color red="128" green="128" blue="128"/>
-      </off_color>
-      <on_color>
-        <color red="0" green="255" blue="0"/>
-      </on_color>
-      <tooltip>펌프 운전 상태</tooltip>
-    </widget>
-    
-    <!-- 압축기 상태 -->
-    <widget type="label" version="2.0.0">
-      <name>CompressorLabel</name>
-      <text>압축기:</text>
-      <x>10</x>
-      <y>140</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="led" version="2.0.0">
-      <name>CompressorLED</name>
-      <pv_name>$(P)COMP:RUNNING</pv_name>
-      <x>100</x>
-      <y>140</y>
-      <width>20</width>
-      <height>20</height>
-      <off_color>
-        <color red="128" green="128" blue="128"/>
-      </off_color>
-      <on_color>
-        <color red="0" green="255" blue="0"/>
-      </on_color>
-      <tooltip>압축기 운전 상태</tooltip>
-    </widget>
-  </widget>
-  
-  <!-- 제어 버튼 패널 -->
-  <widget type="group" version="2.0.0">
-    <name>ControlButtons</name>
-    <x>390</x>
-    <y>60</y>
-    <width>300</width>
-    <height>200</height>
-    <style>3</style>
-    <transparent>false</transparent>
-    <background_color>
-      <color red="255" green="255" blue="255"/>
-    </background_color>
-    <border_color>
-      <color red="128" green="128" blue="128"/>
-    </border_color>
-    
-    <widget type="label" version="2.0.0">
-      <name>ControlTitle</name>
-      <text>시스템 제어</text>
-      <x>10</x>
-      <y>10</y>
-      <width>100</width>
-      <height>25</height>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
-      </font>
-    </widget>
-    
-    <!-- 시작 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>StartButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)CMD:MAIN</pv_name>
-          <value>1</value> <!-- START -->
-          <description>시스템 시작</description>
-        </action>
-      </actions>
-      <text>시작</text>
-      <x>20</x>
-      <y>50</y>
-      <width>80</width>
-      <height>30</height>
-      <background_color>
-        <color red="0" green="255" blue="0"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>정상 시퀀스로 시스템 시작</tooltip>
-      <rules>
-        <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-          <exp bool_exp="pv0==0">
-            <pv name="pv0">$(P)COMP:RUNNING</pv>
-          </exp>
-        </rule>
-      </rules>
-    </widget>
-    
-    <!-- 정지 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>StopButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)CMD:MAIN</pv_name>
-          <value>2</value> <!-- STOP -->
-          <description>시스템 정지</description>
-          <confirm_message>정말로 시스템을 정지하시겠습니까?</confirm_message>
-        </action>
-      </actions>
-      <text>정지</text>
-      <x>110</x>
-      <y>50</y>
-      <width>80</width>
-      <height>30</height>
-      <background_color>
-        <color red="255" green="0" blue="0"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>안전 정지 시퀀스 실행</tooltip>
-      <rules>
-        <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
-          <exp bool_exp="pv0==1">
-            <pv name="pv0">$(P)COMP:RUNNING</pv>
-          </exp>
-        </rule>
-      </rules>
-    </widget>
-    
-    <!-- 홀드 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>HoldButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)CMD:MAIN</pv_name>
-          <value>3</value> <!-- HOLD -->
-          <description>시스템 홀드</description>
-        </action>
-      </actions>
-      <text>홀드</text>
-      <x>200</x>
-      <y>50</y>
-      <width>80</width>
-      <height>30</height>
-      <background_color>
-        <color red="255" green="255" blue="0"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>현재 상태 유지(홀드)</tooltip>
-      <rules>
-        <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
-          <exp bool_exp="pv0==1">
-            <pv name="pv0">$(P)COMP:RUNNING</pv>
-          </exp>
-        </rule>
-      </rules>
-    </widget>
-    
-    <!-- 재개 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>ResumeButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)CMD:MAIN</pv_name>
-          <value>4</value> <!-- RESUME -->
-          <description>시스템 재개</description>
-        </action>
-      </actions>
-      <text>재개</text>
-      <x>20</x>
-      <y>90</y>
-      <width>80</width>
-      <height>30</height>
-      <background_color>
-        <color red="0" green="200" blue="255"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>홀드 상태에서 운전 재개</tooltip>
-      <rules>
-        <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-          <exp bool_exp="pv0==0">
-            <pv name="pv0">$(P)COMP:RUNNING</pv>
-          </exp>
-        </rule>
-      </rules>
-    </widget>
-    
-    <!-- 웜업 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>WarmupButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)CMD:MAIN</pv_name>
-          <value>7</value> <!-- WARMUP -->
-          <description>웜업 시작</description>
-          <confirm_message>웜업을 시작하시겠습니까? (운전 중지 후 진행)</confirm_message>
-        </action>
-      </actions>
-      <text>웜업</text>
-      <x>110</x>
-      <y>90</y>
-      <width>80</width>
-      <height>30</height>
-      <background_color>
-        <color red="255" green="165" blue="0"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>웜업(가열) 시퀀스 실행</tooltip>
-      <rules>
-        <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-          <exp bool_exp="pv0==0">
-            <pv name="pv0">$(P)COMP:RUNNING</pv>
-          </exp>
-        </rule>
-      </rules>
-    </widget>
-    
-    <!-- 비상정지 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>EmergencyButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)CMD:MAIN</pv_name>
-          <value>5</value> <!-- EMERGENCY_STOP -->
-          <description>비상 정지</description>
-          <confirm_message>즉시 비상정지(E-STOP)를 실행하시겠습니까?</confirm_message>
-        </action>
-      </actions>
-      <text>비상정지</text>
-      <x>200</x>
-      <y>90</y>
-      <width>80</width>
-      <height>30</height>
-      <background_color>
-        <color red="200" green="0" blue="0"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>즉시 비상 정지</tooltip>
-    </widget>
-    
-    <!-- 알람 확인 버튼 -->
-    <widget type="action_button" version="3.0.0">
-      <name>AckButton</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>$(P)ALARM:ACK_ALL</pv_name>
-          <value>1</value>
-          <description>알람 확인</description>
-        </action>
-      </actions>
-      <text>알람 확인</text>
-      <x>65</x>
-      <y>130</y>
-      <width>100</width>
-      <height>30</height>
-      <background_color>
-        <color red="200" green="200" blue="200"/>
-      </background_color>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="12.0"/>
-      </font>
-      <tooltip>선택된 알람을 확인 처리</tooltip>
-    </widget>
-  </widget>
-  
-  <!-- KPI 표시 패널 -->
-  <widget type="group" version="2.0.0">
-    <name>KPIPanel</name>
+  <widget type="label" version="2.0.0">
+    <name>PumpControlLabel</name>
+    <text>Pump control</text>
     <x>710</x>
-    <y>60</y>
-    <width>470</width>
-    <height>200</height>
-    <style>3</style>
-    <transparent>false</transparent>
-    <background_color>
-      <color red="255" green="255" blue="255"/>
-    </background_color>
-    <border_color>
-      <color red="128" green="128" blue="128"/>
-    </border_color>
-    
-    <widget type="label" version="2.0.0">
-      <name>KPITitle</name>
-      <text>주요 성능 지표 (KPI)</text>
-      <x>10</x>
-      <y>10</y>
-      <width>200</width>
-      <height>25</height>
-      <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
-      </font>
-    </widget>
-    
-    <!-- 온도 표시 -->
-    <widget type="label" version="2.0.0">
-      <name>TempLabel</name>
-      <text>Cold Head 온도:</text>
-      <x>10</x>
-      <y>40</y>
-      <width>120</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>ColdHeadTemp</name>
-      <pv_name>$(P)TEMP:COLDHEAD</pv_name>
-      <x>140</x>
-      <y>40</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>1</precision>
-      <format>1</format>
-      <tooltip>Cold Head 온도 (K)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>TempUnit</name>
-      <text>K</text>
-      <x>225</x>
-      <y>40</y>
-      <width>20</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- T5 온도 -->
-    <widget type="label" version="2.0.0">
-      <name>T5Label</name>
-      <text>T5 온도:</text>
-      <x>10</x>
-      <y>65</y>
-      <width>120</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>T5Temp</name>
-      <pv_name>$(P)TEMP:T5</pv_name>
-      <x>140</x>
-      <y>65</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>1</precision>
-      <format>1</format>
-      <tooltip>T5 온도 (K)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>T5Unit</name>
-      <text>K</text>
-      <x>225</x>
-      <y>65</y>
-      <width>20</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- T6 온도 -->
-    <widget type="label" version="2.0.0">
-      <name>T6Label</name>
-      <text>T6 온도:</text>
-      <x>10</x>
-      <y>90</y>
-      <width>120</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>T6Temp</name>
-      <pv_name>$(P)TEMP:T6</pv_name>
-      <x>140</x>
-      <y>90</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>1</precision>
-      <format>1</format>
-      <tooltip>T6 온도 (K)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>T6Unit</name>
-      <text>K</text>
-      <x>225</x>
-      <y>90</y>
-      <width>20</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- 압력 표시 -->
-    <widget type="label" version="2.0.0">
-      <name>PT1Label</name>
-      <text>PT1 압력:</text>
-      <x>260</x>
-      <y>40</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>PT1Pressure</name>
-      <pv_name>$(P)PRESS:PT1</pv_name>
-      <x>350</x>
-      <y>40</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>2</precision>
-      <format>1</format>
-      <tooltip>PT1 압력 (bar)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>PT1Unit</name>
-      <text>bar</text>
-      <x>435</x>
-      <y>40</y>
-      <width>30</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- PT3 압력 -->
-    <widget type="label" version="2.0.0">
-      <name>PT3Label</name>
-      <text>PT3 압력:</text>
-      <x>260</x>
-      <y>65</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>PT3Pressure</name>
-      <pv_name>$(P)PRESS:PT3</pv_name>
-      <x>350</x>
-      <y>65</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>2</precision>
-      <format>1</format>
-      <tooltip>PT3 압력 (bar)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>PT3Unit</name>
-      <text>bar</text>
-      <x>435</x>
-      <y>65</y>
-      <width>30</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- LN2 레벨 -->
-    <widget type="label" version="2.0.0">
-      <name>LN2Label</name>
-      <!-- 레벨 PV 미구현: 해당 블럭 제거 -->
-      <x>260</x>
-      <y>90</y>
-      <width>80</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- 제거됨: LN2 레벨 표시 -->
-    
-    <!-- 제거됨: LN2 레벨 단위 -->
-    
-    <!-- 유량 -->
-    <widget type="label" version="2.0.0">
-      <name>FlowLabel</name>
-      <text>유량 (FT18):</text>
-      <x>10</x>
-      <y>115</y>
-      <width>120</width>
-      <height>20</height>
-    </widget>
-    
-    <widget type="textupdate" version="2.0.0">
-      <name>FlowRate</name>
-      <pv_name>$(P)FLOW:FT18</pv_name>
-      <x>140</x>
-      <y>115</y>
-      <width>80</width>
-      <height>20</height>
-      <precision>2</precision>
-      <format>1</format>
-      <tooltip>FT18 유량 (L/min)</tooltip>
-      <border_alarm_sensitive>true</border_alarm_sensitive>
-    </widget>
-    
-    <widget type="label" version="2.0.0">
-      <name>FlowUnit</name>
-      <text>L/min</text>
-      <x>225</x>
-      <y>115</y>
-      <width>40</width>
-      <height>20</height>
-    </widget>
-    
-    <!-- 냉각 파워 -->
-    <!-- 제거됨: 냉각 파워 표시 (PV 미구현) -->
-    
-    <!-- 효율 -->
-    <!-- 제거됨: 시스템 효율 표시 (PV 미구현) -->
+    <y>1510</y>
   </widget>
-  
-  <!-- 온도 XYPlot (TIME PV 기반, 10분 범위) -->
-  <widget type="xyplot" version="2.0.0">
+  <widget type="label" version="2.0.0">
+    <name>LevelTransmitterBottomLabel</name>
+    <text>Level transmitter</text>
+    <x>830</x>
+    <y>1510</y>
+    <width>150</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color red="0" green="0" blue="255">
+      </color>
+    </foreground_color>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>T5Value</name>
+    <pv_name>BL:DCM:CRYO:TEMP:T5</pv_name>
+    <x>40</x>
+    <y>100</y>
+    <width>60</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>V17 Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V17:CMD</pv_name>
+    <bit>1</bit>
+    <x>603</x>
+    <y>184</y>
+    <width>60</width>
+    <height>25</height>
+    <off_label>close</off_label>
+    <on_label>open</on_label>
+    <actions>
+      <action type="write_pv">
+        <description>V17 Open</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>V17 Close</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V11Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V11:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>676</x>
+    <y>286</y>
+    <width>30</width>
+    <height>30</height>
+    <rotation>90.0</rotation>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>V11 Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V11:CMD</pv_name>
+    <bit>1</bit>
+    <x>718</x>
+    <y>289</y>
+    <width>60</width>
+    <height>25</height>
+    <off_label>close</off_label>
+    <on_label>open</on_label>
+    <actions>
+      <action type="write_pv">
+        <description>V17 Open</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>V17 Close</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V20Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V20:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>494</x>
+    <y>283</y>
+    <width>30</width>
+    <height>30</height>
+    <rotation>90.0</rotation>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>V20 Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V20:CMD</pv_name>
+    <bit>1</bit>
+    <x>510</x>
+    <y>184</y>
+    <width>60</width>
+    <height>25</height>
+    <off_label>close</off_label>
+    <on_label>open</on_label>
+    <actions>
+      <action type="write_pv">
+        <description>V17 Open</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>V17 Close</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V15Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V15:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>431</x>
+    <y>283</y>
+    <width>30</width>
+    <height>30</height>
+    <rotation>90.0</rotation>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>V15 Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
+    <bit>1</bit>
+    <x>431</x>
+    <y>184</y>
+    <width>60</width>
+    <height>25</height>
+    <off_label>close</off_label>
+    <on_label>open</on_label>
+    <actions>
+      <action type="write_pv">
+        <description>V17 Open</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>V17 Close</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V19Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V19:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>235</x>
+    <y>283</y>
+    <width>30</width>
+    <height>30</height>
+    <rotation>90.0</rotation>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>V19 Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
+    <bit>1</bit>
+    <x>256</x>
+    <y>310</y>
+    <width>60</width>
+    <height>25</height>
+    <off_label>close</off_label>
+    <on_label>open</on_label>
+    <actions>
+      <action type="write_pv">
+        <description>V17 Open</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>V17 Close</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V19Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V9:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>162</x>
+    <y>283</y>
+    <width>30</width>
+    <height>30</height>
+    <rotation>90.0</rotation>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="bool_button" version="2.0.0">
+    <name>V9 Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V9:CMD</pv_name>
+    <bit>1</bit>
+    <x>110</x>
+    <y>313</y>
+    <width>60</width>
+    <height>25</height>
+    <off_label>close</off_label>
+    <on_label>open</on_label>
+    <actions>
+      <action type="write_pv">
+        <description>V17 Open</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>V17 Close</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V21Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V21:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>120</x>
+    <y>225</y>
+    <width>30</width>
+    <height>30</height>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_2</name>
+    <text>inlet Temperature</text>
+    <x>61</x>
+    <y>70</y>
+    <width>119</width>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_3</name>
+    <text>outlet Temperature</text>
+    <x>706</x>
+    <y>70</y>
+    <width>119</width>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_5</name>
+    <text>DCM LN2 supply valve</text>
+    <x>61</x>
+    <y>265</y>
+    <width>80</width>
+    <height>40</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+    <horizontal_alignment>2</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_6</name>
+    <text>Pressure transmitter</text>
+    <x>265</x>
+    <y>405</y>
+    <width>125</width>
+    <height>15</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_7</name>
+    <text>Heater vessel pressure control valve</text>
+    <x>530</x>
+    <y>285</y>
+    <width>90</width>
+    <height>48</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_9</name>
+    <text>DCM (closed loop) Pressure control valve</text>
+    <x>580</x>
+    <y>142</y>
+    <width>127</width>
+    <height>42</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_8</name>
+    <text>Flow transmitter</text>
+    <x>720</x>
+    <y>398</y>
+    <width>125</width>
+    <height>15</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="symbol" version="2.0.0">
+    <name>V10Valve</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V10:STATUS</pv_name>
+    <symbols>
+      <symbol>symbols/valve_close.svg</symbol>
+    </symbols>
+    <x>452</x>
+    <y>603</y>
+    <width>30</width>
+    <height>30</height>
+    <tooltip>$(pv_name)
+$(pv_value)
+$(actions)</tooltip>
+    <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>FT18Value_1</name>
+    <pv_name>BL:DCM:CRYO:FLOW:V17</pv_name>
+    <x>617</x>
+    <y>265</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>FT18Value_2</name>
+    <pv_name>BL:DCM:CRYO:PUMP:FREQ</pv_name>
+    <x>338</x>
+    <y>510</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="xyplot" version="3.0.0">
     <name>TrendChart</name>
-    <title>온도 트렌드</title>
-    <x>20</x>
-    <y>280</y>
-    <width>560</width>
-    <height>300</height>
-    <background_color>
-      <color red="255" green="255" blue="255"/>
-    </background_color>
+    <x>881</x>
+    <y>70</y>
+    <width>499</width>
+    <height>263</height>
+    <title>Temperature</title>
     <title_font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
     </title_font>
     <x_axis>
-      <title>시간 (s)</title>
+      <title>Time (s)</title>
       <autoscale>true</autoscale>
       <log_scale>false</log_scale>
       <minimum>0.0</minimum>
-      <maximum>600.0</maximum>
+      <maximum>300.0</maximum>
       <show_grid>true</show_grid>
       <title_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="12.0"/>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
       </title_font>
       <scale_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="10.0"/>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
       </scale_font>
       <visible>true</visible>
     </x_axis>
     <y_axes>
       <y_axis>
-        <title>온도 (K)</title>
+        <title>Temperature (K)</title>
         <autoscale>true</autoscale>
         <log_scale>false</log_scale>
         <minimum>0.0</minimum>
         <maximum>300.0</maximum>
         <show_grid>true</show_grid>
         <title_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="12.0"/>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
         </title_font>
         <scale_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="10.0"/>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
         </scale_font>
+        <on_right>false</on_right>
         <visible>true</visible>
+        <color>
+          <color name="Text" red="0" green="0" blue="0">
+          </color>
+        </color>
       </y_axis>
     </y_axes>
     <traces>
@@ -770,7 +680,8 @@ DCM Cryo Cooler 메인 대시보드
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="255" green="0" blue="0"/>
+          <color red="255" green="0" blue="0">
+          </color>
         </color>
         <line_width>2</line_width>
         <line_style>0</line_style>
@@ -786,7 +697,8 @@ DCM Cryo Cooler 메인 대시보드
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="0" green="0" blue="255"/>
+          <color red="0" green="0" blue="255">
+          </color>
         </color>
         <line_width>2</line_width>
         <line_style>0</line_style>
@@ -802,7 +714,8 @@ DCM Cryo Cooler 메인 대시보드
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="0" green="128" blue="0"/>
+          <color red="0" green="128" blue="0">
+          </color>
         </color>
         <line_width>2</line_width>
         <line_style>0</line_style>
@@ -812,51 +725,56 @@ DCM Cryo Cooler 메인 대시보드
       </trace>
     </traces>
   </widget>
-  
-  <!-- 압력 XYPlot (TIME PV 기반, 10분 범위) -->
-  <widget type="xyplot" version="2.0.0">
+  <widget type="xyplot" version="3.0.0">
     <name>PressureTrendChart</name>
-    <title>압력 트렌드</title>
-    <x>600</x>
-    <y>280</y>
-    <width>580</width>
-    <height>300</height>
-    <background_color>
-      <color red="255" green="255" blue="255"/>
-    </background_color>
+    <x>881</x>
+    <y>350</y>
+    <width>499</width>
+    <height>263</height>
+    <title>Pressure</title>
     <title_font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
     </title_font>
     <x_axis>
-      <title>시간 (s)</title>
+      <title>Time (s)</title>
       <autoscale>true</autoscale>
       <log_scale>false</log_scale>
       <minimum>0.0</minimum>
-      <maximum>600.0</maximum>
+      <maximum>300.0</maximum>
       <show_grid>true</show_grid>
       <title_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="12.0"/>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
       </title_font>
       <scale_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="10.0"/>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
       </scale_font>
       <visible>true</visible>
     </x_axis>
     <y_axes>
       <y_axis>
-        <title>압력 (bar)</title>
+        <title>Pressure (bar)</title>
         <autoscale>true</autoscale>
         <log_scale>false</log_scale>
         <minimum>0.0</minimum>
         <maximum>2.0</maximum>
         <show_grid>true</show_grid>
         <title_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="12.0"/>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
         </title_font>
         <scale_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="10.0"/>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
         </scale_font>
+        <on_right>false</on_right>
         <visible>true</visible>
+        <color>
+          <color name="Text" red="0" green="0" blue="0">
+          </color>
+        </color>
       </y_axis>
     </y_axes>
     <traces>
@@ -868,7 +786,8 @@ DCM Cryo Cooler 메인 대시보드
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="255" green="0" blue="255"/>
+          <color red="255" green="0" blue="255">
+          </color>
         </color>
         <line_width>2</line_width>
         <line_style>0</line_style>
@@ -884,7 +803,8 @@ DCM Cryo Cooler 메인 대시보드
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="255" green="165" blue="0"/>
+          <color red="255" green="165" blue="0">
+          </color>
         </color>
         <line_width>2</line_width>
         <line_style>0</line_style>
@@ -894,145 +814,449 @@ DCM Cryo Cooler 메인 대시보드
       </trace>
     </traces>
   </widget>
-  
-  <!-- 알람 패널 -->
-  <widget type="group" version="2.0.0">
-    <name>AlarmPanel</name>
-    <x>20</x>
-    <y>600</y>
-    <width>1160</width>
-    <height>180</height>
+  <widget type="group" version="3.0.0">
+    <name>SystemStatus</name>
+    <x>10</x>
+    <y>710</y>
+    <width>330</width>
+    <height>140</height>
     <style>3</style>
-    <transparent>false</transparent>
-    <background_color>
-      <color red="255" green="255" blue="255"/>
-    </background_color>
-    <border_color>
-      <color red="128" green="128" blue="128"/>
-    </border_color>
-    
     <widget type="label" version="2.0.0">
-      <name>AlarmTitle</name>
-      <text>알람 및 경고</text>
+      <name>StatusTitle</name>
+      <text>CurrentState</text>
       <x>10</x>
-      <y>10</y>
-      <width>150</width>
+      <y>13</y>
       <height>25</height>
       <font>
-        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0"/>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
       </font>
+      <vertical_alignment>1</vertical_alignment>
     </widget>
-    
-    <!-- 알람 테이블 -->
-    <widget type="table" version="2.0.0">
-      <name>AlarmTable</name>
-      <x>10</x>
-      <y>40</y>
-      <width>1140</width>
-      <height>130</height>
-      <pv_name>$(P)ALARM:TABLE</pv_name>
-      <columns>
-        <column>
-          <name>시간</name>
-          <width>120</width>
-          <editable>false</editable>
-        </column>
-        <column>
-          <name>심각도</name>
-          <width>80</width>
-          <editable>false</editable>
-        </column>
-        <column>
-          <name>알람 메시지</name>
-          <width>400</width>
-          <editable>false</editable>
-        </column>
-        <column>
-          <name>상태</name>
-          <width>80</width>
-          <editable>false</editable>
-        </column>
-        <column>
-          <name>확인</name>
-          <width>80</width>
-          <editable>true</editable>
-        </column>
-      </columns>
-      <selection_pv>$(P)ALARM:SELECTED_INDEX</selection_pv>
+    <widget type="textupdate" version="2.0.0">
+      <name>CurrentState</name>
+      <pv_name>$(P)STATE:MAIN</pv_name>
+      <x>140</x>
+      <y>13</y>
+      <width>120</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="200" green="200" blue="200">
+        </color>
+      </background_color>
+      <format>6</format>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <tooltip>현재 메인 상태 표시</tooltip>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>StatusLED</name>
+      <pv_name>$(P)COMP:RUNNING</pv_name>
+      <x>110</x>
+      <y>15</y>
+      <off_color>
+        <color red="128" green="128" blue="128">
+        </color>
+      </off_color>
+      <tooltip>운전중 상태</tooltip>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>AlarmLED_1</name>
+      <pv_name>$(P)ALARM:ACTIVE</pv_name>
+      <x>110</x>
+      <y>103</y>
+      <off_color>
+        <color red="128" green="128" blue="128">
+        </color>
+      </off_color>
+      <on_color>
+        <color red="255" green="0" blue="0">
+        </color>
+      </on_color>
+      <tooltip>알람 활성화 상태</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>AlarmLabel</name>
+      <text>Alarm</text>
+      <x>140</x>
+      <y>103</y>
+      <width>40</width>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PumpLabelTop</name>
+      <text>PUMP</text>
+      <x>140</x>
+      <y>58</y>
+      <width>80</width>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>PumpLEDTop</name>
+      <pv_name>$(P)PUMP:RUNNING</pv_name>
+      <x>110</x>
+      <y>58</y>
+      <off_color>
+        <color red="128" green="128" blue="128">
+        </color>
+      </off_color>
+      <tooltip>펌프 운전 상태</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>CompressorLabel</name>
+      <text>Compressor:</text>
+      <x>240</x>
+      <y>58</y>
+      <width>80</width>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>CompressorLED</name>
+      <pv_name>$(P)COMP:RUNNING</pv_name>
+      <x>210</x>
+      <y>58</y>
+      <off_color>
+        <color red="128" green="128" blue="128">
+        </color>
+      </off_color>
+      <tooltip>압축기 운전 상태</tooltip>
     </widget>
   </widget>
-  
-  <!-- 네비게이션 버튼 -->
-  <widget type="action_button" version="3.0.0">
-    <name>SynopticButton</name>
-    <actions>
-      <action type="open_display">
-        <file>synoptic.bob</file>
-        <target>tab</target>
-        <description>시놉틱 뷰 열기</description>
-        <macros>
-          <P>$(P)</P>
-          <SYS>$(SYS)</SYS>
-          <IOC>$(IOC)</IOC>
-        </macros>
-      </action>
-    </actions>
-    <text>시놉틱 뷰</text>
-    <x>450</x>
-    <y>10</y>
-    <width>100</width>
-    <height>30</height>
-    <background_color>
-      <color red="200" green="200" blue="255"/>
-    </background_color>
+  <widget type="group" version="3.0.0">
+    <name>ControlButtons</name>
+    <x>350</x>
+    <y>710</y>
+    <width>400</width>
+    <height>140</height>
+    <style>3</style>
   </widget>
-  
-  <widget type="action_button" version="3.0.0">
-    <name>PIDButton</name>
-    <actions>
-      <action type="open_display">
-        <file>cryocooler_pid.bob</file>
-        <target>tab</target>
-        <description>P&amp;ID 화면 열기</description>
-        <macros>
-          <P>$(P)</P>
-          <SYS>$(SYS)</SYS>
-          <IOC>$(IOC)</IOC>
-        </macros>
-      </action>
-    </actions>
-    <text>P&amp;ID 화면</text>
-    <x>560</x>
-    <y>10</y>
-    <width>100</width>
-    <height>30</height>
-    <background_color>
-      <color red="200" green="255" blue="200"/>
-    </background_color>
-  </widget>
-  
   <widget type="action_button" version="3.0.0">
     <name>AlarmDetailButton</name>
     <actions>
       <action type="open_display">
-        <file>alarm.bob</file>
-        <target>tab</target>
         <description>알람 상세 화면 열기</description>
+        <file>alarm.bob</file>
         <macros>
           <P>$(P)</P>
           <SYS>$(SYS)</SYS>
           <IOC>$(IOC)</IOC>
         </macros>
+        <target>tab</target>
       </action>
     </actions>
-    <text>알람 상세</text>
-    <x>670</x>
+    <text>Alarm</text>
+    <x>1270</x>
     <y>10</y>
-    <width>100</width>
-    <height>30</height>
     <background_color>
-      <color red="255" green="200" blue="200"/>
+      <color name="ActiveText" red="255" green="255" blue="0">
+      </color>
     </background_color>
+    <tooltip>$(actions)</tooltip>
   </widget>
-  
+  <widget type="label" version="2.0.0">
+    <name>ControlTitle</name>
+    <text>System Control</text>
+    <x>360</x>
+    <y>710</y>
+    <width>170</width>
+    <height>25</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>StartButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 시작</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>START</text>
+    <x>370</x>
+    <y>750</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>정상 시퀀스로 시스템 시작</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>StopButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 정지</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>2</value>
+      </action>
+    </actions>
+    <text>STOP</text>
+    <x>460</x>
+    <y>750</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==1">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>안전 정지 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>HoldButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 홀드</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>3</value>
+      </action>
+    </actions>
+    <text>HOLD</text>
+    <x>550</x>
+    <y>750</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==1">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>현재 상태 유지(홀드)</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>ResumeButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 재개</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>4</value>
+      </action>
+    </actions>
+    <text>RESUME</text>
+    <x>370</x>
+    <y>790</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>홀드 상태에서 운전 재개</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>WarmupButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>웜업 시작</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>7</value>
+      </action>
+    </actions>
+    <text>WARM-UP</text>
+    <x>460</x>
+    <y>790</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>EmergencyButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>비상 정지</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>5</value>
+      </action>
+    </actions>
+    <text>E-STOP</text>
+    <x>550</x>
+    <y>790</y>
+    <width>80</width>
+    <background_color>
+      <color red="200" green="0" blue="0">
+      </color>
+    </background_color>
+    <tooltip>즉시 비상 정지</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>RefillButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>Start Circulation Pump</description>
+        <pv_name>BL:DCM:CRYO:PUMP:CMD</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>Open LN2 Supply Valve V15</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>Open LN2 Tank Valve V19</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>Refill</text>
+    <x>650</x>
+    <y>750</y>
+    <width>80</width>
+    <background_color>
+      <color red="200" green="255" blue="200">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="EnableWhenSafe" prop_id="enabled" out_exp="false">
+        <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
+        <pv_name>BL:DCM:CRYO:SAFETY:INTERLOCK</pv_name>
+        <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+      </rule>
+    </rules>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>RefillCloseButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>Stop Circulation Pump</description>
+        <pv_name>BL:DCM:CRYO:PUMP:CMD</pv_name>
+        <value>0</value>
+      </action>
+      <action type="write_pv">
+        <description>Close LN2 Supply Valve V15</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
+        <value>0</value>
+      </action>
+      <action type="write_pv">
+        <description>Close LN2 Tank Valve V19</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+    <text>Refill
+Close</text>
+    <x>650</x>
+    <y>780</y>
+    <width>80</width>
+    <height>40</height>
+    <background_color>
+      <color red="220" green="220" blue="220">
+      </color>
+    </background_color>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>AlarmLED</name>
+    <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
+    <x>603</x>
+    <y>712</y>
+    <off_color>
+      <color red="128" green="128" blue="128">
+      </color>
+    </off_color>
+    <on_color>
+      <color red="255" green="0" blue="0">
+      </color>
+    </on_color>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>MaxSeverityText</name>
+    <pv_name>BL:DCM:CRYO:ALARM:MAX_SEVERITY</pv_name>
+    <x>628</x>
+    <y>712</y>
+    <format>6</format>
+  </widget>
+  <widget type="group" version="3.0.0">
+    <name>SystemStatus_1</name>
+    <x>1000</x>
+    <y>633</y>
+    <width>379</width>
+    <height>180</height>
+    <style>3</style>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_10</name>
+      <text>- Boiling point   : -195.8 (°C) = 77.35 (K)</text>
+      <x>48</x>
+      <y>71</y>
+      <width>331</width>
+      <height>27</height>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="14.0">
+        </font>
+      </font>
+      <foreground_color>
+        <color name="STOP" red="255" green="0" blue="0">
+        </color>
+      </foreground_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_11</name>
+      <text>Cooling Termperatuer : 78 ~ 100 (K)</text>
+      <x>19</x>
+      <y>17</y>
+      <width>360</width>
+      <height>27</height>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_12</name>
+      <text>- Critical point   : -146.9 (°C) = 126.2 (K)</text>
+      <x>48</x>
+      <y>44</y>
+      <width>331</width>
+      <height>27</height>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_13</name>
+      <text>- Melting point  : -209.8 (°C) = 63.3 (K)</text>
+      <x>48</x>
+      <y>98</y>
+      <width>331</width>
+      <height>27</height>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="14.0">
+        </font>
+      </font>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_14</name>
+      <text>27(°C) = 300(K), 0(°C) = 273.1(K), -173.1(°C) = 100(K) </text>
+      <x>48</x>
+      <y>147</y>
+      <width>302</width>
+      <height>27</height>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+  </widget>
 </display>
