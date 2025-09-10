@@ -1,0 +1,56 @@
+version: 1
+config:
+  # 시뮬레이터 런타임/모델 파라미터
+  dt: 0.1             # step time (s)
+  qload: 50.0         # heat load (W)
+  tsub: 77.3          # subcooler temperature (K)
+  q_dcm: 200.0        # DCM 열부하 (W)
+  # 전이/알람/장치 파생 설정
+  init_seconds: 2.0
+  precool_band: 5.0
+  alarm_t_high: 250.0
+  pump_freq_on: 60.0
+  pump_freq_off: 0.0
+  heater_power_on: 30.0
+  heater_power_off: 0.0
+  # 모델(세부) 파라미터
+  cap: 800.0
+  tau_env: 120.0
+  tau_ln2_in: 10.0
+  tau_ln2_out: 10.0
+  tamb: 300.0
+  k_p: 10.0
+  k_i: 0.2
+  qmax: 2000.0
+  k_dcm: 20.0
+  k_flow: 1.0
+pvs:
+  # 온도/설정값 초기화
+  BL:DCM:CRYO:TEMP:SETPOINT: 80.0
+  BL:DCM:CRYO:TEMP:SUBCOOLER: 77.3
+
+  # 유량 기본값
+  BL:DCM:CRYO:FLOW:FT18: 5.0
+  BL:DCM:CRYO:FLOW:V17: 0.0
+  BL:DCM:CRYO:FLOW:V10: 0.0
+
+  # 장치 기본 상태
+  BL:DCM:CRYO:PUMP:CMD: 0
+  BL:DCM:CRYO:HEATER:CMD: 0
+  BL:DCM:CRYO:VALVE:V9:CMD: 0
+  BL:DCM:CRYO:VALVE:V11:CMD: 0
+  BL:DCM:CRYO:VALVE:V15:CMD: 0
+  BL:DCM:CRYO:VALVE:V17:CMD: 0
+  BL:DCM:CRYO:VALVE:V17: 0.0      # V17 연속 개도(ao, %) 초기값
+  BL:DCM:CRYO:VALVE:V19:CMD: 0
+  BL:DCM:CRYO:VALVE:V20:CMD: 0
+  BL:DCM:CRYO:VALVE:V21:CMD: 0
+
+  # 압력/레벨 초기값 (참고: PT1/PT3는 브리지에서 주기 계산으로 덮어쓸 수 있음)
+  BL:DCM:CRYO:PRESS:PT1: 1.0
+  BL:DCM:CRYO:PRESS:PT3: 1.0
+  BL:DCM:CRYO:LEVEL:LT19: 50.0
+  BL:DCM:CRYO:LEVEL:LT23: 70.0
+
+  # 표시용 전력 (브리지에서 model.q_dcm과 동기화됨)
+  # BL:DCM:CRYO:DCM:POWER: 

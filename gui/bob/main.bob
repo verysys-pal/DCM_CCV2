@@ -255,29 +255,6 @@ $(actions)</tooltip>
     <vertical_alignment>1</vertical_alignment>
     <border_width>1</border_width>
   </widget>
-  <widget type="bool_button" version="2.0.0">
-    <name>V17 Valve</name>
-    <pv_name>BL:DCM:CRYO:VALVE:V17:CMD</pv_name>
-    <bit>1</bit>
-    <x>603</x>
-    <y>184</y>
-    <width>60</width>
-    <height>25</height>
-    <off_label>close</off_label>
-    <on_label>open</on_label>
-    <actions>
-      <action type="write_pv">
-        <description>V17 Open</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>V17 Close</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
-  </widget>
   <widget type="symbol" version="2.0.0">
     <name>V11Valve</name>
     <pv_name>BL:DCM:CRYO:VALVE:V11:STATUS</pv_name>
@@ -293,29 +270,6 @@ $(actions)</tooltip>
 $(pv_value)
 $(actions)</tooltip>
     <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
-  </widget>
-  <widget type="bool_button" version="2.0.0">
-    <name>V11 Valve</name>
-    <pv_name>BL:DCM:CRYO:VALVE:V11:CMD</pv_name>
-    <bit>1</bit>
-    <x>718</x>
-    <y>289</y>
-    <width>60</width>
-    <height>25</height>
-    <off_label>close</off_label>
-    <on_label>open</on_label>
-    <actions>
-      <action type="write_pv">
-        <description>V17 Open</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>V17 Close</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
   </widget>
   <widget type="symbol" version="2.0.0">
     <name>V20Valve</name>
@@ -333,29 +287,6 @@ $(pv_value)
 $(actions)</tooltip>
     <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
   </widget>
-  <widget type="bool_button" version="2.0.0">
-    <name>V20 Valve</name>
-    <pv_name>BL:DCM:CRYO:VALVE:V20:CMD</pv_name>
-    <bit>1</bit>
-    <x>510</x>
-    <y>184</y>
-    <width>60</width>
-    <height>25</height>
-    <off_label>close</off_label>
-    <on_label>open</on_label>
-    <actions>
-      <action type="write_pv">
-        <description>V17 Open</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>V17 Close</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
-  </widget>
   <widget type="symbol" version="2.0.0">
     <name>V15Valve</name>
     <pv_name>BL:DCM:CRYO:VALVE:V15:STATUS</pv_name>
@@ -371,29 +302,6 @@ $(actions)</tooltip>
 $(pv_value)
 $(actions)</tooltip>
     <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
-  </widget>
-  <widget type="bool_button" version="2.0.0">
-    <name>V15 Valve</name>
-    <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
-    <bit>1</bit>
-    <x>431</x>
-    <y>184</y>
-    <width>60</width>
-    <height>25</height>
-    <off_label>close</off_label>
-    <on_label>open</on_label>
-    <actions>
-      <action type="write_pv">
-        <description>V17 Open</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>V17 Close</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
   </widget>
   <widget type="symbol" version="2.0.0">
     <name>V19Valve</name>
@@ -411,29 +319,6 @@ $(pv_value)
 $(actions)</tooltip>
     <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
   </widget>
-  <widget type="bool_button" version="2.0.0">
-    <name>V19 Valve</name>
-    <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
-    <bit>1</bit>
-    <x>256</x>
-    <y>310</y>
-    <width>60</width>
-    <height>25</height>
-    <off_label>close</off_label>
-    <on_label>open</on_label>
-    <actions>
-      <action type="write_pv">
-        <description>V17 Open</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>V17 Close</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
-  </widget>
   <widget type="symbol" version="2.0.0">
     <name>V19Valve</name>
     <pv_name>BL:DCM:CRYO:VALVE:V9:STATUS</pv_name>
@@ -449,29 +334,6 @@ $(actions)</tooltip>
 $(pv_value)
 $(actions)</tooltip>
     <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
-  </widget>
-  <widget type="bool_button" version="2.0.0">
-    <name>V9 Valve</name>
-    <pv_name>BL:DCM:CRYO:VALVE:V9:CMD</pv_name>
-    <bit>1</bit>
-    <x>110</x>
-    <y>313</y>
-    <width>60</width>
-    <height>25</height>
-    <off_label>close</off_label>
-    <on_label>open</on_label>
-    <actions>
-      <action type="write_pv">
-        <description>V17 Open</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>V17 Close</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V17</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
   </widget>
   <widget type="symbol" version="2.0.0">
     <name>V21Valve</name>
@@ -539,8 +401,8 @@ $(actions)</tooltip>
   <widget type="label" version="2.0.0">
     <name>PressureTransmitterLabel1_7</name>
     <text>Heater vessel pressure control valve</text>
-    <x>530</x>
-    <y>285</y>
+    <x>480</x>
+    <y>162</y>
     <width>90</width>
     <height>48</height>
     <font>
@@ -552,7 +414,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_9</name>
     <text>DCM (closed loop) Pressure control valve</text>
     <x>580</x>
-    <y>142</y>
+    <y>162</y>
     <width>127</width>
     <height>42</height>
     <font>
@@ -588,10 +450,10 @@ $(actions)</tooltip>
     <fallback_symbol>symbols/valve_open.svg</fallback_symbol>
   </widget>
   <widget type="textupdate" version="2.0.0">
-    <name>FT18Value_1</name>
+    <name>V17 Flow</name>
     <pv_name>BL:DCM:CRYO:FLOW:V17</pv_name>
-    <x>617</x>
-    <y>265</y>
+    <x>611</x>
+    <y>196</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -601,6 +463,7 @@ $(actions)</tooltip>
     <format>1</format>
     <precision>2</precision>
     <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
     <border_width>1</border_width>
   </widget>
   <widget type="textupdate" version="2.0.0">
@@ -1258,5 +1121,255 @@ Close</text>
         </font>
       </font>
     </widget>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>V10 Flow</name>
+    <pv_name>BL:DCM:CRYO:FLOW:V10</pv_name>
+    <x>448</x>
+    <y>560</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V17 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V17:CMD</pv_name>
+    <label></label>
+    <x>614</x>
+    <y>258</y>
+    <width>30</width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V20 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V20:CMD</pv_name>
+    <label></label>
+    <x>512</x>
+    <y>303</y>
+    <width>30</width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V15 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
+    <label></label>
+    <x>450</x>
+    <y>303</y>
+    <width>30</width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V11 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V11:CMD</pv_name>
+    <label></label>
+    <x>692</x>
+    <y>303</y>
+    <width>30</width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V19 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
+    <label></label>
+    <x>253</x>
+    <y>303</y>
+    <width>30</width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V9 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V9:CMD</pv_name>
+    <label></label>
+    <x>135</x>
+    <y>305</y>
+    <width>30</width>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V10 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V10:CMD</pv_name>
+    <label></label>
+    <x>482</x>
+    <y>577</y>
+    <width>30</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_15</name>
+    <text>Filling Level</text>
+    <x>45</x>
+    <y>335</y>
+    <width>71</width>
+    <height>15</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_16</name>
+    <text>Bypass Valve</text>
+    <x>433</x>
+    <y>540</y>
+    <width>71</width>
+    <height>15</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="group" version="3.0.0">
+    <name>Group</name>
+    <x>765</x>
+    <y>127</y>
+    <width>90</width>
+    <height>48</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_17</name>
+      <text>HLIM : 90K</text>
+      <x>10</x>
+      <y>2</y>
+      <width>71</width>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_18</name>
+      <text>LLIM : 73K</text>
+      <x>10</x>
+      <y>22</y>
+      <width>71</width>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+  </widget>
+  <widget type="group" version="3.0.0">
+    <name>Group_1</name>
+    <x>313</x>
+    <y>306</y>
+    <width>90</width>
+    <height>48</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_19</name>
+      <text>HAL : 85%</text>
+      <x>10</x>
+      <y>2</y>
+      <width>71</width>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_20</name>
+      <text>LAL : 6%</text>
+      <x>10</x>
+      <y>22</y>
+      <width>71</width>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+  </widget>
+  <widget type="group" version="3.0.0">
+    <name>Group_2</name>
+    <x>35</x>
+    <y>355</y>
+    <width>90</width>
+    <height>48</height>
+    <style>3</style>
+    <transparent>true</transparent>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_21</name>
+      <text>HAL : 85%</text>
+      <x>10</x>
+      <y>2</y>
+      <width>71</width>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PressureTransmitterLabel1_22</name>
+      <text>LAL : 30%</text>
+      <x>10</x>
+      <y>22</y>
+      <width>71</width>
+      <font>
+        <font family="Malgun Gothic" style="REGULAR" size="12.0">
+        </font>
+      </font>
+    </widget>
+  </widget>
+  <widget type="tank" version="2.0.0">
+    <name>Tank</name>
+    <pv_name>BL:DCM:CRYO:PRESS:PT3</pv_name>
+    <x>392</x>
+    <y>315</y>
+    <width>9</width>
+    <height>155</height>
+    <scale_visible>false</scale_visible>
+    <maximum>10.0</maximum>
+  </widget>
+  <widget type="tank" version="2.0.0">
+    <name>Tank_1</name>
+    <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+    <x>126</x>
+    <y>445</y>
+    <width>10</width>
+    <height>185</height>
+    <scale_visible>false</scale_visible>
+    <maximum>10.0</maximum>
+  </widget>
+  <widget type="slide_button" version="2.0.0">
+    <name>V21 Valve on/off</name>
+    <pv_name>BL:DCM:CRYO:VALVE:V21:CMD</pv_name>
+    <label></label>
+    <x>72</x>
+    <y>205</y>
+    <width>30</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>T5Value_1</name>
+    <pv_name>BL:DCM:CRYO:TEMP:SUBCOOLER</pv_name>
+    <x>220</x>
+    <y>506</y>
+    <width>60</width>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>LT19Value_1</name>
+    <pv_name>BL:DCM:CRYO:DCM:POWER</pv_name>
+    <x>399</x>
+    <y>142</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>1</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <vertical_alignment>1</vertical_alignment>
+    <border_width>1</border_width>
   </widget>
 </display>

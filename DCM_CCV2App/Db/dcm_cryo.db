@@ -30,14 +30,46 @@ record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
 record(ai,  "BL:DCM:CRYO:TEMP:COLDHEAD") {
     field(EGU,  "K")
     field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "350")
+    field(HIGH, "280")
+    field(HIHI, "300")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
 }
 record(ai,  "BL:DCM:CRYO:TEMP:T5") {
     field(EGU,  "K")
     field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "350")
+    field(HIGH, "280")
+    field(HIHI, "300")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
 }
 record(ai,  "BL:DCM:CRYO:TEMP:T6") {
     field(EGU,  "K")
     field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "350")
+    field(HIGH, "280")
+    field(HIHI, "300")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
+}
+record(ai,  "BL:DCM:CRYO:TEMP:SUBCOOLER") {
+    field(EGU,  "K")
+    field(PREC, "1")
+    field(LOPR, "0")
+    field(HOPR, "350")
+}
+
+# DCM power readback (fixed 100 W in simulator)
+record(ai,  "BL:DCM:CRYO:DCM:POWER") {
+    field(EGU,  "W")
+    field(PREC, "1")
+    field(LOPR, "0")
+    field(HOPR, "1000")
 }
 record(ao,  "BL:DCM:CRYO:TEMP:SETPOINT") {
     field(EGU,  "K")
@@ -49,14 +81,36 @@ record(ao,  "BL:DCM:CRYO:TEMP:SETPOINT") {
 record(ai,  "BL:DCM:CRYO:PRESS:PT1") {
     field(EGU,  "bar")
     field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "10")
+    field(LOLO, "0.2")
+    field(LOW,  "0.5")
+    field(HIGH, "3")
+    field(HIHI, "4")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
 }
 record(ai,  "BL:DCM:CRYO:PRESS:PT3") {
     field(EGU,  "bar")
     field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "10")
+    field(LOLO, "0.2")
+    field(LOW,  "0.5")
+    field(HIGH, "3")
+    field(HIHI, "4")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
 }
 record(ai,  "BL:DCM:CRYO:FLOW:FT18") {
     field(EGU,  "L/min")
     field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "10")
 }
 
 record(calcout, "BL:DCM:CRYO:ALARM:ACTIVE") {
@@ -124,10 +178,30 @@ record(ai,  "BL:DCM:CRYO:TIME") {
 record(ai,  "BL:DCM:CRYO:LEVEL:LT19") {
     field(EGU,  "%")
     field(PREC, "1")
+    field(LOPR, "0")
+    field(HOPR, "100")
+    field(LOLO, "5")
+    field(LOW,  "10")
+    field(HIGH, "90")
+    field(HIHI, "95")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
 }
 record(ai,  "BL:DCM:CRYO:LEVEL:LT23") {
     field(EGU,  "%")
     field(PREC, "1")
+    field(LOPR, "0")
+    field(HOPR, "100")
+    field(LOLO, "5")
+    field(LOW,  "10")
+    field(HIGH, "90")
+    field(HIHI, "95")
+    field(LLSV, "MAJOR")
+    field(LSV,  "MINOR")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
 }
 
 # Additional valves used by GUI
@@ -188,4 +262,73 @@ record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT1") {
 record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT3") {
     field(FTVL, "DOUBLE")
     field(NELM, "2048")
+}
+
+# Additional PVs referenced by GUI
+record(ao,  "BL:DCM:CRYO:PUMP:FREQ") {
+    field(EGU,  "Hz")
+    field(PREC, "0")
+    field(DRVL, "0")
+    field(DRVH, "80")
+    field(LOPR, "0")
+    field(HOPR, "80")
+}
+
+record(ai,  "BL:DCM:CRYO:FLOW:V17") {
+    field(EGU,  "L/min")
+    field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "10")
+}
+
+record(ai,  "BL:DCM:CRYO:FLOW:V10") {
+    field(EGU,  "L/min")
+    field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "10")
+}
+
+record(ao,  "BL:DCM:CRYO:VALVE:V17") {
+    field(EGU,  "%")
+    field(PREC, "1")
+    field(DRVL, "0")
+    field(DRVH, "100")
+    field(LOPR, "0")
+    field(HOPR, "100")
+}
+
+record(bo,  "BL:DCM:CRYO:VALVE:V11:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bi,  "BL:DCM:CRYO:VALVE:V11:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+
+record(bi,  "BL:DCM:CRYO:VALVE:V10:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bo,  "BL:DCM:CRYO:VALVE:V10:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+
+record(bo,  "BL:DCM:CRYO:VALVE:V20:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bi,  "BL:DCM:CRYO:VALVE:V20:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+
+record(bi,  "BL:DCM:CRYO:VALVE:V21:STATUS") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
+}
+record(bo,  "BL:DCM:CRYO:VALVE:V21:CMD") {
+    field(ZNAM, "CLOSE")
+    field(ONAM, "OPEN")
 }
