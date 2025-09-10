@@ -1,0 +1,62 @@
+%%{init: {"theme":"base","themeVariables":{
+"background":"#ffffff",
+"primaryTextColor":"#111111"
+}}}%%
+
+
+%% High-level data flow (IOC ↔ Bridge ↔ Simulator ↔ GUI)
+flowchart LR
+  %% IOC and DB
+  subgraph IOC[EPICS IOC]
+    STCMD[iocBoot/iocDCM_CCV2/st.cmd]
+    DB[(db/dcm_cryo.db)]
+    HIST["BL:DCM:CRYO:HIST:*(waveforms)"]
+  end
+
+  %% Bridge and optional logics
+  subgraph Bridge[PV Bridge]
+    BRIDGE[pv_bridge.py]
+    OPER["sim.logic.operating (optional)"]
+    ILK["sim.logic.interlock (optional)"]
+  end
+
+  %% Simulator core
+  subgraph Sim[Simulator]
+    MODEL[sim.core.model.CryoPlant]
+  end
+
+  %% GUI
+  subgraph GUI[GUI/BOB]
+    BOB[gui/bob/main.bob]
+  end
+
+  %% Config files
+  subgraph CFG[Configs]
+    INIT[tools/pv_init.yaml]
+    OPERCFG[tools/operating.yaml]
+    ILKCFG[tools/interlock.yaml]
+  end
+
+  %% Boot / load records
+  STCMD --> DB
+
+  %% Config → Bridge
+  INIT -->|config + PV seeds| BRIDGE
+  OPERCFG -->|params| BRIDGE
+  ILKCFG -->|thresholds| BRIDGE
+
+  %% IOC ↔ Bridge (directions annotated)
+  DB -->|"commands, setpoints, inputs \n(e.g., SUBCOOLER.TEMP, FT18)"| BRIDGE
+  BRIDGE -->|"temperatures, pressures, flows, status/state, alarms"| DB
+  BRIDGE -->|"history arrays"| HIST
+
+  %% Bridge ↔ Simulator
+  BRIDGE <--> MODEL
+
+  %% Optional external logics used by Bridge
+  BRIDGE -.->|state transition| OPER
+  BRIDGE -.->|severity/safety| ILK
+
+  %% GUI ↔ IOC
+  BOB <--> DB
+  BOB ---- HIST

@@ -1,0 +1,6 @@
+# Interlock thresholds for simulator
+t_high_minor: 250.0   # MINOR alarm threshold for Tch (K)
+t_high_major: 300.0   # MAJOR alarm threshold for Tch (K)
+lt19_low: 10.0        # LT19 low level (%)
+lt23_low: 10.0        # LT23 low level (%)
+flow_ft18_min: 0.5    # Minimum acceptable FT18 flow (L/min)

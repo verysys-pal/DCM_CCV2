@@ -1,0 +1,3 @@
+# Operating/sequence parameters for simulator state machine
+init_seconds: 2.0       # INIT dwell time (s)
+precool_band: 5.0       # PRECOOL -> RUN band (K)

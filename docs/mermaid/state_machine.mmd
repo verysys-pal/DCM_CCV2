@@ -1,0 +1,21 @@
+%%{init: {"theme":"base","themeVariables":{
+"background":"#ffffff",
+"primaryTextColor":"#111111"
+}}}%%
+
+%% Operating state machine (Simulator)
+stateDiagram-v2
+  [*] --> OFF
+  OFF --> INIT: CMD.START
+  INIT --> PRECOOL: after init_seconds
+  PRECOOL --> RUN: Tch <= (Tsp - precool_band)
+  RUN --> HOLD: CMD.HOLD
+  HOLD --> RUN: CMD.RESUME
+  any --> WARMUP: CMD.WARMUP
+  any --> SAFE_SHUTDOWN: CMD.EMERGENCY_STOP
+  SAFE_SHUTDOWN --> OFF: CMD.RESET
+  WARMUP --> OFF: Tch >= (Tamb - precool_band)
+
+  state any {
+    [*] --> [*]
+  }

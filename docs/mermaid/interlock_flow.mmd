@@ -1,0 +1,21 @@
+%% Interlock and alarm evaluation flow (Simulator)
+flowchart TD
+  Tch[Tch (Cold head temp)] --> EVAL{Evaluate thresholds}
+  LT19[LT19 Level %] --> EVAL
+  LT23[LT23 Level %] --> EVAL
+  FT18[FT18 Flow L/min] --> EVAL
+
+  EVAL -->|sev=0| NO[NO_ALARM]
+  EVAL -->|sev=1| MIN[MINOR]
+  EVAL -->|sev=2| MAJ[MAJOR]
+
+  EVAL -->|trip?| SAFE[SAFETY:INTERLOCK=1]
+  SAFE -.-> ACK[ACK/Reset]
+  ACK -.-> SAFE
+
+  classDef sev0 fill:#cfe3,stroke:#468;
+  classDef sev1 fill:#ffebc1,stroke:#c90;
+  classDef sev2 fill:#ffd4d4,stroke:#c33;
+  class NO sev0;
+  class MIN sev1;
+  class MAJ sev2;

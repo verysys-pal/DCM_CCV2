@@ -1,0 +1,24 @@
+%%{init: {"theme":"base","themeVariables":{
+"background":"#ffffff",
+"primaryTextColor":"#111111"
+}}}%%
+
+stateDiagram-v2
+  [*] --> OFF
+  OFF --> INIT: START(1)
+  INIT --> PRECOOL: START(1)/init ok
+  PRECOOL --> RUN: START(1)/precool ok
+  RUN --> HOLD: HOLD(3)
+  HOLD --> RUN: RESUME(4)
+  RUN --> WARMUP: STOP(2)
+  HOLD --> WARMUP: STOP(2)
+  PRECOOL --> WARMUP: STOP(2)
+  WARMUP --> OFF: warm reached
+  
+  state SAFE_SHUTDOWN
+  RUN --> SAFE_SHUTDOWN: EMERGENCY(5) or Safety
+  HOLD --> SAFE_SHUTDOWN: EMERGENCY(5) or Safety
+  INIT --> SAFE_SHUTDOWN: Safety
+  PRECOOL --> SAFE_SHUTDOWN: Safety
+  WARMUP --> SAFE_SHUTDOWN: Safety
+  SAFE_SHUTDOWN --> OFF: RESET(6)=ACK_ALARM

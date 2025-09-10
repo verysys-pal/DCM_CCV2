@@ -59,6 +59,8 @@ except Exception as exc:  # pragma: no cover - import diagnostic
     sys.exit(2)
 
 from sim.core.model import CryoPlant
+from sim.logic.operating import OperatingLogic
+from sim.logic.interlock import InterlockLogic
 
 
 PV_STATE = "BL:DCM:CRYO:STATE:MAIN"
@@ -97,6 +99,7 @@ PV_TIME = "BL:DCM:CRYO:TIME"
 PV_LT19 = "BL:DCM:CRYO:LEVEL:LT19"
 PV_LT23 = "BL:DCM:CRYO:LEVEL:LT23"
 PV_ALARM_MAX = "BL:DCM:CRYO:ALARM:MAX_SEVERITY"
+PV_SAFETY_ILK = "BL:DCM:CRYO:SAFETY:INTERLOCK"
 PV_V17_POS = "BL:DCM:CRYO:VALVE:V17"
 PV_FLOW_V17 = "BL:DCM:CRYO:FLOW:V17"
 PV_FLOW_V10 = "BL:DCM:CRYO:FLOW:V10"
@@ -130,8 +133,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="PV bridge for CryoPlant simulator")
     p.add_argument("--dt", type=float, default=0.1, help="step time (s)")
     p.add_argument("--qload", type=float, default=50.0, help="heat load")
-    p.add_argument("--init-seconds", type=float, default=2.0, help="INIT dwell")
-    p.add_argument("--precool-band", type=float, default=5.0, help="Run target band (K)")
+    # 상태 전이/제어 밴드는 OperatingLogic에서 관리
     p.add_argument(
         "--init-config",
         type=str,
@@ -143,13 +145,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 class PVBridge:
-    def __init__(self, dt: float, qload: float, init_seconds: float, band: float, verbose: bool = False, init_config: str | None = None) -> None:
+    def __init__(self, dt: float, qload: float, verbose: bool = False, init_config: str | None = None) -> None:
         self.model = CryoPlant()
         self.model.reset()
         self.dt = dt
         self.qload = qload
-        self.band = band
-        self.init_seconds = init_seconds
         self.verbose = verbose
         self.init_config = init_config or ""
         # Configurable runtime defaults (can be overridden by YAML)
@@ -198,6 +198,7 @@ class PVBridge:
         self.pv_lt19 = PV(PV_LT19, auto_monitor=False)
         self.pv_lt23 = PV(PV_LT23, auto_monitor=False)
         self.pv_alarm_max = PV(PV_ALARM_MAX, auto_monitor=False)
+        self.pv_safety_ilk = PV(PV_SAFETY_ILK, auto_monitor=False)
         # Additional process PVs for plotting
         self.pv_pt1 = PV("BL:DCM:CRYO:PRESS:PT1", auto_monitor=False)
         self.pv_pt3 = PV("BL:DCM:CRYO:PRESS:PT3", auto_monitor=False)
@@ -216,8 +217,7 @@ class PVBridge:
 
         # Local state
         self.state: int = STATE["OFF"]
-        self.cmd_last: Optional[int] = None
-        self.t_init_left = 0.0
+        # 브리지 상태 보조값은 불필요
         # History buffers (seconds window ~ maxlen * dt)
         self.hist_len = min(2048, max(120, int(600.0 / self.dt)))
         self.hist_time = deque(maxlen=self.hist_len)
@@ -265,6 +265,7 @@ class PVBridge:
             (PV_LT19, self.pv_lt19),
             (PV_LT23, self.pv_lt23),
             (PV_ALARM_MAX, self.pv_alarm_max),
+            (PV_SAFETY_ILK, self.pv_safety_ilk),
             ("BL:DCM:CRYO:HIST:TIME", self.pv_hist_time),
             ("BL:DCM:CRYO:HIST:TEMP:COLDHEAD", self.pv_hist_tch),
             ("BL:DCM:CRYO:HIST:TEMP:T5", self.pv_hist_t5),
@@ -303,48 +304,7 @@ class PVBridge:
             s = self.state
         return self._rev_state.get(int(s), f"UNKNOWN({s})")
 
-    def _maybe_transition(self, tsp: float) -> None:
-        prev = self.state
-        cmd = self.pv_cmd.get() or 0
-        if cmd != self.cmd_last:
-            self.cmd_last = cmd
-            if cmd == CMD["START"]:
-                self.state = STATE["INIT"]
-                self.t_init_left = self.init_seconds
-            elif cmd == CMD["STOP"]:
-                self.state = STATE["OFF"]
-            elif cmd == CMD["HOLD"]:
-                self.state = STATE["HOLD"]
-            elif cmd == CMD["RESUME"] and self.state == STATE["HOLD"]:
-                self.state = STATE["RUN"]
-            elif cmd == CMD["WARMUP"]:
-                self.state = STATE["WARMUP"]
-            elif cmd == CMD["EMERGENCY_STOP"]:
-                self.state = STATE["SAFE_SHUTDOWN"]
-            elif cmd == CMD["RESET"] and self.state == STATE["SAFE_SHUTDOWN"]:
-                self.state = STATE["OFF"]
-
-        # timed INIT -> PRECOOL
-        if self.state == STATE["INIT"]:
-            self.t_init_left -= self.dt
-            if self.t_init_left <= 0:
-                self.state = STATE["PRECOOL"]
-
-        # PRECOOL -> RUN when near setpoint
-        if self.state == STATE["PRECOOL"]:
-            if (self.model.tch) <= (tsp - self.band):
-                self.state = STATE["RUN"]
-
-        # WARMUP -> OFF when near ambient
-        if self.state == STATE["WARMUP"]:
-            if (self.model.tch) >= (self.model.tamb - self.band):
-                self.state = STATE["OFF"]
-
-        if self.verbose and prev != self.state:
-            now = time.monotonic()
-            if (now - self._last_transition_log) >= 1.0:
-                print(f"[pv_bridge] transition {self._state_name(prev)} -> {self._state_name(self.state)}")
-                self._last_transition_log = now
+    # 상태 전이는 OperatingLogic이 담당하므로 브리지 내 로직 없음
 
     def loop(self) -> None:
         # Initialize PVs
@@ -382,6 +342,13 @@ class PVBridge:
         self._write_float(self.pv_flow_v17, 0.0)
         self._write_float(self.pv_flow_v10, 0.0)
         self._write_float(self.pv_dcm_power, 100.0)
+        # Interlock defaults
+        try:
+            self._write_int(self.pv_safety_ilk, 0)
+        except Exception:
+            pass
+        # Optional external logic configs
+        self._load_operating_interlock()
 
         # YAML 초기값 적용(있으면 기본값을 덮어씀)
         self._apply_init_from_yaml()
@@ -405,13 +372,28 @@ class PVBridge:
             print(f"[pv_bridge] loop start dt={self.dt} qload={self.qload}")
         while True:
             tsp = self._read(self.pv_tsp, default=tsp)
-            # Adjust controller target based on state
-            effective_tsp = tsp
-            if self.state in (STATE["OFF"], STATE["SAFE_SHUTDOWN"], STATE["WARMUP"]):
-                # No active cooling during OFF/WARMUP/SAFE; controller will output low Qcool
-                effective_tsp = self.model.tamb
+            # 운영 로직에 상태 전이/컨트롤러 목표 위임
+            new_state = self.oper_logic.next_state(
+                self.state,
+                STATE,
+                CMD,
+                int(self.pv_cmd.get() or 0),
+                tsp,
+                self.model.tch,
+                self.dt,
+            )
+            if new_state != self.state:
+                prev = self.state
+                self.state = new_state
+                if self.verbose:
+                    now = time.monotonic()
+                    if (now - self._last_transition_log) >= 1.0:
+                        print(f"[pv_bridge] transition {self._state_name(prev)} -> {self._state_name(self.state)}")
+                        self._last_transition_log = now
 
-            self._maybe_transition(tsp)
+            effective_tsp = self.oper_logic.controller_target(
+                state=self.state, STATE=STATE, tsp=tsp, tamb=self.model.tamb
+            )
 
             # Read SUBCOOLER temperature and apply as model constraint
             try:
@@ -426,34 +408,54 @@ class PVBridge:
                 pass
 
             self.model.step(effective_tsp, self.qload, self.dt)
-            # Publish temperatures and time
+            # Publish temperatures and time (T5는 밸브 상태에 따라 이후에 보정 적용)
             self._write_float(self.pv_tch, self.model.tch)
-            self._write_float(self.pv_t5, self.model.t5)
             self._write_float(self.pv_t6, self.model.t6)
             self._write_float(self.pv_time, (self.pv_time.get() or 0.0) + self.dt)
 
-            # Derived signals for trending
-            pt1 = max(0.5, 1.5 - 0.002 * (self.model.tamb - self.model.tch))
-            pt3 = max(0.5, 1.2 - 0.0015 * (self.model.tamb - self.model.tch))
-            self._write_float(self.pv_pt1, pt1)
+            # Derived signals for trending (운전 로직 위임)
+            pt1, pt3 = self.oper_logic.derive_pressures(tch=self.model.tch, tamb=self.model.tamb)
+
+            # 유효 측정치는 운영 로직에서 파생하도록 위임
+            t5_eff = float(self.model.t5)
+            pt1_eff = float(pt1)
+            try:
+                if self.oper_logic is not None:
+                    v9_open = int(self.pv_v9_cmd.get() or 0)
+                    v21_open = int(self.pv_v21_cmd.get() or 0)
+                    t5_eff, pt1_eff = self.oper_logic.derive_measurements(
+                        v9_open=v9_open,
+                        v21_open=v21_open,
+                        t5_model=float(self.model.t5),
+                        pt1_base=float(pt1),
+                        tamb=float(self.model.tamb),
+                    )
+            except Exception:
+                # 운영 로직 불가 시 기본값 유지
+                t5_eff = float(self.model.t5)
+                pt1_eff = float(pt1)
+
+            # 출력 PV 반영
+            self._write_float(self.pv_pt1, pt1_eff)
             self._write_float(self.pv_pt3, pt3)
+            self._write_float(self.pv_t5, t5_eff)
             # Do not overwrite FT18 here; external value drives model
             # Update history arrays
             tnext = (self.hist_time[-1] if self.hist_time else 0.0) + self.dt
             self.hist_time.append(tnext)
             self.hist_tch.append(self.model.tch)
-            self.hist_t5.append(self.model.t5)
+            self.hist_t5.append(t5_eff)
             self.hist_t6.append(self.model.t6)
-            self.hist_pt1.append(pt1)
+            self.hist_pt1.append(pt1_eff)
             self.hist_pt3.append(pt3)
             self._publish_history()
             self._write_int(self.pv_state, self.state)
             self.pv_state_text.put(self._state_name(), wait=False)
 
-            # Compressor status derived from state
-            comp_on = int(self.state in (STATE["INIT"], STATE["PRECOOL"], STATE["RUN"], STATE["HOLD"]))
+            # Compressor status derived from state (운전 로직 위임)
+            comp_on, comp_txt = self.oper_logic.comp_status(state=self.state, STATE=STATE)
             self._write_int(self.pv_comp_run, comp_on)
-            self.pv_comp_status.put("RUNNING" if comp_on else "OFF", wait=False)
+            self.pv_comp_status.put(comp_txt, wait=False)
 
             # Mirror valve statuses from commands
             v9_cmd = int(self.pv_v9_cmd.get() or 0)
@@ -467,30 +469,44 @@ class PVBridge:
             self._write_int(self.pv_v10_status, int(self.pv_v10_cmd.get() or 0))
             self._write_int(self.pv_v21_status, int(self.pv_v21_cmd.get() or 0))
 
-            # Synthesize V17 position/flow from command (0% or 100%)
-            v17_pos = 100.0 if int(self.pv_v17_cmd.get() or 0) else 0.0
+            # 밸브 개도/유량 파생 (운전 로직 위임)
+            v17_cmd = int(self.pv_v17_cmd.get() or 0)
+            v10_cmd = int(self.pv_v10_cmd.get() or 0)
+            v17_pos, flow_v17, flow_v10 = self.oper_logic.valve_flows(v17_cmd=v17_cmd, v10_cmd=v10_cmd)
             self._write_float(self.pv_v17_pos, v17_pos)
-            # Flow scales with position (max about 8 L/min)
-            self._write_float(self.pv_flow_v17, 0.08 * v17_pos)
-            # Simple V10 bypass flow: 0 or 6 L/min based on CMD
-            v10_open = int(self.pv_v10_cmd.get() or 0)
-            self._write_float(self.pv_flow_v10, 6.0 if v10_open else 0.0)
+            self._write_float(self.pv_flow_v17, flow_v17)
+            self._write_float(self.pv_flow_v10, flow_v10)
 
-            # Mirror pump/heater RUNNING from CMD
-            self._write_int(self.pv_pump_run, int(self.pv_pump_cmd.get() or 0))
-            self._write_int(self.pv_heat_run, int(self.pv_heat_cmd.get() or 0))
-            # Simple derived outputs for pump/heater (configurable)
-            self._write_float(
-                self.pv_pump_freq,
-                self.pump_freq_on if int(self.pv_pump_cmd.get() or 0) else self.pump_freq_off,
+            # 펌프/히터 출력 파생 (운전 로직 위임)
+            pump_cmd = int(self.pv_pump_cmd.get() or 0)
+            heat_cmd = int(self.pv_heat_cmd.get() or 0)
+            pump_run, pump_freq, heat_run, heat_power = self.oper_logic.device_actuators(
+                pump_cmd=pump_cmd,
+                heat_cmd=heat_cmd,
+                pump_freq_on=self.pump_freq_on,
+                pump_freq_off=self.pump_freq_off,
+                heater_power_on=self.heater_power_on,
+                heater_power_off=self.heater_power_off,
             )
-            self._write_float(
-                self.pv_heat_power,
-                self.heater_power_on if int(self.pv_heat_cmd.get() or 0) else self.heater_power_off,
-            )
+            self._write_int(self.pv_pump_run, pump_run)
+            self._write_float(self.pv_pump_freq, pump_freq)
+            self._write_int(self.pv_heat_run, heat_run)
+            self._write_float(self.pv_heat_power, heat_power)
 
-            # Simple alarm max severity heuristic: 0 normally, 1 if T > threshold
-            self._write_int(self.pv_alarm_max, 1 if self.model.tch > float(self.alarm_t_high) else 0)
+            # Interlock evaluation (if configured), else fallback simple rule
+            if self.ilk_logic is not None:
+                sev, safe = self.ilk_logic.evaluate(
+                    {
+                        "tch": self.model.tch,
+                        "lt19": float(self._read(self.pv_lt19, 50.0)),
+                        "lt23": float(self._read(self.pv_lt23, 70.0)),
+                        "ft18": float(self.model.flow_ft18),
+                    }
+                )
+                self._write_int(self.pv_alarm_max, int(sev))
+                self._write_int(self.pv_safety_ilk, 1 if safe else 0)
+            else:
+                self._write_int(self.pv_alarm_max, 1 if self.model.tch > float(self.alarm_t_high) else 0)
             # Publish DCM power (fixed from model)
             try:
                 self._write_float(self.pv_dcm_power, float(getattr(self.model, 'q_dcm', 100.0)))
@@ -512,6 +528,33 @@ class PVBridge:
         except Exception as e:
             if self.verbose:
                 print(f"[pv_bridge] history publish error: {e}")
+
+    def _load_operating_interlock(self) -> None:
+        """Load optional operating/interlock YAMLs to configure external logic."""
+        self.oper_logic = None
+        self.ilk_logic = None
+        try:
+            oper_path = _ROOT / "tools" / "operating.yaml"
+            data = {}
+            if oper_path.exists():
+                import yaml
+                with open(oper_path, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+            # 운영 로직은 항상 생성 (YAML 없으면 기본값)
+            self.oper_logic = OperatingLogic.from_yaml(data)
+        except Exception:
+            # 실패 시에도 기본 파라미터로 생성
+            self.oper_logic = OperatingLogic.from_yaml({})
+        try:
+            ilk_path = _ROOT / "tools" / "interlock.yaml"
+            if ilk_path.exists():
+                import yaml
+
+                with open(ilk_path, "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f) or {}
+                self.ilk_logic = InterlockLogic.from_yaml(data)
+        except Exception:
+            self.ilk_logic = None
 
     def _apply_init_from_yaml(self) -> None:
         """선택적 YAML 설정 파일에서 초기 설정과 PV 값을 적용한다.
@@ -551,16 +594,7 @@ class PVBridge:
                         self.qload = float(cfg["qload"])
                     except Exception:
                         pass
-                if "init_seconds" in cfg:
-                    try:
-                        self.init_seconds = float(cfg["init_seconds"])
-                    except Exception:
-                        pass
-                if "precool_band" in cfg:
-                    try:
-                        self.band = float(cfg["precool_band"])
-                    except Exception:
-                        pass
+                # init_seconds/precool_band는 OperatingLogic이 관리하므로 무시
                 if "alarm_t_high" in cfg:
                     try:
                         self.alarm_t_high = float(cfg["alarm_t_high"])
@@ -647,8 +681,6 @@ def main(argv: list[str]) -> int:
     bridge = PVBridge(
         args.dt,
         args.qload,
-        args.init_seconds,
-        args.precool_band,
         verbose=args.verbose,
         init_config=args.init_config,
     )
