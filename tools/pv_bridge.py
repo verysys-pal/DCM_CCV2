@@ -78,6 +78,7 @@ PV_T5 = "BL:DCM:CRYO:TEMP:T5"
 PV_T6 = "BL:DCM:CRYO:TEMP:T6"
 PV_PT1 = "BL:DCM:CRYO:PRESS:PT1"
 PV_PT3 = "BL:DCM:CRYO:PRESS:PT3"
+PV_PT3_SP = "BL:DCM:CRYO:PRESS:PT3:SP"
 PV_FT18 = "BL:DCM:CRYO:FLOW:FT18"
 PV_TSUB = "BL:DCM:CRYO:TEMP:SUBCOOLER"
 PV_STATE_TEXT = "BL:DCM:CRYO:STATE:TEXT"
@@ -225,6 +226,7 @@ class PVBridge:
         # Additional process PVs for plotting
         self.pv_pt1 = PV(PV_PT1, auto_monitor=False)
         self.pv_pt3 = PV(PV_PT3, auto_monitor=False)
+        self.pv_pt3_sp = PV(PV_PT3_SP, auto_monitor=True)
         self.pv_ft18 = PV(PV_FT18, auto_monitor=False)
         self.pv_v17_pos = PV(PV_V17_POS, auto_monitor=True)
         self.pv_flow_v17 = PV(PV_FLOW_V17, auto_monitor=False)
@@ -290,6 +292,7 @@ class PVBridge:
             (PV_LT23, self.pv_lt23),
             (PV_ALARM_MAX, self.pv_alarm_max),
             (PV_SAFETY_ILK, self.pv_safety_ilk),
+            (PV_PT3_SP, self.pv_pt3_sp),
             (PV_HIST_TIME, self.pv_hist_time),
             (PV_HIST_T5, self.pv_hist_t5),
             (PV_HIST_T6, self.pv_hist_t6),
@@ -332,11 +335,19 @@ class PVBridge:
     def loop(self) -> None:
         # Initialize PVs
         tsp = self._read(self.pv_tsp, default=80.0)
+        
+        # Initialize PT3 setpoint PV with current model value
+        try:
+            self._write_float(self.pv_pt3_sp, float(self.sim.controls.press_sp_bar))
+        except Exception:
+            pass
+
         self._write_int(self.pv_state, self.state)
         self.pv_state_text.put(self._state_name(), wait=False)
         self._write_float(self.pv_t5, self.sim.state.T5)
         self._write_float(self.pv_t6, self.sim.state.T6)
         self._write_float(self.pv_time, 0.0)
+        
         # Subcooler default
         try:
             # Initialize SUBCOOLER to 77.3 K
@@ -393,13 +404,31 @@ class PVBridge:
             tsp = self._read(self.pv_tsp, default=tsp)
             mode_val = int(self.pv_mode.get() or 0)
             cmd_val = int(self.pv_cmd.get() or 0)
-            if cmd_val != self._last_cmd_val or mode_val != self._last_mode_val:
-                self._handle_command(cmd_val, mode_val)
+            cmd_changed = (cmd_val != self._last_cmd_val) or (mode_val != self._last_mode_val)
+            if cmd_changed:
+                try:
+                    if self.oper_logic is not None:
+                        self.oper_logic.apply_mode_action(self.sim, cmd_val=cmd_val, mode_val=mode_val, CMD=CMD)
+                except Exception as e:
+                    if self.verbose:
+                        print(f"[pv_bridge] operating.apply_mode_action error: {e}")
+                # Update hold flag from command
+                if cmd_val == CMD.get("HOLD", -1):
+                    self._held = True
+                elif cmd_val in (
+                    CMD.get("RESUME", -1), CMD.get("START", -1), CMD.get("STOP", -1), CMD.get("EMERGENCY_STOP", -1), CMD.get("RESET", -1)
+                ):
+                    self._held = False
                 self._last_cmd_val = cmd_val
                 self._last_mode_val = mode_val
 
             # Simulator step and publish
             self._apply_manual_actuators_if_allowed()
+            # Apply PT3 setpoint from PV
+            try:
+                self.sim.controls.press_sp_bar = float(self._read(self.pv_pt3_sp, default=self.sim.controls.press_sp_bar))
+            except Exception:
+                pass
             self.sim.step(self.dt, power_W=self.q_dcm)
             self._write_float(self.pv_t5, self.sim.state.T5)
             self._write_float(self.pv_t6, self.sim.state.T6)
@@ -415,7 +444,32 @@ class PVBridge:
             self.hist_pt1.append(self.sim.state.PT1)
             self.hist_pt3.append(self.sim.state.PT3)
             self._publish_history()
-            self._update_state_from_sim()
+            # State transition managed by OperatingLogic
+            try:
+                if self.oper_logic is not None:
+                    # START와 같은 레벨 명령은 변경 시점에만 유효하도록 펄스 처리
+                    cmd_for_transition = cmd_val if cmd_changed else 0
+                    new_state = self.oper_logic.next_state(
+                        state=self.state,
+                        STATE=STATE,
+                        CMD=CMD,
+                        cmd_val=cmd_for_transition,
+                        mode_val=mode_val,
+                        tsp=tsp,
+                        t5=self.sim.state.T5,
+                        tamb=getattr(self.sim, 'ambK', 280.0),
+                        dt=self.dt,
+                    )
+                    if int(new_state) != int(self.state):
+                        self.state = int(new_state)
+                        self._write_int(self.pv_state, self.state)
+                        self.pv_state_text.put(self._state_name(), wait=False)
+                else:
+                    # Fallback: keep state as-is
+                    pass
+            except Exception as e:
+                if self.verbose:
+                    print(f"[pv_bridge] operating.next_state error: {e}")
             comp_on = 1 if (self.sim.controls.pump_hz > 0.0 or self.sim.controls.press_ctrl_on) else 0
             self._write_int(self.pv_comp_run, comp_on)
             self.pv_comp_status.put("RUNNING" if comp_on else "OFF", wait=False)
@@ -496,46 +550,11 @@ class PVBridge:
             self.ilk_logic = None
 
     # --- Helpers for CryoCoolerSim integration ---
-    def _handle_command(self, cmd_val: int, mode_val: int) -> None:
-        if cmd_val == CMD.get("START", -1):
-            if mode_val == 3:
-                self.sim.auto_cool_down()
-            elif mode_val == 4:
-                self.sim.auto_warm_up()
-            elif mode_val == 5:
-                self.sim.auto_refill_hv()
-            elif mode_val == 2:  # READY hold
-                self.sim.controls.V9 = True
-                self.sim.controls.V11 = True
-                self.sim.controls.V17 = 0.0
-                self.sim.controls.pump_hz = max(self.sim.controls.pump_hz, 40.0)
-                self.sim.controls.press_ctrl_on = True
-                self.sim.state.mode = 'READY'
-            elif mode_val == 1:  # PURGE
-                self.sim.controls.V9 = False
-                self.sim.controls.V11 = False
-                self.sim.controls.V17 = 0.4
-                self.sim.controls.V21 = True
-                self.sim.controls.pump_hz = 20.0
-                self.sim.state.mode = 'PURGE'
-            else:
-                pass
-        elif cmd_val == CMD.get("STOP", -1):
-            self.sim.stop()
-            self._held = False
-        elif cmd_val == CMD.get("HOLD", -1):
-            self._held = True
-        elif cmd_val == CMD.get("RESUME", -1):
-            self._held = False
-        elif cmd_val == CMD.get("EMERGENCY_STOP", -1):
-            self.sim.off()
-            self._held = False
-        elif cmd_val == CMD.get("RESET", -1):
-            # Re-create simulator to clear stages
-            self.__init__(self.dt, self.q_dcm, verbose=self.verbose, init_config=self.init_config)
+    
 
     def _apply_manual_actuators_if_allowed(self) -> None:
-        if self._held or (self.sim.auto.name != 'NONE'):
+        # 수동 조작은 자동 시퀀스 진행 중이 아닐 때 허용한다.
+        if (self.sim.auto.name != 'NONE'):
             return
         try:
             self.sim.controls.V9 = bool(int(self.pv_v9_cmd.get() or 0))
@@ -561,22 +580,7 @@ class PVBridge:
         self._write_int(self.pv_v10_status, 1 if self.sim.controls.V10 > 0.5 else 0)
         self._write_int(self.pv_v21_status, 1 if self.sim.controls.V21 else 0)
 
-    def _update_state_from_sim(self) -> None:
-        text = str(self.sim.state.mode or 'OFF').upper()
-        if 'OFF' in text:
-            code = STATE['OFF']
-        elif 'STOP' in text:
-            code = STATE['SAFE_SHUTDOWN']
-        elif 'WARM' in text:
-            code = STATE['WARMUP']
-        elif 'READY' in text:
-            code = STATE['RUN']
-        elif 'COOL' in text:
-            code = STATE['PRECOOL']
-        else:
-            code = STATE['RUN']
-        self._write_int(self.pv_state, code)
-        self.pv_state_text.put(text, wait=False)
+    
 
     def _apply_init_from_yaml(self) -> None:
         """선택적 YAML 설정 파일에서 초기 설정과 PV 값을 적용한다.
@@ -646,6 +650,22 @@ class PVBridge:
                     try:
                         self.q_dcm = float(cfg["q_dcm"])
                         self._write_float(self.pv_dcm_power, float(self.q_dcm))
+                    except Exception:
+                        pass
+                # Level dynamics tuning (optional)
+                if "lt19_fill_lps" in cfg:
+                    try:
+                        self.sim.fill_Lps_v19 = float(cfg["lt19_fill_lps"])  # [L/s]
+                    except Exception:
+                        pass
+                if "lt23_refill_rate_pctps" in cfg:
+                    try:
+                        self.sim.refill_rate_pctps = float(cfg["lt23_refill_rate_pctps"])  # [%/s]
+                    except Exception:
+                        pass
+                if "lt23_drain_rate_pctps" in cfg:
+                    try:
+                        self.sim.drain_rate_pctps = float(cfg["lt23_drain_rate_pctps"])  # [%/s]
                     except Exception:
                         pass
                 # 기타 모델 파라미터는 CryoCoolerSim에 직접 적용하지 않음

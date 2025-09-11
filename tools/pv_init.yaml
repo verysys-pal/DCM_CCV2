@@ -2,7 +2,7 @@ version: 1
 config:
   # Runtime / simulator parameters (pv_bridge/CryoCoolerSim)
   dt: 0.1               # step time (s)
-  q_dcm: 200.0          # DCM heat load (W)
+  q_dcm: 100.0          # DCM heat load (W)
   tsub: 77.3            # subcooler temperature (K)
   
 
@@ -12,6 +12,10 @@ config:
   pump_freq_off: 0.0
   heater_power_on: 30.0
   heater_power_off: 0.0
+  # Level dynamics (optional tuning)
+  lt19_fill_lps: 1.2        # [L/s] Subcooler fill flow when V19 OPEN (default 1/60)
+  lt23_refill_rate_pctps: 1.2  # [%/s] HV refill rate when V15 OPEN (default 10/60 for fast test)
+  lt23_drain_rate_pctps: 0.0167   # [%/s] HV drain rate proportional to V17 (default 1/60)
 
   # Operating logic parameters live in tools/operating.yaml (not used here)
 
@@ -41,8 +45,9 @@ pvs:
   # 압력/레벨 초기값 (참고: PT1/PT3는 브리지에서 주기 계산으로 덮어쓸 수 있음)
   BL:DCM:CRYO:PRESS:PT1: 1.0
   BL:DCM:CRYO:PRESS:PT3: 1.0
-  BL:DCM:CRYO:LEVEL:LT19: 50.0
-  BL:DCM:CRYO:LEVEL:LT23: 70.0
+  BL:DCM:CRYO:PRESS:PT3:SP: 2.0
+  BL:DCM:CRYO:LEVEL:LT19: 10.0
+  BL:DCM:CRYO:LEVEL:LT23: 7.0
 
   # 표시용 전력 (브리지에서 model.q_dcm과 동기화됨)
   # BL:DCM:CRYO:DCM:POWER: 

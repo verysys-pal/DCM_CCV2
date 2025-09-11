@@ -48,26 +48,29 @@ class AutoKind(Enum):
 
 
 class CryoCoolerSim:
-    Q80 = 15.0
-    rho = 800.0
-    cp = 2000.0
-    ambK = 280.0
-    delta_subcool = 6.0
-    k_tau = 120.0
-    tau_warm0 = 180.0
-    Kh = 0.5
-    Kc = 0.4
-    kv17 = 0.5
-    kv20 = 0.5
-    kv21 = 0.8
-    leak = 0.02
-    base_cons_Lps = 3.0 / 3600.0
-    cons_coeff_Lps_perW = 0.023 / 3600.0
-    gamma_vent_Lps_per_Lpm = 0.004 / 60.0
-    Vsub_L = 200.0
-    Vhv_L = 20.0
-    PSV_open_bar = 5.0
-    max_bar = 5.0
+    """ 
+    Simple physics-inspired discrete-time simulator for a Bruker-type DCM Cryo-Cooler.
+    """
+    Q80 = 15.0                  # Max flow rate at 80Hz, L/min      
+    rho = 800.0                 # LN₂의 유효 밀도 [kg/m³]. 질량유량 ṁ 계산(ṁ = ρ·Q_eff/60·1e-3)에 사용.
+    cp = 2000.0                 # LN₂의 유효 비열 [J/(kg·K)].열부하 반영 T6 = T5 + Power/(ṁ·c_p)에 사용.
+    ambK = 280.0                # 주변 온도 [K]. 퍼지/격리 시 T5가 복귀하는 목표 온도
+    delta_subcool = 6.0         # 서브쿨 여유(과냉도) [K]. T_supply = max(77, T_boil(PT1) − Δ_subcool·R_SC)에서 사용.
+    k_tau = 120.0               # 냉각 1차시정수 계수 [s·(L/min)]. τ_cool = k_tau / Q_eff. 유량이 클수록 응답 빠름.
+    tau_warm0 = 180.0           # 퍼지/가열 시 기본 시정수 [s]. 잔냉량(LT19)·펌프에 의해 자동 가중.
+    Kh = 0.5                    # HV 히터 → PT3 가압 이득 [bar/s] (@히터출력 1).
+    Kc = 0.4                    # PT3 → PT1 결합 이득 [1/s]. 베셀 압력이 루프 압력으로 전달되는 정도.
+    kv17 = 0.5                  # 루프 벤트(V17)의 감압 계수 [1/s]. PT1을 1 bar로 내리는 속도 결정.
+    kv20 = 0.5                  # HV 벤트(V20)의 감압 계수 [1/s]. PT3를 내리는 속도.
+    kv21 = 0.8                  # 퍼지(V21)가 열릴 때 루프 감압 효과 [1/s]. PT1 저감 항에 가중.
+    leak = 0.02                 # HV 압력의 누설/자연감압 계수 [1/s]. PT3가 1 bar로 서서히 복귀하는 경향.
+    base_cons_Lps = 3.0 / 3600.0            # 기본 LN₂ 소비량 [L/s](≈3 L/h). 순수 유지·기본 손실.
+    cons_coeff_Lps_perW = 0.023 / 3600.0    # 열부하 100 W당 약 2.3 L/h 추가 소비 항의 계수 [(L/s)/W].
+    gamma_vent_Lps_per_Lpm = 0.004 / 60.0   # 오픈루프(벤트 경로)로 손실되는 추가 소비 계수 [(L/s)/(L/min)]. 
+    Vsub_L = 200.0              # 서브쿨러 유효 용량 [L]. 레벨 %↔절대량 변환에 사용.
+    Vhv_L = 20.0                # 히터 베셀 유효 용량 [L]. LT23 변화 속도에 영향.
+    PSV_open_bar = 5.0          # 안전밸브(PSV) 작동 압력 [bar(g)]. 모델은 PSV−0.5로 클램핑.
+    max_bar = 5.0               # 시뮬레이터 상 한계 압력 [bar(g)]. 수치적 안전 클램프.
 
     def __init__(self, state: State, controls: Controls):
         self.state = state
@@ -77,6 +80,13 @@ class CryoCoolerSim:
         self.stage_timer: float = 0.0
         self._pulse_timer: float = 0.0
         self._pulse_state: bool = False
+        # --- Tunable level dynamics (can be overridden via YAML through pv_bridge) ---
+        # Subcooler (LT19) fill flow when V19 is OPEN [L/s]
+        self.fill_Lps_v19: float = 1.0 / 60.0
+        # HV tank (LT23) refill/drain rates in percentage per second [%/s]
+        # Defaults reflect current accelerated test tuning
+        self.refill_rate_pctps: float = 10.0 / 60.0
+        self.drain_rate_pctps: float = 1.0 / 60.0
 
     @staticmethod
     def clamp(v, lo, hi):
@@ -139,7 +149,17 @@ class CryoCoolerSim:
         if self.auto == AutoKind.NONE:
             return
         self.stage_timer += dt
+
         if self.auto == AutoKind.COOL_DOWN:
+            """
+            쿨다운 시퀀스(stage) 진행 기준
+            Stage 0: 초기 purge/보충(60초 등)
+            Stage 1: HV 보충(PT3 제어 off)
+            Stage 2: V9 on, V17=1.0 유지, T6 < 200 K 도달 시 다음
+            Stage 3: V17=0.35, V11 on, T6 < 90 K 도달 시 다음
+            Stage 4: V17=0.0, T6 < 82 K 도달 시 다음
+            Stage 5: 압력 제어 on(press_ctrl_on=True), PT3를 SP(기본 2.0 bar)로 맞추고 READY로 수렴
+            """
             if self.stage == 0:
                 u.V10 = 0.6
                 u.pump_hz = max(u.pump_hz, 30.0)
@@ -149,7 +169,7 @@ class CryoCoolerSim:
                 u.V9 = False
                 u.V11 = False
                 u.V19 = True
-                if self.stage_timer >= 60.0:
+                if self.stage_timer >= 3.0:
                     u.V19 = False
                     self.stage += 1
                     self.stage_timer = 0.0
@@ -302,14 +322,12 @@ class CryoCoolerSim:
         cons_Lps = (
             self.base_cons_Lps + self.cons_coeff_Lps_perW * power_W + self.gamma_vent_Lps_per_Lpm * max(Q_eff - Q_loop, 0.0) * 60.0
         )
-        fill_Lps = 1.0 / 60.0 if u.V19 else 0.0
+        fill_Lps = float(self.fill_Lps_v19) if u.V19 else 0.0
         dLT19 = (fill_Lps - cons_Lps) / self.Vsub_L * 100.0
         s.LT19 = self.clamp(s.LT19 + dLT19 * dt, 0.0, 100.0)
-        refill_rate_pctps = 0.5 / 60.0
-        drain_rate_pctps = 0.3 / 60.0
         if u.V15:
-            s.LT23 = self.clamp(s.LT23 + refill_rate_pctps * dt, 0.0, 100.0)
-        s.LT23 = self.clamp(s.LT23 - drain_rate_pctps * u.V17 * dt, 0.0, 100.0)
+            s.LT23 = self.clamp(s.LT23 + float(self.refill_rate_pctps) * dt, 0.0, 100.0)
+        s.LT23 = self.clamp(s.LT23 - float(self.drain_rate_pctps) * u.V17 * dt, 0.0, 100.0)
         if s.LT19 < 30.0:
             u.V19 = True
         if s.LT19 > 40.0:
@@ -354,4 +372,3 @@ if __name__ == '__main__':
         f'LT19={sim.state.LT19:.1f}%, LT23={sim.state.LT23:.1f}%, '
         f'FT18={sim.state.FT18:.1f} L/min'
     )
-

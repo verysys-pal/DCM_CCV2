@@ -76,6 +76,7 @@
 | `BL:DCM:CRYO:TEMP:SETPOINT` | `ao` | K | 목표 온도(Setpoint) |
 | `BL:DCM:CRYO:PRESS:PT1` | `ai` | bar | 고압 측 압력 |
 | `BL:DCM:CRYO:PRESS:PT3` | `ai` | bar | 저압 측 압력 |
+| `BL:DCM:CRYO:PRESS:PT3:SP` | `ao` | bar | PT3 압력 설정값 (제어 목표) |
 | `BL:DCM:CRYO:FLOW:FT18` | `ai` | L/min | 유량 |
 | `BL:DCM:CRYO:ALARM:ACTIVE` | `calcout` | - | 활성 알람 여부 |
 | `BL:DCM:CRYO:ALARM:ACK_ALL` | `bo` | - | 모든 알람 확인 |

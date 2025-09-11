@@ -279,3 +279,59 @@
 
 비고
 - 기능적 변화는 없음(표현/명칭 정리). GUI와 테스트는 T5 기준으로 동작.
+2025-09-11 18:55:16 KST
+
+작업 내역
+- `sim/logic/operating.py`를 MainCmd/ModeCmd 중심으로 최소화하여 재작성
+  - 유지: `MainCmd`, `ModeCmd`, `OperatingLogic.from_yaml`, `set_mode`, `next_state`(최소 전이 규칙)
+  - 제거: 사용되지 않는 파생/보조 메서드(derive_*, comp_status, device_actuators, valve_flows 등)
+  - 목적: 불필요 코드 제거로 가독성 및 책임 분리 명확화 (시퀀스/물리는 `sim/core`, EPICS I/O는 `tools/pv_bridge.py`)
+
+변경 사항
+- sim/logic/operating.py: 파일 전면 간소화 후 최소 전이 파라미터(`init_seconds`,`precool_band`)와
+  START/INIT→PRECOOL→RUN, WARMUP→OFF 전이 규칙 정의
+
+수정파일
+- sim/logic/operating.py
+- tools/pv_bridge.py (상태 전이/명령 해석을 OperatingLogic에 위임)
+
+비고
+- pv_bridge 루프에서 `apply_mode_action`, `next_state`를 호출하여 운영 로직에 위임하도록 조정함.
+2025-09-11 19:44:04 KST
+
+작업 내역
+- PT3 압력 설정값 변경 기능 추가
+  - DB: `BL:DCM:CRYO:PRESS:PT3:SP`(`ao`) 레코드 추가 (0–5 bar)
+  - 브리지: `PV_PT3_SP` 추가, 루프에서 해당 PV를 읽어 `sim.controls.press_sp_bar`에 반영
+  - 초기값: `tools/pv_init.yaml`에 `PRESS:PT3:SP: 2.0` 추가
+  - 문서: Reference PV 표에 `PRESS:PT3:SP` 추가
+
+변경 사항
+- 런타임에서 PT3 목표 압력을 PV로 제어 가능. 히터 제어는 기존과 같이 `HEATER:CMD`(press_ctrl_on)로 활성/비활성
+
+수정파일
+- DCM_CCV2App/Db/dcm_cryo.db
+- tools/pv_bridge.py
+- tools/pv_init.yaml
+- docs/Reference/Reference_Guide.md
+
+비고
+- GUI 바인딩은 추후 필요 시 `PRESS:PT3:SP` 입력 위젯을 추가하면 됩니다.
+2025-09-11 20:45:00 KST
+
+작업 내역
+- 레벨 동역학 파라미터 YAML 화(튜닝 가능)
+  - sim/core/dcm_cryo_cooler_sim.py: `fill_Lps_v19`(LT19 보충 유량 [L/s]), `refill_rate_pctps`/`drain_rate_pctps`(LT23 [%/s]) 인스턴스 변수 추가
+  - tools/pv_bridge.py: `tools/pv_init.yaml:config`에서 `lt19_fill_lps`, `lt23_refill_rate_pctps`, `lt23_drain_rate_pctps`를 읽어 시뮬레이터에 반영
+  - tools/pv_init.yaml: 키 주석 추가(기본값/단위 명시)
+
+변경 사항
+- YAML로 보충/배출 속도 조정 가능 (재시작 또는 init-config 재적용 시 반영)
+
+수정파일
+- sim/core/dcm_cryo_cooler_sim.py
+- tools/pv_bridge.py
+- tools/pv_init.yaml
+
+비고
+- 현재 기본값은 테스트 가속을 위해 LT23 보충 10/60 [%/s], 배출 1/60 [%/s]로 설정되어 있음. 실환경에 맞게 YAML로 조정하세요.

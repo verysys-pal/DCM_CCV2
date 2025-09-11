@@ -15,16 +15,38 @@ The model captures:
 ## Terminology — This System
 
 ### Auto Cool‑down (자동 냉각)
-One‑button **automatic cool‑down** procedure that brings the loop and DCM to cryogenic operating state.  
-It sequences valves/pump/pressure control to: pre‑purge and fill, initial open‑loop cool, closed‑loop cool,
-enable **Pressure Control** (HV heater based) at the setpoint (≈2 bar recommended), adjust HV/Sub‑Cooler
-levels (HV ≈25–30 %), and finally assert **System READY** once thresholds are met.
+- 정의:
+    - 사용자가 개입하지 않아도 루프와 DCM을 안전하게 극저온 상태로 내리고, 압력·레벨을 맞춘 뒤 System Ready 신호를 만들도록 밸브/펌프/히터 압력제어를 순차 실행하는 자동 시퀀스. (
+- 선행 조건(요지):
+    1. LN₂ 공급 연결, 
+    2. Sub-Cooler 최소 15%(Auto-refill ON 권장), 
+    3. 루프·전송라인 건식 N₂ 퍼지 완료. 
+- 자동 동작(핵심 단계/목표값):
+    1. 배기(VENT) 파이프 히터 ON, 
+    2. Heater Vessel(LT23) 충전
+    3. 소비자(DCM) ≈78 K까지 냉각, 
+    4. HV 적정 레벨(대략 25–30%)로 조정
+    5. 압력제어 ON(권장 2 bar) 및 안정화, 
+    6. Ready 출력.
+- 자동 시퀀스는 수동 절차의 논리를 그대로 내장:
+    - T6<200 K 에서 V17≈35% & V11=OPEN,
+    - T6<90 K에서 V17=CLOSE,
+    - T6<82 K 이후 압력제어 ON → HV 레벨 미세조정 → Ready.
+- 비고:
+    - 진행 중 Stop(짧게)으로 중단 가능.
 
 ### Auto Warm‑up (자동 워밍업)
-One‑button **automatic warm‑up** procedure that safely returns the loop to near‑ambient while preserving setup
-for the next cool‑down. It isolates the consumer (V9/V11 CLOSE), partially vents the loop (V17), waits until
-**PT1 < 1 bar**, then opens **V21 PURGE** with dry N₂ and continues until **T6 ≈ 280 K**, after which the purge
-is stopped and vents are closed.
+- 정의:
+    - 냉각 루프를 안전하게 상온으로 되돌리되, 다음 냉각을 위해 시스템 구성을 보존하도록 밸브 시퀀스·퍼지를 자동 수행하는 절차.
+- 선행 조건(요지):
+    - 루프가 정상 운전 중이며 V21 퍼지 포트에 건식 N₂(>1 bar) 연결.
+- 자동 동작(핵심 단계/목표값):
+    1. V9/V11 CLOSE(소비자 격리), 
+    2. V17 일부 개방(압력 완화), 
+    3. PT1<1 bar가 되면 V21 OPEN(건식 N₂ 퍼지 시작), 
+    4. T6=280 K 도달까지 퍼지·가열 지속.
+- 주의:
+    - V21에 N₂가 연결되지 않으면 액체 질소가 배출될 수 있으므로 반드시 연결 후 실행.
 
 ---
 ## 요약
