@@ -1,5 +1,7 @@
-"""Simulator core package for DCM Cryo Cooler.
+"""Core simulation models for the DCM Cryo-Cooler.
 
-Contains simple thermal-capacitance model and controllers.
+Exports:
+- dcm_cryo_cooler_sim: physics-inspired full simulator (State/Controls/CryoCoolerSim)
 """
 
+from .dcm_cryo_cooler_sim import State, Controls, CryoCoolerSim  # re-export

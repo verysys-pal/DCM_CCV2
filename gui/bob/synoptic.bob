@@ -171,7 +171,7 @@ DCM Cryo Cooler 시놉틱 뷰
     
     <widget type="textupdate" version="2.0.0">
       <name>ColdHeadTemp</name>
-      <pv_name>BL:DCM:CRYO:TEMP:COLDHEAD</pv_name>
+      <pv_name>BL:DCM:CRYO:TEMP:T5</pv_name>
       <x>35</x>
       <y>30</y>
       <width>80</width>

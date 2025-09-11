@@ -13,8 +13,7 @@
 - 목적: 콜드헤드 및 DCM 주변의 열 상태 모니터링과 제어 목표(SETPOINT) 제공
 - 관련 PV
   - `BL:DCM:CRYO:TEMP:SETPOINT` (ao): 운전 목표 온도
-  - `BL:DCM:CRYO:TEMP:COLDHEAD` (ai): 콜드헤드 온도 Tch
-  - `BL:DCM:CRYO:TEMP:T5` (ai): DCM 측 온도 센서 T5
+- `BL:DCM:CRYO:TEMP:T5` (ai): 콜드헤드/냉각부 대표 온도
   - `BL:DCM:CRYO:TEMP:T6` (ai): 다운스트림 온도 T6
   - `BL:DCM:CRYO:TEMP:SUBCOOLER` (ai): 서브쿨러 온도 Tsub
 - 사용 조건/로직
@@ -116,4 +115,3 @@
 - pv_bridge: EPICS I/O 중계, 모델 스텝, 히스토리 퍼블리시
 - operating: 상태 전이, 컨트롤 목표, 측정/유량/출력 파생
 - interlock: 안전 판단 및 최대 알람 등급 산출
-

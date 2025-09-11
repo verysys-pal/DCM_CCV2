@@ -12,6 +12,22 @@
     <color red="245" green="245" blue="245">
     </color>
   </background_color>
+  <widget type="rectangle" version="2.0.0">
+    <name>Rectangle</name>
+    <x>10</x>
+    <y>675</y>
+    <width>850</width>
+    <height>165</height>
+    <line_width>2</line_width>
+    <line_color>
+      <color name="Header_Background" red="77" green="77" blue="77">
+      </color>
+    </line_color>
+    <background_color>
+      <color name="Button_Background" red="210" green="210" blue="210">
+      </color>
+    </background_color>
+  </widget>
   <widget type="picture" version="2.0.0">
     <name>Picture_1</name>
     <file>../assets/Cryocooler_image4.jpg</file>
@@ -49,7 +65,7 @@
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>T6Value</name>
-    <pv_name>BL:DCM:CRYO:TEMP:T6</pv_name>
+    <pv_name>$(P)TEMP:T6</pv_name>
     <x>770</x>
     <y>101</y>
     <width>50</width>
@@ -65,7 +81,7 @@
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>PT1Value</name>
-    <pv_name>BL:DCM:CRYO:PRESS:PT1</pv_name>
+    <pv_name>$(P)PRESS:PT1</pv_name>
     <x>40</x>
     <y>170</y>
     <width>60</width>
@@ -81,7 +97,7 @@
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>PT3Value</name>
-    <pv_name>BL:DCM:CRYO:PRESS:PT3</pv_name>
+    <pv_name>$(P)PRESS:PT3</pv_name>
     <x>273</x>
     <y>363</y>
     <width>40</width>
@@ -107,7 +123,7 @@
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>LT19Value</name>
-    <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+    <pv_name>$(P)LEVEL:LT19</pv_name>
     <x>60</x>
     <y>405</y>
     <width>50</width>
@@ -124,7 +140,7 @@
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>LT23Value</name>
-    <pv_name>BL:DCM:CRYO:LEVEL:LT23</pv_name>
+    <pv_name>$(P)LEVEL:LT23</pv_name>
     <x>332</x>
     <y>288</y>
     <width>45</width>
@@ -155,7 +171,7 @@ $(actions)</tooltip>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>FT18Value</name>
-    <pv_name>BL:DCM:CRYO:FLOW:FT18</pv_name>
+    <pv_name>$(P)FLOW:FT18</pv_name>
     <x>720</x>
     <y>368</y>
     <width>50</width>
@@ -241,7 +257,7 @@ $(actions)</tooltip>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>T5Value</name>
-    <pv_name>BL:DCM:CRYO:TEMP:T5</pv_name>
+    <pv_name>$(P)TEMP:T5</pv_name>
     <x>40</x>
     <y>100</y>
     <width>60</width>
@@ -451,7 +467,7 @@ $(actions)</tooltip>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>V17 Flow</name>
-    <pv_name>BL:DCM:CRYO:FLOW:V17</pv_name>
+    <pv_name>$(P)FLOW:V17</pv_name>
     <x>611</x>
     <y>196</y>
     <width>50</width>
@@ -468,7 +484,7 @@ $(actions)</tooltip>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>FT18Value_2</name>
-    <pv_name>BL:DCM:CRYO:PUMP:FREQ</pv_name>
+    <pv_name>$(P)PUMP:FREQ</pv_name>
     <x>338</x>
     <y>510</y>
     <width>50</width>
@@ -536,9 +552,9 @@ $(actions)</tooltip>
     </y_axes>
     <traces>
       <trace>
-        <name>Cold Head</name>
+        <name>T5</name>
         <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:TEMP:COLDHEAD</y_pv>
+        <y_pv>$(P)HIST:TEMP:T5</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -679,16 +695,20 @@ $(actions)</tooltip>
   </widget>
   <widget type="group" version="3.0.0">
     <name>SystemStatus</name>
-    <x>10</x>
-    <y>710</y>
-    <width>330</width>
+    <x>20</x>
+    <y>690</y>
+    <width>243</width>
     <height>140</height>
     <style>3</style>
+    <background_color>
+      <color red="179" green="179" blue="179">
+      </color>
+    </background_color>
     <widget type="label" version="2.0.0">
       <name>StatusTitle</name>
       <text>CurrentState</text>
-      <x>10</x>
-      <y>13</y>
+      <x>15</x>
+      <y>11</y>
       <height>25</height>
       <font>
         <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
@@ -699,16 +719,16 @@ $(actions)</tooltip>
     <widget type="textupdate" version="2.0.0">
       <name>CurrentState</name>
       <pv_name>$(P)STATE:MAIN</pv_name>
-      <x>140</x>
-      <y>13</y>
-      <width>120</width>
+      <x>146</x>
+      <y>11</y>
+      <width>80</width>
       <height>25</height>
       <font>
         <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
         </font>
       </font>
       <background_color>
-        <color red="200" green="200" blue="200">
+        <color red="230" green="230" blue="77">
         </color>
       </background_color>
       <format>6</format>
@@ -717,21 +737,10 @@ $(actions)</tooltip>
       <tooltip>현재 메인 상태 표시</tooltip>
     </widget>
     <widget type="led" version="2.0.0">
-      <name>StatusLED</name>
-      <pv_name>$(P)COMP:RUNNING</pv_name>
-      <x>110</x>
-      <y>15</y>
-      <off_color>
-        <color red="128" green="128" blue="128">
-        </color>
-      </off_color>
-      <tooltip>운전중 상태</tooltip>
-    </widget>
-    <widget type="led" version="2.0.0">
       <name>AlarmLED_1</name>
       <pv_name>$(P)ALARM:ACTIVE</pv_name>
-      <x>110</x>
-      <y>103</y>
+      <x>10</x>
+      <y>94</y>
       <off_color>
         <color red="128" green="128" blue="128">
         </color>
@@ -745,57 +754,84 @@ $(actions)</tooltip>
     <widget type="label" version="2.0.0">
       <name>AlarmLabel</name>
       <text>Alarm</text>
-      <x>140</x>
-      <y>103</y>
+      <x>40</x>
+      <y>100</y>
       <width>40</width>
       <vertical_alignment>1</vertical_alignment>
     </widget>
     <widget type="label" version="2.0.0">
       <name>PumpLabelTop</name>
       <text>PUMP</text>
-      <x>140</x>
-      <y>58</y>
+      <x>40</x>
+      <y>55</y>
       <width>80</width>
       <vertical_alignment>1</vertical_alignment>
     </widget>
     <widget type="led" version="2.0.0">
       <name>PumpLEDTop</name>
       <pv_name>$(P)PUMP:RUNNING</pv_name>
-      <x>110</x>
-      <y>58</y>
+      <x>10</x>
+      <y>55</y>
       <off_color>
         <color red="128" green="128" blue="128">
         </color>
       </off_color>
       <tooltip>펌프 운전 상태</tooltip>
     </widget>
-    <widget type="label" version="2.0.0">
-      <name>CompressorLabel</name>
-      <text>Compressor:</text>
-      <x>240</x>
-      <y>58</y>
-      <width>80</width>
-      <vertical_alignment>1</vertical_alignment>
-    </widget>
     <widget type="led" version="2.0.0">
-      <name>CompressorLED</name>
-      <pv_name>$(P)COMP:RUNNING</pv_name>
-      <x>210</x>
-      <y>58</y>
+      <name>AlarmLED</name>
+      <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
+      <x>116</x>
+      <y>100</y>
       <off_color>
         <color red="128" green="128" blue="128">
         </color>
       </off_color>
-      <tooltip>압축기 운전 상태</tooltip>
+      <on_color>
+        <color red="255" green="0" blue="0">
+        </color>
+      </on_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>MaxSeverityText</name>
+      <pv_name>$(P)ALARM:MAX_SEVERITY</pv_name>
+      <x>146</x>
+      <y>100</y>
+      <width>80</width>
+      <format>6</format>
     </widget>
   </widget>
   <widget type="group" version="3.0.0">
     <name>ControlButtons</name>
-    <x>350</x>
-    <y>710</y>
-    <width>400</width>
+    <x>275</x>
+    <y>690</y>
+    <width>267</width>
     <height>140</height>
     <style>3</style>
+    <background_color>
+      <color red="179" green="179" blue="179">
+      </color>
+    </background_color>
+    <widget type="textupdate" version="2.0.0">
+      <name>CurrentState_2</name>
+      <pv_name>$(P)CMD:MAIN</pv_name>
+      <x>158</x>
+      <y>11</y>
+      <width>95</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="204" green="204" blue="51">
+        </color>
+      </background_color>
+      <format>6</format>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <tooltip>현재 메인 상태 표시</tooltip>
+    </widget>
   </widget>
   <widget type="action_button" version="3.0.0">
     <name>AlarmDetailButton</name>
@@ -820,239 +856,9 @@ $(actions)</tooltip>
     </background_color>
     <tooltip>$(actions)</tooltip>
   </widget>
-  <widget type="label" version="2.0.0">
-    <name>ControlTitle</name>
-    <text>System Control</text>
-    <x>360</x>
-    <y>710</y>
-    <width>170</width>
-    <height>25</height>
-    <font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </font>
-    <vertical_alignment>1</vertical_alignment>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>StartButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>시스템 시작</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>1</value>
-      </action>
-    </actions>
-    <text>START</text>
-    <x>370</x>
-    <y>750</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==0">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>정상 시퀀스로 시스템 시작</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>StopButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>시스템 정지</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>2</value>
-      </action>
-    </actions>
-    <text>STOP</text>
-    <x>460</x>
-    <y>750</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==1">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>안전 정지 시퀀스 실행</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>HoldButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>시스템 홀드</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>3</value>
-      </action>
-    </actions>
-    <text>HOLD</text>
-    <x>550</x>
-    <y>750</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==1">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>현재 상태 유지(홀드)</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>ResumeButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>시스템 재개</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>4</value>
-      </action>
-    </actions>
-    <text>RESUME</text>
-    <x>370</x>
-    <y>790</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==0">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>홀드 상태에서 운전 재개</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>WarmupButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>웜업 시작</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>7</value>
-      </action>
-    </actions>
-    <text>WARM-UP</text>
-    <x>460</x>
-    <y>790</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==0">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>EmergencyButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>비상 정지</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>5</value>
-      </action>
-    </actions>
-    <text>E-STOP</text>
-    <x>550</x>
-    <y>790</y>
-    <width>80</width>
-    <background_color>
-      <color red="200" green="0" blue="0">
-      </color>
-    </background_color>
-    <tooltip>즉시 비상 정지</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>RefillButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>Start Circulation Pump</description>
-        <pv_name>BL:DCM:CRYO:PUMP:CMD</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>Open LN2 Supply Valve V15</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>Open LN2 Tank Valve V19</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
-        <value>1</value>
-      </action>
-    </actions>
-    <text>Refill</text>
-    <x>650</x>
-    <y>750</y>
-    <width>80</width>
-    <background_color>
-      <color red="200" green="255" blue="200">
-      </color>
-    </background_color>
-    <rules>
-      <rule name="EnableWhenSafe" prop_id="enabled" out_exp="false">
-        <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
-        <pv_name>BL:DCM:CRYO:SAFETY:INTERLOCK</pv_name>
-        <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
-      </rule>
-    </rules>
-    <tooltip>$(actions)</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>RefillCloseButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>Stop Circulation Pump</description>
-        <pv_name>BL:DCM:CRYO:PUMP:CMD</pv_name>
-        <value>0</value>
-      </action>
-      <action type="write_pv">
-        <description>Close LN2 Supply Valve V15</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
-        <value>0</value>
-      </action>
-      <action type="write_pv">
-        <description>Close LN2 Tank Valve V19</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
-    <text>Refill
-Close</text>
-    <x>650</x>
-    <y>780</y>
-    <width>80</width>
-    <height>40</height>
-    <background_color>
-      <color red="220" green="220" blue="220">
-      </color>
-    </background_color>
-    <tooltip>$(actions)</tooltip>
-  </widget>
-  <widget type="led" version="2.0.0">
-    <name>AlarmLED</name>
-    <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
-    <x>603</x>
-    <y>712</y>
-    <off_color>
-      <color red="128" green="128" blue="128">
-      </color>
-    </off_color>
-    <on_color>
-      <color red="255" green="0" blue="0">
-      </color>
-    </on_color>
-  </widget>
-  <widget type="textupdate" version="2.0.0">
-    <name>MaxSeverityText</name>
-    <pv_name>BL:DCM:CRYO:ALARM:MAX_SEVERITY</pv_name>
-    <x>628</x>
-    <y>712</y>
-    <format>6</format>
-  </widget>
   <widget type="group" version="3.0.0">
     <name>SystemStatus_1</name>
-    <x>1000</x>
+    <x>881</x>
     <y>633</y>
     <width>379</width>
     <height>180</height>
@@ -1124,7 +930,7 @@ Close</text>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>V10 Flow</name>
-    <pv_name>BL:DCM:CRYO:FLOW:V10</pv_name>
+    <pv_name>$(P)FLOW:V10</pv_name>
     <x>448</x>
     <y>560</y>
     <width>50</width>
@@ -1341,7 +1147,7 @@ Close</text>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>T5Value_1</name>
-    <pv_name>BL:DCM:CRYO:TEMP:SUBCOOLER</pv_name>
+    <pv_name>$(P)TEMP:SUBCOOLER</pv_name>
     <x>220</x>
     <y>506</y>
     <width>60</width>
@@ -1357,8 +1163,8 @@ Close</text>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>LT19Value_1</name>
-    <pv_name>BL:DCM:CRYO:DCM:POWER</pv_name>
-    <x>399</x>
+    <pv_name>$(P)DCM:POWER</pv_name>
+    <x>424</x>
     <y>142</y>
     <width>50</width>
     <height>15</height>
@@ -1371,5 +1177,375 @@ Close</text>
     <horizontal_alignment>1</horizontal_alignment>
     <vertical_alignment>1</vertical_alignment>
     <border_width>1</border_width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>PressureTransmitterLabel1_23</name>
+    <text>Power(W)</text>
+    <x>366</x>
+    <y>142</y>
+    <width>78</width>
+    <height>15</height>
+    <font>
+      <font family="Malgun Gothic" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+  <widget type="group" version="3.0.0">
+    <name>ControlButtons_1</name>
+    <x>560</x>
+    <y>690</y>
+    <width>286</width>
+    <height>140</height>
+    <style>3</style>
+    <background_color>
+      <color red="179" green="179" blue="179">
+      </color>
+    </background_color>
+    <widget type="textupdate" version="2.0.0">
+      <name>CurrentState_1</name>
+      <pv_name>$(P)CMD:MODE</pv_name>
+      <x>182</x>
+      <y>11</y>
+      <width>95</width>
+      <height>25</height>
+      <font>
+        <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+        </font>
+      </font>
+      <background_color>
+        <color red="230" green="230" blue="77">
+        </color>
+      </background_color>
+      <format>6</format>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <tooltip>현재 메인 상태 표시</tooltip>
+    </widget>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>V10 Flow_1</name>
+    <pv_name>$(P)TEMP:VENTHT</pv_name>
+    <x>781</x>
+    <y>590</y>
+    <width>50</width>
+    <height>15</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <format>1</format>
+    <precision>2</precision>
+    <horizontal_alignment>1</horizontal_alignment>
+    <border_width>1</border_width>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>HoldButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 홀드</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>3</value>
+      </action>
+    </actions>
+    <text>HOLD</text>
+    <x>283</x>
+    <y>781</y>
+    <width>70</width>
+    <rules>
+      <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==1">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>현재 상태 유지(홀드)</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>EmergencyButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>비상 정지</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>5</value>
+      </action>
+    </actions>
+    <text>E-STOP</text>
+    <x>461</x>
+    <y>741</y>
+    <width>70</width>
+    <background_color>
+      <color red="200" green="77" blue="0">
+      </color>
+    </background_color>
+    <tooltip>즉시 비상 정지</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>ControlTitle</name>
+    <text>System Control</text>
+    <x>283</x>
+    <y>701</y>
+    <width>170</width>
+    <height>25</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>ResumeButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 재개</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>4</value>
+      </action>
+    </actions>
+    <text>RESUME</text>
+    <x>375</x>
+    <y>781</y>
+    <width>70</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>홀드 상태에서 운전 재개</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>ResumeButton_1</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 RESET</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>6</value>
+      </action>
+    </actions>
+    <text>RESET</text>
+    <x>461</x>
+    <y>781</y>
+    <width>70</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>홀드 상태에서 운전 재개</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>StartButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 시작</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>START</text>
+    <x>283</x>
+    <y>741</y>
+    <width>70</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>정상 시퀀스로 시스템 시작</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>StopButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>시스템 정지</description>
+        <pv_name>$(P)CMD:MAIN</pv_name>
+        <value>2</value>
+      </action>
+    </actions>
+    <text>STOP</text>
+    <x>375</x>
+    <y>741</y>
+    <width>70</width>
+    <rules>
+      <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==1">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>안전 정지 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>WarmupButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>MODE : Cool Down</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>3</value>
+      </action>
+    </actions>
+    <text>Cool-Down</text>
+    <x>570</x>
+    <y>781</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>RefillButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>Start Circulation Pump</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>5</value>
+      </action>
+      <action type="write_pv">
+        <description>Open LN2 Supply Valve V15</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
+        <value>1</value>
+      </action>
+      <action type="write_pv">
+        <description>Open LN2 Tank Valve V19</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>Refill</text>
+    <x>756</x>
+    <y>741</y>
+    <width>80</width>
+    <background_color>
+      <color red="200" green="255" blue="200">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="EnableWhenSafe" prop_id="enabled" out_exp="false">
+        <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
+        <pv_name>BL:DCM:CRYO:SAFETY:INTERLOCK</pv_name>
+        <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+      </rule>
+    </rules>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>RefillCloseButton</name>
+    <actions>
+      <action type="write_pv">
+        <description>Stop Circulation Pump</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>6</value>
+      </action>
+      <action type="write_pv">
+        <description>Close LN2 Supply Valve V15</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
+        <value>0</value>
+      </action>
+      <action type="write_pv">
+        <description>Close LN2 Tank Valve V19</description>
+        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
+        <value>0</value>
+      </action>
+    </actions>
+    <text>Refill
+Close</text>
+    <x>756</x>
+    <y>771</y>
+    <width>80</width>
+    <height>40</height>
+    <background_color>
+      <color red="220" green="220" blue="220">
+      </color>
+    </background_color>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>ControlTitle_2</name>
+    <text>Select Mode</text>
+    <x>570</x>
+    <y>701</y>
+    <width>160</width>
+    <height>25</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>WarmupButton_1</name>
+    <actions>
+      <action type="write_pv">
+        <description>MODE : PURGE</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <text>PURGE</text>
+    <x>570</x>
+    <y>741</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>WarmupButton_2</name>
+    <actions>
+      <action type="write_pv">
+        <description>MODE : Ready</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>2</value>
+      </action>
+    </actions>
+    <text>READY</text>
+    <x>662</x>
+    <y>741</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>WarmupButton_3</name>
+    <actions>
+      <action type="write_pv">
+        <description>MODE : Warm-Up</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>4</value>
+      </action>
+    </actions>
+    <text>Warm-up</text>
+    <x>662</x>
+    <y>781</y>
+    <width>80</width>
+    <rules>
+      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+        <exp bool_exp="pv0==0">
+          <expression></expression>
+        </exp>
+      </rule>
+    </rules>
+    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
   </widget>
 </display>

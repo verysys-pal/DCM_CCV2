@@ -82,7 +82,7 @@ DCM Cryo Cooler 알람 설정 화면
     
     <widget type="textentry" version="3.0.0">
       <name>ColdHeadMinAlarm</name>
-      <pv_name>$(P)ALARM:TEMP:COLDHEAD:MIN</pv_name>
+      <pv_name>$(P)ALARM:TEMP:T5:MIN</pv_name>
       <x>225</x>
       <y>45</y>
       <width>60</width>
@@ -103,7 +103,7 @@ DCM Cryo Cooler 알람 설정 화면
     
     <widget type="textentry" version="3.0.0">
       <name>ColdHeadMaxAlarm</name>
-      <pv_name>$(P)ALARM:TEMP:COLDHEAD:MAX</pv_name>
+      <pv_name>$(P)ALARM:TEMP:T5:MAX</pv_name>
       <x>345</x>
       <y>45</y>
       <width>60</width>

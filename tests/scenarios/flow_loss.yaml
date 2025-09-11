@@ -4,5 +4,4 @@ steps:
   - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 3, timeout: 600 }  # RUN
   # NOTE: Placeholder: In a real setup, flow PV would drop to 0 and alarm triggers.
   # Here we just assert temperature is not ambient, meaning cooling active.
-  - assert: { pv: BL:DCM:CRYO:TEMP:COLDHEAD, max: 200 }
-
+  - assert: { pv: BL:DCM:CRYO:TEMP:T5, max: 200 }

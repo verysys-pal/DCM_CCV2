@@ -24,19 +24,19 @@ record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
     field(FRST, "RESUME")
     field(FVST, "EMERGENCY_STOP")
     field(SXST, "RESET")
-    field(SVST, "WARMUP")
 }
 
-record(ai,  "BL:DCM:CRYO:TEMP:COLDHEAD") {
-    field(EGU,  "K")
-    field(PREC, "2")
-    field(LOPR, "0")
-    field(HOPR, "350")
-    field(HIGH, "280")
-    field(HIHI, "300")
-    field(HSV,  "MINOR")
-    field(HHSV, "MAJOR")
+# Select Mode command
+record(mbbo, "BL:DCM:CRYO:CMD:MODE") {
+    field(ZRST, "NONE")          # 0
+    field(ONST, "PURGE")         # 1
+    field(TWST, "READY")         # 2
+    field(THST, "Cool-Down")     # 3
+    field(FRST, "Warm-up")       # 4
+    field(FVST, "Refill ON")     # 5
+    field(SXST, "Refill OFF")    # 6
 }
+
 record(ai,  "BL:DCM:CRYO:TEMP:T5") {
     field(EGU,  "K")
     field(PREC, "2")
@@ -58,6 +58,14 @@ record(ai,  "BL:DCM:CRYO:TEMP:T6") {
     field(HHSV, "MAJOR")
 }
 record(ai,  "BL:DCM:CRYO:TEMP:SUBCOOLER") {
+    field(EGU,  "K")
+    field(PREC, "1")
+    field(LOPR, "0")
+    field(HOPR, "350")
+}
+
+# Vent pipe heater temperature
+record(ai,  "BL:DCM:CRYO:TEMP:VENTHT") {
     field(EGU,  "K")
     field(PREC, "1")
     field(LOPR, "0")
@@ -240,10 +248,6 @@ record(mbbi, "BL:DCM:CRYO:ALARM:MAX_SEVERITY") {
 
 # Historical arrays for plotting (XYPlot expects arrays)
 record(waveform, "BL:DCM:CRYO:HIST:TIME") {
-    field(FTVL, "DOUBLE")
-    field(NELM, "2048")
-}
-record(waveform, "BL:DCM:CRYO:HIST:TEMP:COLDHEAD") {
     field(FTVL, "DOUBLE")
     field(NELM, "2048")
 }

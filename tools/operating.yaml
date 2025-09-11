@@ -1,3 +1,7 @@
-# Operating/sequence parameters for simulator state machine
-init_seconds: 2.0       # INIT dwell time (s)
-precool_band: 5.0       # PRECOOL -> RUN band (K)
+# Operating/sequence parameters for OperatingLogic (sim/logic/operating.py)
+#
+# Keys and types:
+# - init_seconds: float   # INIT dwell time (s)
+# - precool_band: float   # PRECOOL -> RUN threshold band (K)
+init_seconds: 2.0
+precool_band: 5.0

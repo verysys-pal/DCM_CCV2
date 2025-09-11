@@ -1,29 +1,21 @@
 version: 1
 config:
-  # 시뮬레이터 런타임/모델 파라미터
-  dt: 0.1             # step time (s)
-  qload: 50.0         # heat load (W)
-  tsub: 77.3          # subcooler temperature (K)
-  q_dcm: 200.0        # DCM 열부하 (W)
-  # 전이/알람/장치 파생 설정
-  init_seconds: 2.0
-  precool_band: 5.0
+  # Runtime / simulator parameters (pv_bridge/CryoCoolerSim)
+  dt: 0.1               # step time (s)
+  q_dcm: 200.0          # DCM heat load (W)
+  tsub: 77.3            # subcooler temperature (K)
+  
+
+  # Derived/aux parameters managed by pv_bridge (naming matches code)
   alarm_t_high: 250.0
   pump_freq_on: 60.0
   pump_freq_off: 0.0
   heater_power_on: 30.0
   heater_power_off: 0.0
-  # 모델(세부) 파라미터
-  cap: 800.0
-  tau_env: 120.0
-  tau_ln2_in: 10.0
-  tau_ln2_out: 10.0
-  tamb: 300.0
-  k_p: 10.0
-  k_i: 0.2
-  qmax: 2000.0
-  k_dcm: 20.0
-  k_flow: 1.0
+
+  # Operating logic parameters live in tools/operating.yaml (not used here)
+
+  
 pvs:
   # 온도/설정값 초기화
   BL:DCM:CRYO:TEMP:SETPOINT: 80.0

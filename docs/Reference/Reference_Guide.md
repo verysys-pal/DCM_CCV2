@@ -70,11 +70,10 @@
 | PV | 타입 | 단위 | 설명 |
 |---|---|---|---|
 | `BL:DCM:CRYO:STATE:MAIN` | `mbbi` | - | 0=OFF,1=INIT,2=PRECOOL,3=RUN,4=HOLD,5=WARMUP,6=SAFE_SHUTDOWN,7=ALARM |
-| `BL:DCM:CRYO:CMD:MAIN` | `mbbo` | - | 1=START,2=STOP,3=HOLD,4=RESUME,5=EMERGENCY_STOP,6=RESET,7=WARMUP |
+| `BL:DCM:CRYO:CMD:MAIN` | `mbbo` | - | 0=NONE,1=START,2=STOP,3=HOLD,4=RESUME,5=EMERGENCY_STOP,6=RESET |
 | `BL:DCM:CRYO:EQUIP:COMPRESSOR` | `bo` | - | 압축기 On/Off 명령 |
 | `BL:DCM:CRYO:VALVE:V9:CMD` | `bo` | - | 퍼지 밸브 (alias: `...:PURGE:CMD`) |
 | `BL:DCM:CRYO:TEMP:SETPOINT` | `ao` | K | 목표 온도(Setpoint) |
-| `BL:DCM:CRYO:TEMP:COLDHEAD` | `ai` | K | 콜드헤드 온도 (alias of T5) |
 | `BL:DCM:CRYO:PRESS:PT1` | `ai` | bar | 고압 측 압력 |
 | `BL:DCM:CRYO:PRESS:PT3` | `ai` | bar | 저압 측 압력 |
 | `BL:DCM:CRYO:FLOW:FT18` | `ai` | L/min | 유량 |
@@ -102,7 +101,7 @@ record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
     field(FRST, "RESUME")
     field(FVST, "EMERGENCY_STOP")
     field(SXST, "RESET")
-    field(SVST, "WARMUP")
+    # WARMUP 명령은 CMD:MODE=Warm-up과 결합하여 사용 (CMD:MAIN에는 없음)
 }
 
 record(ai,  "BL:DCM:CRYO:TEMP:T5")       { field(EGU,"K") field(PREC,"2") }
@@ -205,12 +204,12 @@ steps:
   - set: { pv: BL:DCM:CRYO:CMD:MAIN, value: 1 }   # START
   - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 2, timeout: 60 }   # PRECOOL
   - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 3, timeout: 600 }  # RUN
-  - assert: { pv: BL:DCM:CRYO:TEMP:COLDHEAD, max: 85 }
+  - assert: { pv: BL:DCM:CRYO:TEMP:T5, max: 85 }
 ```
 
 ### 9.3 프로퍼티 테스트(불변식)
 - `ALARM:ACTIVE==0` 이면 `SAFE_SHUTDOWN` 상태가 아님
-- `RUN` 상태에서 `TEMP:COLDHEAD` 오차가 허용 범위(±Δ)
+- `RUN` 상태에서 `TEMP:T5` 오차가 허용 범위(±Δ)
 - 압력 한계 초과 시 일정 시간 내 `ALARM=1` 및 상태 전이
 
 `pytest` + `hypothesis` 샘플
@@ -221,7 +220,7 @@ from hypothesis import given, strategies as st
 def test_sp_tracks_setpoint(sp):
     set_pv("BL:DCM:CRYO:TEMP:SETPOINT", sp)
     # ... run for N seconds ...
-    assert abs(get_pv("BL:DCM:CRYO:TEMP:COLDHEAD") - sp) < 10
+    assert abs(get_pv("BL:DCM:CRYO:TEMP:T5") - sp) < 10
 ```
 
 

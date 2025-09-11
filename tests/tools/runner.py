@@ -9,7 +9,7 @@ steps:
   - set: { pv: BL:DCM:CRYO:CMD:MAIN, value: 1 }
   - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 2, timeout: 60 }
   - wait: { pv: BL:DCM:CRYO:STATE:MAIN, equals: 3, timeout: 600 }
-  - assert: { pv: BL:DCM:CRYO:TEMP:COLDHEAD, max: 85 }
+  - assert: { pv: BL:DCM:CRYO:TEMP:T5, max: 85 }
 """
 
 from __future__ import annotations

@@ -1,3 +1,69 @@
+2025-09-11 18:02:05 KST
+
+작업 내역
+- 변수명/키 통일(기준: `sim/core/dcm_cryo_cooler_sim.py`)
+  - `tools/pv_bridge.py`: PT1/PT3/FT18/HIST PV 상수화 및 사용, 헤더 주석에 CMD/Mode 명세 추가
+  - `tools/pv_init.yaml`: `q_dcm`로 완전 통일(`qload` 제거), 불필요/레거시 키 삭제
+  - `tools/operating.yaml`: 키 설명 주석을 `OperatingLogic` 기준으로 정리
+  - `sim/logic/operating.py`: 주석 갱신(CMD/Mode 정의와 역할 분리 명시)
+
+변경 사항
+- 코드 가독성 향상: 인라인 문자열 PV 이름을 상수로 치환(일관성 확보)
+- 설정 파일 가독성 향상: 사용 키/비사용 키 구분 및 주석 정리
+
+수정파일
+- tools/pv_bridge.py
+- tools/pv_init.yaml
+- tools/operating.yaml
+- sim/logic/operating.py
+
+비고
+- 기능 변경 없음(명세/주석/상수화 중심). 기존 시나리오/GUI 동작에는 영향 없음.
+
+
+
+2025-09-11 17:46:16 KST
+
+작업 내역
+- CMD 체계 역할 분리 반영 (main.bob 기준): Select Mode(`$(P)CMD:MODE`)로 시퀀스 선택, System Control(`$(P)CMD:MAIN`)으로 실행/정지 제어
+- `CMD:MAIN`에서 `WARMUP` 명령 제거(모드는 `CMD:MODE=Warm-up`으로 선택 후 `CMD:MAIN=START`로 실행)
+- 브리지/로직의 명령 맵과 문서 일치화
+
+변경 사항
+- DCM_CCV2App/Db/dcm_cryo.db: `CMD:MAIN` 레코드에서 `SVST WARMUP` 제거
+- sim/logic/operating.py: MainCmd Enum 및 주석에서 `WARMUP` 제거, 분리된 역할 설명 정합화
+- tools/pv_bridge.py: `CMD` 딕셔너리에서 `WARMUP` 항목 제거 (모드+스타트 조합으로 Warm-up 실행)
+- docs/Reference/Reference_Guide.md: `CMD:MAIN` 표기 수정(0=NONE…6=RESET), DB 예시에서 WARMUP 라인 제거 및 주석 추가
+
+수정파일
+- DCM_CCV2App/Db/dcm_cryo.db
+- sim/logic/operating.py
+- tools/pv_bridge.py
+- docs/Reference/Reference_Guide.md
+
+비고
+- GUI(`gui/bob/main.bob`)는 PV 라벨을 DB에서 읽으므로 별도 수정 없이 일치합니다.
+
+
+
+2025-09-11 17:42:50 KST
+
+작업 내역
+- `.codex/work-rules.md`(작업 규칙) 확인 및 준수 선언
+- 한국어 응답 규칙 요약: 모든 답변은 한국어, 코드와 파일명은 영어(식별자/파일명), 기술 용어는 한·영 병기, 에러/로그는 원문 유지+한국어 설명
+- 프롬프트 작업규칙 준수: 모든 작업을 `docs/note_working.md`에 기록, 새 항목 앞 3줄 공백으로 구분, 필수 섹션(작업/변경/수정파일/비고) 포함
+
+변경 사항
+- 코드/구성 변경 없음(프로세스 준수 확약만 추가)
+
+수정파일
+- docs/note_working.md: 본 항목 추가
+
+비고
+- 이후 모든 응답은 한국어로 제공하며, 기술 용어는 필요 시 병기합니다.
+
+
+
 2025-09-10 10:51:13 KST
 
 작업 내역
@@ -181,3 +247,35 @@
 
 비고
 - 브리지는 EPICS I/O와 모델 스텝, 히스토리 퍼블리시만 수행
+2025-09-11 18:34:20 KST
+
+작업 내역
+- TEMP:COLDHEAD 제거 및 T5로 일원화
+  - DB: `BL:DCM:CRYO:TEMP:COLDHEAD` 및 `HIST:TEMP:COLDHEAD` 레코드 삭제
+  - GUI: synoptic/main/alarm_config에서 COLDHEAD 참조를 T5로 대체
+  - 문서/테스트: COLDHEAD 언급/검증을 T5로 치환
+- 히스토리 PV 전역 상수화
+  - `PV_HIST_TIME`, `PV_HIST_T5`, `PV_HIST_T6`, `PV_HIST_PT1`, `PV_HIST_PT3`를 모듈 상단에 선언하고 전역 사용
+- q_dcm 통일 및 레거시 제거
+  - CLI: `--q_dcm`로 통일(`--qload` 제거)
+  - YAML: `tools/pv_init.yaml`에서 `qload` 및 레거시 키/주석 제거
+  - 스크립트: `tools/run_bridge.sh` 갱신
+
+변경 사항
+- DCM_CCV2App/Db/dcm_cryo.db: TEMP:COLDHEAD 계열 레코드 삭제
+- tools/pv_bridge.py: COLDHEAD 관련 코드/히스토리 제거, q_dcm 적용, HIST PV 상수화
+- gui/bob/*.bob: COLDHEAD → T5로 PV 교체
+- docs/Reference_*/device_overview: COLDHEAD 제거 및 설명 정리
+- tests/*: COLDHEAD 검증을 T5로 변경
+- tools/pv_init.yaml, tools/run_bridge.sh: q_dcm 통일
+
+수정파일
+- DCM_CCV2App/Db/dcm_cryo.db
+- tools/pv_bridge.py
+- tools/pv_init.yaml, tools/run_bridge.sh
+- gui/bob/synoptic.bob, gui/bob/main.bob, gui/bob/alarm_config.bob
+- docs/Reference/Reference_Guide.md, docs/device_overview.md, docs/mermaid/pv_map.mmd
+- tests/scenarios/*.yaml, tests/tools/runner.py
+
+비고
+- 기능적 변화는 없음(표현/명칭 정리). GUI와 테스트는 T5 기준으로 동작.
