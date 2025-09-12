@@ -13,32 +13,7 @@ config:
   heater_power_on: 30.0
   heater_power_off: 0.0
 
-  # Level dynamics (optional tuning)
-  lt19_fill_lps: 1.2        # [L/s] Subcooler fill flow when V19 OPEN (default 1/60)
-  lt23_refill_rate_pctps: 1.2  # [%/s] HV refill rate when V15 OPEN (default 10/60 for fast test)
-  lt23_drain_rate_pctps: 0.0167   # [%/s] HV drain rate proportional to V17 (default 1/60)
-
-  # HV tank (LT23) consumption sensitivity (percentage per second)
-  # - lt23_base_cons_pctps: 시스템 동작 시 기본 소비율 [%/s]
-  # - lt23_power_cons_pctps_perW: 전력 1 W당 추가 소비율 [%/(s·W)]
-  # - lt23_heater_cons_pctps_max: 압력제어(히터) 최대동작 시 추가 소비율 상한 [%/s]
-  # - lt23_vent_gamma_pctps: HV 벤트(V20) 개방 시 추가 소비율 계수(개도 비율에 비례) [%/s]
-  # 기본값은 0.0(비활성); 아래 예시는 소비 효과를 눈에 띄게 키우려는 경우
-  # lt23_base_cons_pctps: 0.05              # 기본 소비율 [%/s]
-  # lt23_power_cons_pctps_perW: 2.0e-04     # 전력 의존 소비율 [%/(s·W)] → 1000W에서 +0.2%/s
-  # lt23_heater_cons_pctps_max: 0.3         # 압력제어(히터) 의존 [%/s] (u._heater_u=1.0일 때)
-  # lt23_vent_gamma_pctps: 0.2              # HV 벤트 의존 [%/s] (V20=1.0일 때)
-  lt23_base_cons_pctps: 0.1
-  lt23_power_cons_pctps_perW: 0.001
-  lt23_heater_cons_pctps_max: 0.5
-
-  # SubCooler consumption sensitivity (advanced; increase to see stronger power effect)
-  # 기본값(모델): base_cons_Lps = 3.0/3600 ≈ 0.000833 L/s, cons_coeff_Lps_perW = 0.023/3600 ≈ 6.39e-6 L/s/W
-  # 예: 1000 W에서 50 L/h(≈0.0139 L/s) 추가 소비를 원하면 0.05/3600 ≈ 1.39e-5 L/s/W 로 설정
-  # lt19_base_cons_lps: 0.000833            # 기본 소비량 [L/s]
-  # lt19_power_cons_lps_perW: 1.39e-05      # 전력당 추가 소비 [(L/s)/W]  (≈0.05 L/h/W)
-  # lt19_vent_gamma_lps_perLpm: 0.004/60    # 벤트 경로 손실 계수 [(L/s)/(L/min)]  
-  lt19_power_cons_lps_perW: 0.001
+  # Level dynamics/consumption 등 상세 튜닝 값은 tools/tuning.yaml에서 관리합니다.
 
   # Operating logic parameters live in tools/operating.yaml (not used here)
 

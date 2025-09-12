@@ -733,3 +733,13 @@
 - tools/tuning.yaml: 샘플 오버레이 파일 추가(주석 템플릿).
 수정파일: tools/pv_bridge.py, docs/logic/DCM_CryoCooler_Simulator_README.md, tools/tuning.yaml
 추가 보완 및 비고: IOC에 튜닝 PV가 없으면 자동으로 무시(선택적). 필요 시 DB에 해당 PV들을 정의하면 런타임 조정 가능. 기존 pv_init.yaml은 그대로 동작하며, tuning.yaml이 있을 경우에만 병합됨.
+
+
+
+작업내용: DB에 튜닝 PV 추가, 초기 튜닝값을 tools/tuning.yaml로 이관.
+변경사항:
+- db/dcm_cryo.db: BL:DCM:CRYO:TUNE:* 계열(ao) 10종 추가(LT19 fill/cons/vent, LT23 refill/drain/cons/vent/heater 등). EGU/범위/표시 설정 포함.
+- tools/pv_init.yaml: 세부 튜닝 키 제거(운영 기본만 유지), 주석으로 tuning.yaml로 이관 안내.
+- tools/tuning.yaml: config 섹션에 기존 튜닝 초기값 반영(lt19_fill_lps, lt23_* 등).
+수정파일: db/dcm_cryo.db, tools/pv_init.yaml, tools/tuning.yaml
+추가 보완 및 비고: pv_bridge가 tuning PV를 자동 게시/반영하므로 IOC 기동 후 바로 UI에서 값 조정 가능. 중복 설정 충돌 방지를 위해 pv_init.yaml의 동일 키는 제거.
