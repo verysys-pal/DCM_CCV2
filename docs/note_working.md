@@ -22,6 +22,209 @@
 
 
 
+2025-09-12 21:18:00 KST
+
+작업 내역
+- STOP/OFF 명령 직후 시뮬레이터가 설정한 V10/V17/V20 값이 다음 루프에서 수동 PV 매핑에 의해 0으로 덮어써지는 문제 수정
+
+변경 사항
+- `pv_bridge`의 STOP/OFF 차단 로직 제거하고, 대신 STOP/OFF 직후 현재 시뮬레이터 상태를 CMD PV로 동기화하여 즉시 수동모드로 전환되도록 변경
+
+수정파일
+- tools/pv_bridge.py: `_apply_manual_actuators_if_allowed()` STOP/OFF 차단 제거, `_sync_manual_cmd_pvs_from_sim()` 추가 및 STOP/OFF 시 호출
+
+비고
+- 자동 시퀀스 진행 중(`auto != NONE`)에도 기존대로 수동 조작 차단 유지. START/READY 등 정상 운전 상태에서만 수동 명령 반영.
+2025-09-12 21:05:00 KST
+
+작업 내역
+- 메인 명령에서 ESTOP(EMERGENCY_STOP) 명칭을 OFF로 변경
+- STOP/OFF 기능 차별화 구현:
+  - STOP: 기본 상태로 복귀(모든 밸브 CLOSE, V10 100% OPEN, 펌프 OFF, 압력제어 OFF, Ready 꺼짐), 자동절차 즉시 중지
+  - OFF: STOP과 동일 + 루프 벤트 V17, HV 벤트 V20을 OPEN하여 과압 방지 상태로 안전 워밍업
+
+변경 사항
+- EPICS DB의 CMD:MAIN 맵에서 5번 항목을 EMERGENCY_STOP→OFF로 변경
+- 브리지(`pv_bridge`)의 CMD 딕셔너리 및 설명 주석 업데이트, HOLD 래치 해제 집합에 OFF 반영
+- 운영 로직(`operating`)에서 EMERGENCY_STOP 분기를 OFF로 대체하고, OFF 명령 시 `sim.off()` 호출하도록 처리
+- 시뮬레이터 STOP 동작 강화: 모든 밸브 CLOSE(V9/V11/V15/V19/V21=Close, V17/V20=0), 단 V10=100% 유지
+- 참고 문서/도표 일부(Reference/mermaid)에서 명칭 반영
+
+수정파일
+- DCM_CCV2App/Db/dcm_cryo.db: CMD:MAIN의 FVST 문자열 변경
+- tools/pv_bridge.py: 명령 정의/주석 및 HOLD 해제 집합 수정(OFF 반영)
+- sim/logic/operating.py: MainCmd 열거형/전이/액션 업데이트(OFF 처리, `sim.off()` 호출)
+- sim/core/dcm_cryo_cooler_sim.py: `stop()`에서 밸브 일괄 CLOSE 로직 명확화
+- docs/Reference/Reference_Guide.md: CMD:MAIN 표/DB 예시 업데이트
+- docs/mermaid/state_machine.mmd: EMERGENCY_STOP → OFF 전이 수정
+
+비고
+- SAFE_SHUTDOWN 상태는 인터락/알람 경로에서만 사용(직접 명령 삭제). 추가 연결이 필요하면 추후 별도 이슈로 연계 예정.
+2025-09-12 14:34:20 KST
+
+작업 내역
+- LT19/LT23 초기 레벨을 `pv_init.yaml`에서 손쉽게 설정 가능하도록 `config` 키 추가
+- `lt19_init_pct`, `lt23_init_pct` 값을 지정하면 브리지가 시뮬레이터 상태와 PV를 동시에 초기화
+
+변경 사항
+- `pvs:`로 직접 PV를 지정하지 않아도 레벨 초기값을 구성에서 제어 가능(두 방식 병행 사용 가능)
+
+수정파일
+- tools/pv_bridge.py: `_apply_init_from_yaml()`에 `lt19_init_pct`/`lt23_init_pct` 처리 추가
+- tools/pv_init.yaml: 해당 키 주석/예시 추가
+
+비고
+- 초기 동기화 경로: (1) IOC PV→sim.seed, (2) YAML 적용, (3) PV→sim 재동기화, (4) 루프 중 sim→PV 주기 publish
+2025-09-12 14:22:20 KST
+
+작업 내역
+- LT23(히터 베셀) 소비가 압력제어/전력 변화에 둔감한 문제에 대한 조정 파라미터 추가 및 레벨 동역학 보강
+- 시뮬레이터에 HV 소비 항 추가(기본/전력/히터동작/벤트 기여) 및 YAML로 튜닝 가능하게 연결
+
+변경 사항
+- 압력제어 on 시 히터 동작(u._heater_u)에 비례한 LT23 소비가 발생(튜닝값으로 조절 가능)
+- 전력 증가(DCM POWER↑) 또는 V20 개방 시 LT23 감소율 증가(튜닝값에 비례)
+
+수정파일
+- sim/core/dcm_cryo_cooler_sim.py: HV 소비 항목 속성/기본값 추가 및 `_update_levels`에 소비식 반영
+- tools/pv_bridge.py: `_apply_init_from_yaml()`에서 lt23_* 파라미터 읽어 시뮬레이터에 주입
+- tools/pv_init.yaml: lt23_* 설정 키와 주석 가이드 추가
+
+비고
+- 기본값은 보수적으로 0(비활성)로 두었고, 현장 요구에 맞게 YAML에서 값을 올려 사용하면 됩니다.
+2025-09-12 14:08:30 KST
+
+작업 내역
+- SubTank(LT19) 소비량이 DCM Power 변화(100W↔1000W)에 둔감한 문제 조정 가능하도록 파라미터 외부화
+- `pv_bridge`에서 YAML(config)로 다음 항목을 받아 시뮬레이터에 주입:
+  - `lt19_base_cons_lps`: 기본 소비량 [L/s]
+  - `lt19_power_cons_lps_perW`: 전력당 추가 소비 [(L/s)/W]
+  - `lt19_vent_gamma_lps_perLpm`: 벤트 경로 손실 계수 [(L/s)/(L/min)]
+- `tools/pv_init.yaml`에 주석 가이드 추가(강한 전력 민감도 예시 포함)
+
+변경 사항
+- 구성만으로 소비량 민감도를 손쉽게 키워 100W와 1000W의 LT19 소모 차이를 크게 만들 수 있음
+
+수정파일
+- tools/pv_bridge.py: `_apply_init_from_yaml()`에 lt19_* 파라미터 처리 추가
+- tools/pv_init.yaml: lt19_* 파라미터 사용 예시/주석 추가
+
+비고
+- 기본 모델 상수는 유지되며, 필요 시 YAML에서 상수 덮어쓰기로 현장 튜닝 가능
+2025-09-12 13:50:10 KST
+
+작업 내역
+- PV 갱신 일관성 보완: 루프 초기화 시 `BL:DCM:CRYO:DCM:POWER`에 내부 `q_dcm` 초기값을 반영하여 HMI 표시값과 동기화
+
+변경 사항
+- 브리지 시작 후 `caget BL:DCM:CRYO:DCM:POWER`가 CLI `--q_dcm`와 일치
+
+수정파일
+- tools/pv_bridge.py: 루프 초기화에서 `pv_dcm_power` 초기 write 추가
+
+비고
+- 이후 루프에서는 해당 PV를 입력으로 읽어 내부 열부하를 갱신합니다.
+2025-09-12 13:38:20 KST
+
+작업 내역
+- LT19/LT23 PV 값이 갱신되지 않는 문제 수정: 시뮬레이터 상태값을 매 루프마다 PV(`BL:DCM:CRYO:LEVEL:LT19`, `LT23`)로 publish
+
+변경 사항
+- `caget`로 확인 시 LT19/LT23 값이 로그와 동일하게 증가/변화
+
+수정파일
+- tools/pv_bridge.py: `sim.step()` 이후 `pv_lt19/pv_lt23`에 `_write_float()` 추가
+
+비고
+- 초기 동기화는 기존대로 PV→시뮬레이터 반영, 이후 루프에서는 시뮬레이터→PV로 지속 업데이트
+2025-09-12 12:15:45 KST
+
+작업 내역
+- 타이밍 이슈 추적을 위해 `pv_bridge`에 주기 로깅 옵션 추가(`--log-interval`)
+- 로그 항목: 시간, CMD(Main), MODE(raw), effMODE(latched), STATE, V15/V19 상태, LT23/LT19
+
+변경 사항
+- 명령/모드/레벨 변화가 시간축에서 어떻게 상호작용하는지 CLI에서 직접 관찰 가능
+
+수정파일
+- tools/pv_bridge.py: `--log-interval` 파라미터 추가 및 루프 내 주기 출력 구현
+
+비고
+- 사용 예: `python -m tools.pv_bridge --verbose --log-interval 0.5`
+2025-09-12 12:03:10 KST
+
+작업 내역
+- START 직후 V19/V15가 꺼진 상태로 유지되는 문제의 원인 후보(레벨 초기값 불일치) 대응
+- 브리지 초기화 시 LT19/LT23를 IOC PV에서 읽어 시뮬레이터 상태에 동기화하고, `pv_init.yaml` 적용 후에도 재동기화
+
+변경 사항
+- HMI에서 초기 레벨(LT19/LT23)을 7% 등으로 설정한 경우, START 시 자동 시퀀스가 내부 상태와 일치된 레벨로 진행 → V15가 즉시 닫히는 현상 방지
+
+수정파일
+- tools/pv_bridge.py: 루프 초기화에서 LT19/LT23를 `_read()`로 동기화하는 코드 추가(초기/설정 적용 후 2회)
+
+비고
+- 여전히 비정상 동작 시, MODE/MAIN/레벨 값을 주기적으로 로깅하여 타이밍 이슈를 추가 진단 예정
+2025-09-12 11:45:30 KST
+
+작업 내역
+- 아키텍처 정리: `pv_bridge`는 순수 PV 중계로 유지하고, 시퀀스 트리거/진행은 `sim/logic/operating.py`에서만 수행
+- 모드 변경 시에는 `OperatingLogic.set_mode()`만 호출(행동 없음), START/STOP 등 MainCmd 변화 시에만 `apply_mode_action()` 호출
+
+변경 사항
+- Refill-HV 모드 선택만으로 밸브가 깜빡이는 현상 방지(START 없이 동작 금지)
+- START 시 래칭된 모드로 시퀀스 안정 트리거(앞서 추가한 모드 래치 `_last_nonzero_mode`와 함께 동작)
+
+수정파일
+- tools/pv_bridge.py: 모드/명령 변화 감지 분리, `set_mode()` 호출 추가, `cmd_changed`에서만 액션 실행
+
+비고
+- HMI가 START 시 MODE를 0으로 되돌려도, 브리지는 마지막 유효 모드를 유지해 시퀀스가 정상 시작됩니다.
+2025-09-12 11:32:20 KST
+
+작업 내역
+- START 시점에 HMI가 MODE를 `NONE(0)`으로 되돌려 자동 시퀀스 트리거가 누락될 수 있는 타이밍 이슈 보완
+- 브리지에서 최근 유효 모드(latched)를 기억하여, START 펄스 처리 시 `mode_val=0`이면 마지막 비-제로 모드를 사용
+
+변경 사항
+- "Refill HV ON" 선택 후 START 시, `auto_refill_hv()`가 안정적으로 시작되어 V15가 즉시 OPEN 상태 유지
+- 상태 전이(`next_state`) 계산에도 동일한 유효 모드 적용으로 일관성 확보
+
+수정파일
+- tools/pv_bridge.py: `_last_nonzero_mode` 추가 및 `apply_mode_action`/`next_state` 호출에 `eff_mode_val` 적용
+
+비고
+- HMI/IOC 환경에 따라 MODE가 START 직후 초기화되는 경우가 있어 래칭이 필요합니다.
+2025-09-12 11:17:40 KST
+
+작업 내역
+- "Heater Vessel Refill ON" 모드 실행 시 즉시 V15(히터 베셀 주입 밸브)가 열리도록 보장
+- `sim/logic/operating.py`의 `apply_mode_action`에서 `REFILL_HETER_ON` 처리 시, 자동 시퀀스 시작 전 `V15=True`, `press_ctrl_on=False`를 선반영
+
+변경 사항
+- UI에서 모드 선택 후 START 시, V15가 즉시 OPEN으로 반영(깜빡임 없이 명확)
+- 자동 시퀀스(`auto_refill_hv`) 동작은 기존과 동일하며, V19는 LT19 히스테리시스 로직에 의해 필요 시에만 동작
+
+수정파일
+- sim/logic/operating.py: REFILL_HETER_ON 분기에서 V15/press_ctrl_on 선반영 추가
+
+비고
+- 실제 IOC/HMI에서 동작 확인 권장. 추가로 verbose 로깅(모드/명령/밸브 상태) 출력이 필요하면 알려주세요.
+2025-09-12 11:05:00 KST
+
+작업 내역
+- `tools/pv_bridge.py` 루프에서 `flow_v17/flow_v10` 변수를 정의하기 전에 히스토리(`hist_flow_v17`, `hist_flow_v10`)에 추가하여 `UnboundLocalError`가 발생하던 문제 수정
+- 파생 유량 값 계산(`v17_pos`, `flow_v17`, `flow_v10`)을 히스토리 업데이트 전에 선계산하도록 순서 조정
+
+변경 사항
+- 런타임 예외 제거: `UnboundLocalError: local variable 'flow_v17' referenced before assignment` 해소
+- 기능/동작 변화 없음(계산식과 출력은 동일, 순서만 조정)
+
+수정파일
+- tools/pv_bridge.py: 히스토리 갱신 이전에 유량 계산 코드 이동
+
+비고
+- `timeout 2s python -m tools.pv_bridge --verbose`로 단기 실행 점검(비상 종료 시 출력 없음). 실제 IOC 연결 환경에서 정상 동작 예상.
 2025-09-11 17:46:16 KST
 
 작업 내역
@@ -335,3 +538,198 @@
 
 비고
 - 현재 기본값은 테스트 가속을 위해 LT23 보충 10/60 [%/s], 배출 1/60 [%/s]로 설정되어 있음. 실환경에 맞게 YAML로 조정하세요.
+2025-09-12 10:05:00 KST
+
+작업 내역
+- SUBCOOLER 충전 모드 추가 및 모드 체계 확장
+  - `ModeCmd`: REFILL_HETER_ON/OFF, REFILL_SBCOL_ON/OFF 추가(값 5..8)
+  - 서브쿨러 자동 보충 시퀀스 구현(`auto_refill_subcooler`)
+  - 브리지 설명 주석의 CMD:MODE 매핑 갱신
+  - IOC DB의 CMD:MODE 선택지 확장 및 라벨 정합화
+
+변경 사항
+- 운전 모드 선택 범위 확장(Refill을 HV/서브쿨러로 분리)
+- START + MODE 동작:
+  - `Refill HV ON` → `sim.auto_refill_hv()` 실행
+  - `Refill SUB ON` → `sim.auto_refill_subcooler()` 실행
+- OFF 계열 모드 선택 시 해당 경로 밸브 닫힘(V15/V20 또는 V19) 및 자동 시퀀스 종료
+
+수정파일
+- sim/logic/operating.py: `ModeCmd` 확장 및 `apply_mode_action` 분기 추가
+- sim/core/dcm_cryo_cooler_sim.py: `AutoKind.REFILL_SUB` 및 `auto_refill_subcooler` 구현
+- DCM_CCV2App/Db/dcm_cryo.db: `CMD:MODE` 라벨 확장(5..8)
+- tools/pv_bridge.py: 헤더 주석의 CMD:MODE 매핑 갱신
+
+비고
+- GUI는 `mbbo` 라벨을 사용하므로 DB 갱신으로 자동 반영
+- 기존 `Refill ON/OFF`는 `Refill HV ON/OFF`로 명확화됨
+
+
+
+2025-09-12 10:18:00 KST
+
+작업 내역
+- IOC가 실제 로드하는 DB 경로 수정 반영(`db/dcm_cryo.db`도 동일 변경 적용)
+- `CMD:MAIN`에서 WARMUP 항목 제거(역할 분리 원칙 유지)
+- `CMD:MODE`에 7/8 선택지 필드명 오류(FVST/SXST 중복)를 정정하여 EPICS Illegal choice 오류 해결
+
+변경 사항
+- `db/dcm_cryo.db`에서 `CMD:MODE`를 0..8까지 정상 정의(ZRST..EIST)
+- GUI/IOC에서 7,8 선택 시 오류 로그 미발생 확인 기대
+
+수정파일
+- db/dcm_cryo.db: CMD:MAIN에서 WARMUP 제거, CMD:MODE 라벨/필드명 정정 및 확장
+
+비고
+- `iocBoot/iocDCM_CCV2/st.cmd`가 `${TOP}/db/dcm_cryo.db`를 로드하므로 해당 파일을 기준으로 유지합니다.
+
+
+
+2025-09-12 10:32:00 KST
+
+작업 내역
+- HOLD/STOP 동작 명확화 및 구현
+  - HOLD: 자동 시퀀스를 "일시 정지"(paused)하여 stage/타이머 보존, 수동조작 불가
+  - RESUME: HOLD 해제 후 기존 시퀀스 계속 진행
+  - STOP: 자동 시퀀스 완전 종료(auto=None) 및 수동조작 허용(브리지 규칙과 일관)
+  - 시뮬레이터에 `paused` 플래그 추가 및 `_update_auto`에서 진행 정지 처리
+  - 운영 로직 `apply_mode_action`에서 HOLD/RESUME/STOP에 따른 `paused/auto` 제어
+
+변경 사항
+- 수동조작 허용 조건: `sim.auto == NONE`일 때만 허용(기존 브리지 로직과 일치)
+- HOLD 상태에서는 자동 진행만 멈추고 제어는 유지되므로 트렌드/상태는 계속 업데이트
+
+수정파일
+- sim/core/dcm_cryo_cooler_sim.py: `paused` 플래그 도입 및 `_update_auto` 가드 추가
+- sim/logic/operating.py: HOLD/RESUME/STOP 처리 분기 업데이트
+
+비고
+- 기존 `_held` 플래그는 내부 상태 추적용으로 유지(동작에는 영향 없음)
+
+
+
+2025-09-12 10:45:00 KST
+
+작업 내역
+- STOP(수동조작 모드)에서 V19 상태가 갱신되지 않는 문제 수정
+  - 원인: `sim._update_levels()`에서 LT19 히스테리시스(30/40%)에 따라 V19를 자동 제어하여 수동 명령을 즉시 덮어씀
+  - 조치: 자동 시퀀스 진행 중(`auto != NONE`이고 `paused=False`)에만 V19 자동 제어를 적용
+
+변경 사항
+- 수동 모드(STOP, 또는 AUTO=None)에서는 V19를 사용자가 직접 ON/OFF 가능하고, STATUS도 즉시 반영됨
+
+수정파일
+- sim/core/dcm_cryo_cooler_sim.py: `_update_levels()`에서 V19 자동 제어 조건부 처리로 변경
+
+비고
+- 다른 밸브들은 자동 히스테리시스가 없어서 정상 동작했던 것으로 판단
+
+
+
+2025-09-12 10:58:00 KST
+
+작업 내역
+- `$(P)DCM:POWER`(= `BL:DCM:CRYO:DCM:POWER`) 값을 입력으로 받아 `q_dcm`에 적용
+  - 브리지 루프에서 해당 PV를 읽어 `self.q_dcm`에 반영
+  - 기존처럼 주기적으로 PV에 `q_dcm`을 써 덮어쓰는 동작 제거
+  - 초기 기본값은 `config.q_dcm`로 설정 가능, 필요 시 `pv_init.yaml`의 `pvs:` 섹션에서 PV 값을 시드
+
+변경 사항
+- 운영자가 PV를 조정하면 즉시 열부하(`q_dcm`)에 반영되어 모델에 적용
+
+수정파일
+- tools/pv_bridge.py: DCM:POWER 주기적 put 제거, 매 루프 get하여 `q_dcm` 업데이트
+
+비고
+- DB에서는 `DCM:POWER`가 ai 타입이지만, 시뮬레이터에서는 입력으로 취급함(테스트 목적)
+
+
+
+2025-09-12 11:08:00 KST
+
+작업 내역
+- GUI에서 `BL:DCM:CRYO:DCM:POWER` 값을 직접 입력할 수 있도록 입력 위젯 추가
+  - `gui/bob/main.bob`: Power(W) 표시 옆에 `textentry` 추가(`$(P)DCM:POWER` 바인딩)
+
+변경 사항
+- 사용자는 GUI에서 열부하(W)를 입력하면 즉시 시뮬레이터에 반영됨
+
+수정파일
+- gui/bob/main.bob: `DCMPowerEntry` 위젯 추가
+
+비고
+- 기존 표시(`textupdate`)는 유지하여 현재값을 동시에 확인 가능
+
+
+
+2025-09-12 11:16:00 KST
+
+작업 내역
+- `BL:DCM:CRYO:DCM:POWER`를 입력 가능하도록 DB 타입을 `ai`→`ao`로 변경
+  - `db/dcm_cryo.db`, `DCM_CCV2App/Db/dcm_cryo.db` 모두 수정 (DRVL/DRVH 포함)
+
+변경 사항
+- GUI의 `textentry`가 정상 작동하여 사용자가 값을 쓸 수 있음
+
+수정파일
+- db/dcm_cryo.db
+- DCM_CCV2App/Db/dcm_cryo.db
+
+비고
+- 브리지는 해당 PV를 입력으로 읽으므로 코드 변경 불필요
+
+
+
+2025-09-12 11:28:00 KST
+
+작업 내역
+- 메인 화면에 유량/펌프 주파수 트렌드 그래프 추가
+  - 히스토리 파형 PV 추가: `HIST:FLOW:FT18`, `HIST:FLOW:V17`, `HIST:FLOW:V10`, `HIST:PUMP:FREQ`
+  - 브리지에 히스토리 버퍼 및 퍼블리시 로직 추가
+  - GUI에 `FlowTrendChart`(xyplot) 추가하여 TIME vs 각 히스토리 파형 표시
+
+변경 사항
+- FT18/V10/V17 유량과 펌프 Hz의 시간 추세를 메인 화면에서 확인 가능
+
+수정파일
+- tools/pv_bridge.py: 히스토리 PV/버퍼 추가 및 퍼블리시
+- db/dcm_cryo.db, DCM_CCV2App/Db/dcm_cryo.db: 신규 waveform 레코드 추가
+- gui/bob/main.bob: `FlowTrendChart` 위젯 추가
+
+비고
+- 히스토리 길이는 기존과 동일(`NELM=2048`), 시간축은 `HIST:TIME` 사용
+
+
+
+2025-09-12 16:01:23 KST
+
+작업 내역
+- `.codex/work-rules.md`의 한국어 응답/작업 규칙을 확인하고 전면 적용
+  - 모든 응답은 한국어로 작성, 코드/식별자는 영어 유지
+  - 작업 기록은 `docs/note_working.md`에 일관 포맷으로 누락 없이 축적
+
+변경 사항
+- 정책 적용(행동 원칙 변경)으로 기능/코드 변경 없음
+
+수정파일
+- (없음)
+
+비고
+- 이후 대화/설명은 한국어로 제공, 에러/로그는 원문 유지 + 한국어 설명 병행
+
+
+
+작업내용: .codex/work-rules.md(작업 규칙) 확인 및 준수 선언. 한국어 응답 원칙, 코드/파일명/명령어 예외 규칙, 에러/로그 설명 방식, 작업 이력 기록 프로세스 적용.
+변경사항: 리포지토리 기능 변경 없음. 작업 원칙 수립 및 기록만 수행.
+수정파일: .codex/work-rules.md 열람, docs/note_working.md에 본 항목 추가.
+추가 보완 및 비고: 이후 모든 응답은 한국어로 제공. pv_bridge.py=EPICS–시뮬레이터 중계, operating.py=시퀀스 관리, dcm_cryo_cooler_sim.py=물리 시뮬레이션 역할 구분 준수.
+
+
+
+작업내용: 파라메타 튜닝/관리 개선. pv_bridge에 런타임 튜닝 PV 지원 추가, YAML 오버레이(tools/tuning.yaml) 병합 로직 및 설정값 검증/클램프 적용. 문서에 사용법 반영.
+변경사항: 
+- pv_bridge.py: TUNE PV 상수/초기화/루프 반영(_init_tuning_pvs, _apply_tuning_from_pvs) 추가, init-config 로딩 시 tools/tuning.yaml 오버레이 병합, _apply_config_with_validation로 파라메타 범위 검증 및 적용.
+- docs/logic/DCM_CryoCooler_Simulator_README.md: 튜닝/설정 섹션(6.1/6.2) 추가.
+- tools/tuning.yaml: 샘플 오버레이 파일 추가(주석 템플릿).
+수정파일: tools/pv_bridge.py, docs/logic/DCM_CryoCooler_Simulator_README.md, tools/tuning.yaml
+추가 보완 및 비고: IOC에 튜닝 PV가 없으면 자동으로 무시(선택적). 필요 시 DB에 해당 PV들을 정의하면 런타임 조정 가능. 기존 pv_init.yaml은 그대로 동작하며, tuning.yaml이 있을 경우에만 병합됨.

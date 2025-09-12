@@ -3,8 +3,9 @@ from __future__ import annotations
 """
 Operating logic focused on Main/Mode commands.
 
-- MainCmd: 시스템 제어 명령 집합 (START/STOP/HOLD/RESUME/EMERGENCY_STOP/RESET)
-- ModeCmd: 시퀀스 선택 모드 (PURGE/READY/COOL_DOWN/WARM_UP/REFILL_ON/REFILL_OFF)
+- MainCmd: 시스템 제어 명령 집합 (START/STOP/HOLD/RESUME/OFF/RESET)
+- ModeCmd: 시퀀스 선택 모드 (PURGE/READY/COOL_DOWN/WARM_UP/
+           REFILL_HETER_ON/REFILL_HETER_OFF/REFILL_SBCOL_ON/REFILL_SBCOL_OFF)
 
 본 모듈은 EPICS I/O를 수행하지 않으며, 브리지(tools/pv_bridge.py)가 필요 시 이 로직을 호출합니다.
 현재 브리지는 시퀀스 트리거를 자체 처리하므로 이 모듈은 최소한의 전이 규칙과 모드 저장만 제공합니다.
@@ -20,7 +21,7 @@ class MainCmd(IntEnum):
     STOP = 2
     HOLD = 3
     RESUME = 4
-    EMERGENCY_STOP = 5
+    OFF = 5
     RESET = 6
 
 
@@ -30,8 +31,10 @@ class ModeCmd(IntEnum):
     READY = 2
     COOL_DOWN = 3
     WARM_UP = 4
-    REFILL_ON = 5
-    REFILL_OFF = 6
+    REFILL_HETER_ON = 5
+    REFILL_HETER_OFF = 6
+    REFILL_SBCOL_ON = 7
+    REFILL_SBCOL_OFF = 8
 
 
 class OperatingLogic:
@@ -80,7 +83,8 @@ class OperatingLogic:
         - PRECOOL (T5 <= TSP - band) → RUN
         - WARMUP (T5 >= tamb - 1K 근접) → OFF
         - STOP → OFF, HOLD → HOLD, RESUME(HOLD에서만) → RUN
-        - EMERGENCY_STOP → SAFE_SHUTDOWN, RESET(SAFE에서만) → OFF
+        - OFF → OFF (STOP과 동일, 단 시뮬레이터에서 V17/V20 추가 개방)
+        - RESET(SAFE에서만) → OFF
         """
         prev = state
         # Command-driven transitions
@@ -97,8 +101,8 @@ class OperatingLogic:
             state = STATE.get("HOLD", state)
         elif cmd_val == CMD.get("RESUME", -1) and prev == STATE.get("HOLD", -999):
             state = STATE.get("RUN", state)
-        elif cmd_val == CMD.get("EMERGENCY_STOP", -1):
-            state = STATE.get("SAFE_SHUTDOWN", state)
+        elif cmd_val == CMD.get("OFF", -1):
+            state = STATE.get("OFF", state)
         elif cmd_val == CMD.get("RESET", -1) and prev == STATE.get("SAFE_SHUTDOWN", -999):
             state = STATE.get("OFF", state)
 
@@ -133,8 +137,22 @@ class OperatingLogic:
                 sim.auto_cool_down()
             elif int(mode_val) == ModeCmd.WARM_UP:
                 sim.auto_warm_up()
-            elif int(mode_val) == ModeCmd.REFILL_ON:
+            elif int(mode_val) == ModeCmd.REFILL_HETER_ON:
+                # 즉시 효과를 위해 V15를 열고 히터 제어를 잠시 끈 뒤
+                # 자동 시퀀스를 시작한다(시퀀스 0단계에서도 동일 동작 수행).
+                try:
+                    sim.controls.V15 = True
+                    sim.controls.press_ctrl_on = False
+                except Exception:
+                    pass
                 sim.auto_refill_hv()
+            elif int(mode_val) == ModeCmd.REFILL_SBCOL_ON:
+                # 서브쿨러 충전 자동 시퀀스
+                try:
+                    sim.auto_refill_subcooler()
+                except AttributeError:
+                    # 구버전 시뮬레이터 호환: 단순 밸브 개방으로 대체
+                    sim.controls.V19 = True
             elif int(mode_val) == ModeCmd.READY:
                 # 간단한 Ready 유지 세팅
                 sim.controls.V9 = True
@@ -151,12 +169,44 @@ class OperatingLogic:
                 sim.controls.pump_hz = 20.0
                 sim.state.mode = 'PURGE'
         elif cmd_val == CMD.get("STOP", -1):
+            # 시퀀스 종료 및 수동 조작 허용
             sim.stop()
-        elif cmd_val == CMD.get("HOLD", -1):
-            # 자동 시퀀스를 중단하여 수동 조작 허용
             try:
+                sim.paused = False
                 sim.auto = type(sim.auto).NONE
             except Exception:
                 pass
-        elif cmd_val == CMD.get("EMERGENCY_STOP", -1):
+        elif cmd_val == CMD.get("HOLD", -1):
+            # 자동 시퀀스를 일시 정지(상태(stage) 유지), 수동 조작은 불가
+            try:
+                sim.paused = True
+            except Exception:
+                pass
+        elif cmd_val == CMD.get("RESUME", -1):
+            # HOLD 해제하여 시퀀스 재개
+            try:
+                sim.paused = False
+            except Exception:
+                pass
+        elif cmd_val == CMD.get("OFF", -1):
+            # OFF: STOP과 동일하되, 루프/베셀 벤트 개방 포함
             sim.off()
+            try:
+                sim.paused = False
+                sim.auto = type(sim.auto).NONE
+            except Exception:
+                pass
+        # 보조: OFF 계열 모드 처리 (START 없이도 수동 적용 시 의미 있음)
+        try:
+            if int(mode_val) == ModeCmd.REFILL_HETER_OFF:
+                sim.controls.V15 = False
+                sim.controls.V20 = 0.0
+                # 자동 시퀀스 종료
+                if getattr(sim, 'auto', None) is not None:
+                    sim.auto = type(sim.auto).NONE
+            elif int(mode_val) == ModeCmd.REFILL_SBCOL_OFF:
+                sim.controls.V19 = False
+                if getattr(sim, 'auto', None) is not None:
+                    sim.auto = type(sim.auto).NONE
+        except Exception:
+            pass

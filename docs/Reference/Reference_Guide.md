@@ -70,7 +70,7 @@
 | PV | 타입 | 단위 | 설명 |
 |---|---|---|---|
 | `BL:DCM:CRYO:STATE:MAIN` | `mbbi` | - | 0=OFF,1=INIT,2=PRECOOL,3=RUN,4=HOLD,5=WARMUP,6=SAFE_SHUTDOWN,7=ALARM |
-| `BL:DCM:CRYO:CMD:MAIN` | `mbbo` | - | 0=NONE,1=START,2=STOP,3=HOLD,4=RESUME,5=EMERGENCY_STOP,6=RESET |
+| `BL:DCM:CRYO:CMD:MAIN` | `mbbo` | - | 0=NONE,1=START,2=STOP,3=HOLD,4=RESUME,5=OFF,6=RESET |
 | `BL:DCM:CRYO:EQUIP:COMPRESSOR` | `bo` | - | 압축기 On/Off 명령 |
 | `BL:DCM:CRYO:VALVE:V9:CMD` | `bo` | - | 퍼지 밸브 (alias: `...:PURGE:CMD`) |
 | `BL:DCM:CRYO:TEMP:SETPOINT` | `ao` | K | 목표 온도(Setpoint) |
@@ -100,7 +100,7 @@ record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
     field(TWST, "STOP")
     field(THST, "HOLD")
     field(FRST, "RESUME")
-    field(FVST, "EMERGENCY_STOP")
+    field(FVST, "OFF")
     field(SXST, "RESET")
     # WARMUP 명령은 CMD:MODE=Warm-up과 결합하여 사용 (CMD:MAIN에는 없음)
 }

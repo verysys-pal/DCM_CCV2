@@ -24,8 +24,9 @@ Primary PVs (must exist in IOC DB):
   - BL:DCM:CRYO:ALARM:MAX_SEVERITY (mbbi)
 
 Commands:
-  - CMD:MAIN (system control): 0 NONE, 1 START, 2 STOP, 3 HOLD, 4 RESUME, 5 EMERGENCY_STOP, 6 RESET
-  - CMD:MODE (sequence select): 0 NONE, 1 PURGE, 2 READY, 3 Cool-Down, 4 Warm-up, 5 Refill ON, 6 Refill OFF
+  - CMD:MAIN (system control): 0 NONE, 1 START, 2 STOP, 3 HOLD, 4 RESUME, 5 OFF, 6 RESET
+  - CMD:MODE (sequence select): 0 NONE, 1 PURGE, 2 READY, 3 Cool-Down, 4 Warm-up,
+    5 Refill HV ON, 6 Refill HV OFF, 7 Refill SUB ON, 8 Refill SUB OFF
   - Start semantics: START + MODE triggers simulator sequence (e.g., MODE=3 -> auto_cool_down)
 
 Devices and auxiliaries mirrored by the bridge:
@@ -116,12 +117,28 @@ PV_FLOW_V17 = "BL:DCM:CRYO:FLOW:V17"
 PV_FLOW_V10 = "BL:DCM:CRYO:FLOW:V10"
 PV_DCM_POWER = "BL:DCM:CRYO:DCM:POWER"
 
+# Optional live-tuning PVs (existence optional in IOC DB)
+PV_TUNE_LT19_FILL_LPS = "BL:DCM:CRYO:TUNE:LT19:FILL_LPS"
+PV_TUNE_LT19_BASE_CONS_LPS = "BL:DCM:CRYO:TUNE:LT19:BASE_CONS_LPS"
+PV_TUNE_LT19_POWER_CONS_LPS_PERW = "BL:DCM:CRYO:TUNE:LT19:POWER_CONS_LPS_PERW"
+PV_TUNE_LT19_VENT_GAMMA_LPS_PERLPM = "BL:DCM:CRYO:TUNE:LT19:VENT_GAMMA_LPS_PERLPM"
+PV_TUNE_LT23_REFILL_RATE_PCTPS = "BL:DCM:CRYO:TUNE:LT23:REFILL_RATE_PCTPS"
+PV_TUNE_LT23_DRAIN_RATE_PCTPS = "BL:DCM:CRYO:TUNE:LT23:DRAIN_RATE_PCTPS"
+PV_TUNE_LT23_BASE_CONS_PCTPS = "BL:DCM:CRYO:TUNE:LT23:BASE_CONS_PCTPS"
+PV_TUNE_LT23_POWER_CONS_PCTPS_PERW = "BL:DCM:CRYO:TUNE:LT23:POWER_CONS_PCTPS_PERW"
+PV_TUNE_LT23_HEATER_CONS_PCTPS_MAX = "BL:DCM:CRYO:TUNE:LT23:HEATER_CONS_PCTPS_MAX"
+PV_TUNE_LT23_VENT_GAMMA_PCTPS = "BL:DCM:CRYO:TUNE:LT23:VENT_GAMMA_PCTPS"
+
 # Historical arrays (waveforms)
 PV_HIST_TIME = "BL:DCM:CRYO:HIST:TIME"
 PV_HIST_T5 = "BL:DCM:CRYO:HIST:TEMP:T5"
 PV_HIST_T6 = "BL:DCM:CRYO:HIST:TEMP:T6"
 PV_HIST_PT1 = "BL:DCM:CRYO:HIST:PRESS:PT1"
 PV_HIST_PT3 = "BL:DCM:CRYO:HIST:PRESS:PT3"
+PV_HIST_FT18 = "BL:DCM:CRYO:HIST:FLOW:FT18"
+PV_HIST_FLOW_V17 = "BL:DCM:CRYO:HIST:FLOW:V17"
+PV_HIST_FLOW_V10 = "BL:DCM:CRYO:HIST:FLOW:V10"
+PV_HIST_PUMP_FREQ = "BL:DCM:CRYO:HIST:PUMP:FREQ"
 
 
 STATE = {
@@ -141,7 +158,7 @@ CMD = {
     "STOP": 2,
     "HOLD": 3,
     "RESUME": 4,
-    "EMERGENCY_STOP": 5,
+    "OFF": 5,
     "RESET": 6,
 }
 
@@ -150,6 +167,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="PV bridge for CryoCooler simulator")
     p.add_argument("--dt", type=float, default=0.1, help="step time (s)")
     p.add_argument("--q_dcm", type=float, default=200.0, help="DCM heat load (W)")
+    p.add_argument("--log-interval", type=float, default=0.0, help="주기 로그 간격(seconds). 0이면 비활성화")
     # 상태 전이/제어 밴드는 OperatingLogic에서 관리
     p.add_argument(
         "--init-config",
@@ -162,7 +180,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 class PVBridge:
-    def __init__(self, dt: float, q_dcm: float, verbose: bool = False, init_config: str | None = None) -> None:
+    def __init__(self, dt: float, q_dcm: float, verbose: bool = False, init_config: str | None = None, log_interval: float = 0.0) -> None:
         # Initialize full CryoCooler simulator
         self.sim = CryoCoolerSim(
             SimState(T5=280.0, T6=280.0, PT1=1.0, PT3=1.0, LT19=40.0, LT23=30.0),
@@ -184,6 +202,10 @@ class PVBridge:
         self.heater_power_off = 0.0
         self._last_transition_log = 0.0
         self._rev_state = {v: k for k, v in STATE.items()}
+        self.log_interval = float(log_interval or 0.0)
+        self._log_elapsed = 0.0
+        # Live-tuning PV registry (connected ones only)
+        self._tune_pvs: dict[str, PV] = {}
 
         # EPICS PVs
         self.pv_state = PV(PV_STATE, auto_monitor=True)
@@ -219,8 +241,8 @@ class PVBridge:
         self.pv_heat_run = PV(PV_HEAT_RUN, auto_monitor=False)
         self.pv_heat_power = PV(PV_HEAT_POWER, auto_monitor=False)
         self.pv_time = PV(PV_TIME, auto_monitor=False)
-        self.pv_lt19 = PV(PV_LT19, auto_monitor=False)
-        self.pv_lt23 = PV(PV_LT23, auto_monitor=False)
+        self.pv_lt19 = PV(PV_LT19, auto_monitor=True)
+        self.pv_lt23 = PV(PV_LT23, auto_monitor=True)
         self.pv_alarm_max = PV(PV_ALARM_MAX, auto_monitor=False)
         self.pv_safety_ilk = PV(PV_SAFETY_ILK, auto_monitor=False)
         # Additional process PVs for plotting
@@ -238,11 +260,17 @@ class PVBridge:
         self.pv_hist_t6 = PV(PV_HIST_T6, auto_monitor=False)
         self.pv_hist_pt1 = PV(PV_HIST_PT1, auto_monitor=False)
         self.pv_hist_pt3 = PV(PV_HIST_PT3, auto_monitor=False)
+        self.pv_hist_ft18 = PV(PV_HIST_FT18, auto_monitor=False)
+        self.pv_hist_flow_v17 = PV(PV_HIST_FLOW_V17, auto_monitor=False)
+        self.pv_hist_flow_v10 = PV(PV_HIST_FLOW_V10, auto_monitor=False)
+        self.pv_hist_pump_freq = PV(PV_HIST_PUMP_FREQ, auto_monitor=False)
 
         # Local state
         self.state: int = STATE["OFF"]
         self._last_cmd_val: int = 0
         self._last_mode_val: int = 0
+        # 사용자가 최근에 선택했던 유효 모드(0이 아닌 값) 기억: START 펄스와 모드 갱신 간 타이밍 이슈 보완
+        self._last_nonzero_mode: int = 0
         self._held: bool = False
         # 브리지 상태 보조값은 불필요
         # History buffers (seconds window ~ maxlen * dt)
@@ -252,6 +280,10 @@ class PVBridge:
         self.hist_t6 = deque(maxlen=self.hist_len)
         self.hist_pt1 = deque(maxlen=self.hist_len)
         self.hist_pt3 = deque(maxlen=self.hist_len)
+        self.hist_ft18 = deque(maxlen=self.hist_len)
+        self.hist_flow_v17 = deque(maxlen=self.hist_len)
+        self.hist_flow_v10 = deque(maxlen=self.hist_len)
+        self.hist_pump_freq = deque(maxlen=self.hist_len)
 
         # Verify connections
         conns = [
@@ -354,8 +386,12 @@ class PVBridge:
             self._write_float(self.pv_tsub, 77.3)
         except Exception:
             pass
-        self._write_float(self.pv_lt19, self.sim.state.LT19)
-        self._write_float(self.pv_lt23, self.sim.state.LT23)
+        # LT19/LT23는 IOC 현재값을 신뢰하여 시뮬레이터 상태에 반영한다(초기 시드 동기화).
+        try:
+            self.sim.state.LT19 = float(self._read(self.pv_lt19, self.sim.state.LT19))
+            self.sim.state.LT23 = float(self._read(self.pv_lt23, self.sim.state.LT23))
+        except Exception:
+            pass
         self._write_int(self.pv_alarm_max, 0)
         # Initialize auxiliaries
         self._write_int(self.pv_pump_run, 0)
@@ -373,7 +409,12 @@ class PVBridge:
         self._write_float(self.pv_v17_pos, 0.0)
         self._write_float(self.pv_flow_v17, 0.0)
         self._write_float(self.pv_flow_v10, 0.0)
-        self._write_float(self.pv_dcm_power, 100.0)
+        # DCM power PV는 입력으로 사용(초기값은 pv_init.yaml로 시드 가능)
+        try:
+            # 표시 목적 및 일관성 확보를 위해 초기 q_dcm 값을 PV에도 반영해 둔다
+            self._write_float(self.pv_dcm_power, float(self.q_dcm))
+        except Exception:
+            pass
         # Interlock defaults
         try:
             self._write_int(self.pv_safety_ilk, 0)
@@ -384,6 +425,17 @@ class PVBridge:
 
         # YAML 초기값 적용(있으면 기본값을 덮어씀)
         self._apply_init_from_yaml()
+        # 튜닝 PV 초기화(있을 시 현재 파라메타 게시)
+        try:
+            self._init_tuning_pvs()
+        except Exception:
+            pass
+        # YAML이 PV를 갱신했을 수 있으므로 다시 동기화
+        try:
+            self.sim.state.LT19 = float(self._read(self.pv_lt19, self.sim.state.LT19))
+            self.sim.state.LT23 = float(self._read(self.pv_lt23, self.sim.state.LT23))
+        except Exception:
+            pass
         
         # Seed history with first sample
         self.hist_time.clear()
@@ -396,19 +448,39 @@ class PVBridge:
         self.hist_t6.append(self.sim.state.T6)
         self.hist_pt1.append(1.0)
         self.hist_pt3.append(1.0)
+        self.hist_ft18.append(0.0)
+        self.hist_flow_v17.append(0.0)
+        self.hist_flow_v10.append(0.0)
+        self.hist_pump_freq.append(0.0)
         self._publish_history()
 
         if self.verbose:
             print(f"[pv_bridge] loop start dt={self.dt} q_dcm={self.q_dcm}")
         while True:
             tsp = self._read(self.pv_tsp, default=tsp)
+            # Live-tuning PV 값 반영
+            try:
+                self._apply_tuning_from_pvs()
+            except Exception:
+                pass
             mode_val = int(self.pv_mode.get() or 0)
+            # 최근 유효 모드(latched) 갱신 및 OperatingLogic에 반영 (0은 무시하여 래칭 유지)
+            mode_changed = (mode_val != self._last_mode_val)
+            if mode_val != 0:
+                self._last_nonzero_mode = mode_val
+                if mode_changed and (self.oper_logic is not None):
+                    try:
+                        self.oper_logic.set_mode(mode_val)
+                    except Exception:
+                        pass
             cmd_val = int(self.pv_cmd.get() or 0)
-            cmd_changed = (cmd_val != self._last_cmd_val) or (mode_val != self._last_mode_val)
+            cmd_changed = (cmd_val != self._last_cmd_val)
+            # START/STOP 등 MainCmd 변화시에만 시퀀스 액션 호출
+            eff_mode_val = (self.oper_logic.mode if getattr(self, 'oper_logic', None) is not None else 0) or (self._last_nonzero_mode or 0)
             if cmd_changed:
                 try:
                     if self.oper_logic is not None:
-                        self.oper_logic.apply_mode_action(self.sim, cmd_val=cmd_val, mode_val=mode_val, CMD=CMD)
+                        self.oper_logic.apply_mode_action(self.sim, cmd_val=cmd_val, mode_val=eff_mode_val, CMD=CMD)
                 except Exception as e:
                     if self.verbose:
                         print(f"[pv_bridge] operating.apply_mode_action error: {e}")
@@ -416,9 +488,15 @@ class PVBridge:
                 if cmd_val == CMD.get("HOLD", -1):
                     self._held = True
                 elif cmd_val in (
-                    CMD.get("RESUME", -1), CMD.get("START", -1), CMD.get("STOP", -1), CMD.get("EMERGENCY_STOP", -1), CMD.get("RESET", -1)
+                    CMD.get("RESUME", -1), CMD.get("START", -1), CMD.get("STOP", -1), CMD.get("OFF", -1), CMD.get("RESET", -1)
                 ):
                     self._held = False
+                # STOP/OFF 직후 수동모드로 전환: 현재 강제 상태를 PV CMD에 반영해 동기화
+                try:
+                    if cmd_val in (CMD.get("STOP", -1), CMD.get("OFF", -1)):
+                        self._sync_manual_cmd_pvs_from_sim()
+                except Exception:
+                    pass
                 self._last_cmd_val = cmd_val
                 self._last_mode_val = mode_val
 
@@ -436,6 +514,15 @@ class PVBridge:
             self._write_float(self.pv_pt3, self.sim.state.PT3)
             self._write_float(self.pv_ft18, self.sim.state.FT18)
             self._write_float(self.pv_time, (self.pv_time.get() or 0.0) + self.dt)
+            # Publish levels to PVs so HMI (caget) reflects simulator state
+            self._write_float(self.pv_lt19, self.sim.state.LT19)
+            self._write_float(self.pv_lt23, self.sim.state.LT23)
+            # Pre-compute derived flows before history append
+            # (fix: ensure flow_v17/flow_v10 are defined before use)
+            v17_pos = float(self.sim.controls.V17) * 100.0
+            flow_v17 = 0.08 * v17_pos
+            flow_v10 = 6.0 if int(self.sim.controls.V10 > 0.5) else 0.0
+
             # Update history arrays
             tnext = (self.hist_time[-1] if self.hist_time else 0.0) + self.dt
             self.hist_time.append(tnext)
@@ -443,6 +530,10 @@ class PVBridge:
             self.hist_t6.append(self.sim.state.T6)
             self.hist_pt1.append(self.sim.state.PT1)
             self.hist_pt3.append(self.sim.state.PT3)
+            self.hist_ft18.append(self.sim.state.FT18)
+            self.hist_flow_v17.append(flow_v17)
+            self.hist_flow_v10.append(flow_v10)
+            self.hist_pump_freq.append(self.sim.controls.pump_hz)
             self._publish_history()
             # State transition managed by OperatingLogic
             try:
@@ -454,7 +545,7 @@ class PVBridge:
                         STATE=STATE,
                         CMD=CMD,
                         cmd_val=cmd_for_transition,
-                        mode_val=mode_val,
+                        mode_val=eff_mode_val,
                         tsp=tsp,
                         t5=self.sim.state.T5,
                         tamb=getattr(self.sim, 'ambK', 280.0),
@@ -476,9 +567,6 @@ class PVBridge:
 
             # Mirror valve statuses from commands
             self._mirror_status_from_sim()
-            v17_pos = float(self.sim.controls.V17) * 100.0
-            flow_v17 = 0.08 * v17_pos
-            flow_v10 = 6.0 if int(self.sim.controls.V10 > 0.5) else 0.0
             self._write_float(self.pv_v17_pos, v17_pos)
             self._write_float(self.pv_flow_v17, flow_v17)
             self._write_float(self.pv_flow_v10, flow_v10)
@@ -501,11 +589,36 @@ class PVBridge:
                 self._write_int(self.pv_safety_ilk, 1 if safe else 0)
             else:
                 self._write_int(self.pv_alarm_max, 1 if self.sim.state.T6 > float(self.alarm_t_high) else 0)
-            # Publish DCM power (fixed from model)
+            # Read DCM power from PV as input (operator-set heat load)
             try:
-                self._write_float(self.pv_dcm_power, float(self.q_dcm))
+                self.q_dcm = float(self._read(self.pv_dcm_power, default=self.q_dcm))
             except Exception:
                 pass
+
+            # 주기 로그(모드/메인 명령 및 핵심 상태) 출력
+            if self.log_interval > 0.0:
+                self._log_elapsed += self.dt
+                if self._log_elapsed >= self.log_interval:
+                    self._log_elapsed = 0.0
+                    try:
+                        ts = datetime.now().strftime('%H:%M:%S.%f')[:-3]
+                    except Exception:
+                        ts = f"t={self.pv_time.get() or 0.0:.1f}s"
+                    try:
+                        print(
+                            "[trace]",
+                            ts,
+                            f"CMD={int(cmd_val)}",
+                            f"MODE={int(mode_val)}",
+                            f"effMODE={int(eff_mode_val)}",
+                            f"STATE={self._state_name()}",
+                            #f"V15={'OPEN' if self.sim.controls.V15 else 'CLOSE'}",
+                            #f"V19={'OPEN' if self.sim.controls.V19 else 'CLOSE'}",
+                            #f"LT23={self.sim.state.LT23:.1f}%",
+                            #f"LT19={self.sim.state.LT19:.1f}%",
+                        )
+                    except Exception:
+                        pass
 
             # Done updating derived PVs (suppress per-iteration verbose prints)
 
@@ -518,9 +631,81 @@ class PVBridge:
             self.pv_hist_t6.put(np.asarray(self.hist_t6, dtype=float), wait=False)
             self.pv_hist_pt1.put(np.asarray(self.hist_pt1, dtype=float), wait=False)
             self.pv_hist_pt3.put(np.asarray(self.hist_pt3, dtype=float), wait=False)
+            self.pv_hist_ft18.put(np.asarray(self.hist_ft18, dtype=float), wait=False)
+            self.pv_hist_flow_v17.put(np.asarray(self.hist_flow_v17, dtype=float), wait=False)
+            self.pv_hist_flow_v10.put(np.asarray(self.hist_flow_v10, dtype=float), wait=False)
+            self.pv_hist_pump_freq.put(np.asarray(self.hist_pump_freq, dtype=float), wait=False)
         except Exception as e:
             if self.verbose:
                 print(f"[pv_bridge] history publish error: {e}")
+
+    # --- Live tuning PVs (optional) ---
+    def _init_tuning_pvs(self) -> None:
+        """튜닝용 PV들을 연결하고, 연결 시 현재 파라메타 값을 게시한다."""
+        def _try_bind(name: str, value: float) -> None:
+            try:
+                pv = PV(name, auto_monitor=True)
+                if pv.wait_for_connection(timeout=0.2):
+                    pv.put(float(value), wait=False)
+                    self._tune_pvs[name] = pv
+            except Exception:
+                pass
+        # Subcooler (LT19)
+        _try_bind(PV_TUNE_LT19_FILL_LPS, getattr(self.sim, 'fill_Lps_v19', 1.0/60.0))
+        _try_bind(PV_TUNE_LT19_BASE_CONS_LPS, getattr(self.sim, 'base_cons_Lps', 3.0/3600.0))
+        _try_bind(PV_TUNE_LT19_POWER_CONS_LPS_PERW, getattr(self.sim, 'cons_coeff_Lps_perW', 0.023/3600.0))
+        _try_bind(PV_TUNE_LT19_VENT_GAMMA_LPS_PERLPM, getattr(self.sim, 'gamma_vent_Lps_per_Lpm', 0.004/60.0))
+        # HV tank (LT23)
+        _try_bind(PV_TUNE_LT23_REFILL_RATE_PCTPS, getattr(self.sim, 'refill_rate_pctps', 10.0/60.0))
+        _try_bind(PV_TUNE_LT23_DRAIN_RATE_PCTPS, getattr(self.sim, 'drain_rate_pctps', 1.0/60.0))
+        _try_bind(PV_TUNE_LT23_BASE_CONS_PCTPS, getattr(self.sim, 'hv_base_cons_pctps', 0.0))
+        _try_bind(PV_TUNE_LT23_POWER_CONS_PCTPS_PERW, getattr(self.sim, 'hv_power_cons_pctps_perW', 0.0))
+        _try_bind(PV_TUNE_LT23_HEATER_CONS_PCTPS_MAX, getattr(self.sim, 'hv_heater_cons_pctps_max', 0.0))
+        _try_bind(PV_TUNE_LT23_VENT_GAMMA_PCTPS, getattr(self.sim, 'hv_vent_gamma_pctps', 0.0))
+
+    def _apply_tuning_from_pvs(self) -> None:
+        """튜닝 PV 값이 연결되어 있으면 읽어와 합리적 범위로 클램프 후 적용한다."""
+        def _get(name: str) -> Optional[float]:
+            pv = self._tune_pvs.get(name)
+            if pv is None:
+                return None
+            try:
+                val = pv.get()
+                return float(val) if val is not None else None
+            except Exception:
+                return None
+        def clamp(v: float, lo: float, hi: float) -> float:
+            return max(lo, min(hi, v))
+        v = _get(PV_TUNE_LT19_FILL_LPS)
+        if v is not None:
+            self.sim.fill_Lps_v19 = clamp(v, 0.0, 10.0)
+        v = _get(PV_TUNE_LT19_BASE_CONS_LPS)
+        if v is not None:
+            self.sim.base_cons_Lps = clamp(v, 0.0, 1.0)
+        v = _get(PV_TUNE_LT19_POWER_CONS_LPS_PERW)
+        if v is not None:
+            self.sim.cons_coeff_Lps_perW = clamp(v, 0.0, 0.01)
+        v = _get(PV_TUNE_LT19_VENT_GAMMA_LPS_PERLPM)
+        if v is not None:
+            self.sim.gamma_vent_Lps_per_Lpm = clamp(v, 0.0, 0.5)
+        v = _get(PV_TUNE_LT23_REFILL_RATE_PCTPS)
+        if v is not None:
+            self.sim.refill_rate_pctps = clamp(v, 0.0, 100.0)
+        v = _get(PV_TUNE_LT23_DRAIN_RATE_PCTPS)
+        if v is not None:
+            self.sim.drain_rate_pctps = clamp(v, 0.0, 100.0)
+        v = _get(PV_TUNE_LT23_BASE_CONS_PCTPS)
+        if v is not None:
+            self.sim.hv_base_cons_pctps = clamp(v, 0.0, 100.0)
+        v = _get(PV_TUNE_LT23_POWER_CONS_PCTPS_PERW)
+        if v is not None:
+            self.sim.hv_power_cons_pctps_perW = clamp(v, 0.0, 1.0)
+        v = _get(PV_TUNE_LT23_HEATER_CONS_PCTPS_MAX)
+        if v is not None:
+            self.sim.hv_heater_cons_pctps_max = clamp(v, 0.0, 100.0)
+        v = _get(PV_TUNE_LT23_VENT_GAMMA_PCTPS)
+        if v is not None:
+            self.sim.hv_vent_gamma_pctps = clamp(v, 0.0, 100.0)
 
     def _load_operating_interlock(self) -> None:
         """Load optional operating/interlock YAMLs to configure external logic."""
@@ -570,6 +755,52 @@ class PVBridge:
         except Exception:
             pass
 
+    def _sync_manual_cmd_pvs_from_sim(self) -> None:
+        """STOP/OFF 직후 수동 모드로의 전환을 원활히 하기 위해
+        현재 시뮬레이터 강제 상태를 PV 명령(CMD)과 동기화한다.
+        이렇게 하면 다음 루프부터 수동 조작이 즉시 일관되게 반영된다.
+        """
+        try:
+            self._write_int(self.pv_v9_cmd, 1 if self.sim.controls.V9 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v11_cmd, 1 if self.sim.controls.V11 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v15_cmd, 1 if self.sim.controls.V15 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v19_cmd, 1 if self.sim.controls.V19 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v20_cmd, 1 if self.sim.controls.V20 > 0.5 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v17_cmd, 1 if self.sim.controls.V17 > 0.5 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v10_cmd, 1 if self.sim.controls.V10 > 0.5 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_v21_cmd, 1 if self.sim.controls.V21 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_pump_cmd, 1 if self.sim.controls.pump_hz > 0.0 else 0)
+        except Exception:
+            pass
+        try:
+            self._write_int(self.pv_heat_cmd, 1 if self.sim.controls.press_ctrl_on else 0)
+        except Exception:
+            pass
+
     def _mirror_status_from_sim(self) -> None:
         self._write_int(self.pv_v9_status, 1 if self.sim.controls.V9 else 0)
         self._write_int(self.pv_v11_status, 1 if self.sim.controls.V11 else 0)
@@ -606,69 +837,31 @@ class PVBridge:
                 return
             with open(cfg_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
+            # Optional overlay (tools/tuning.yaml) to override config/pvs
+            try:
+                overlay_path = _ROOT / "tools" / "tuning.yaml"
+                if overlay_path.exists():
+                    with open(overlay_path, "r", encoding="utf-8") as f:
+                        overlay = yaml.safe_load(f) or {}
+                    if isinstance(overlay, dict):
+                        if isinstance(overlay.get("config"), dict):
+                            base_cfg = data.get("config") or {}
+                            if not isinstance(base_cfg, dict):
+                                base_cfg = {}
+                            base_cfg.update(overlay["config"])  # type: ignore[index]
+                            data["config"] = base_cfg
+                        if isinstance(overlay.get("pvs"), dict):
+                            base_pvs = data.get("pvs") or {}
+                            if not isinstance(base_pvs, dict):
+                                base_pvs = {}
+                            base_pvs.update(overlay["pvs"])  # type: ignore[index]
+                            data["pvs"] = base_pvs
+            except Exception:
+                pass
             # 1) config 섹션: dt, q_dcm, tsub 등 런타임 파라미터 적용
             cfg = data.get("config", {}) if isinstance(data, dict) else {}
             if isinstance(cfg, dict):
-                if "dt" in cfg:
-                    try:
-                        self.dt = float(cfg["dt"])
-                    except Exception:
-                        pass
-                # init_seconds/precool_band는 OperatingLogic이 관리하므로 무시
-                if "alarm_t_high" in cfg:
-                    try:
-                        self.alarm_t_high = float(cfg["alarm_t_high"])
-                    except Exception:
-                        pass
-                if "pump_freq_on" in cfg:
-                    try:
-                        self.pump_freq_on = float(cfg["pump_freq_on"])
-                    except Exception:
-                        pass
-                if "pump_freq_off" in cfg:
-                    try:
-                        self.pump_freq_off = float(cfg["pump_freq_off"])
-                    except Exception:
-                        pass
-                if "heater_power_on" in cfg:
-                    try:
-                        self.heater_power_on = float(cfg["heater_power_on"])
-                    except Exception:
-                        pass
-                if "heater_power_off" in cfg:
-                    try:
-                        self.heater_power_off = float(cfg["heater_power_off"])
-                    except Exception:
-                        pass
-                if "tsub" in cfg:
-                    try:
-                        # PV에만 반영 (CryoCoolerSim에서 직접 사용하지 않음)
-                        self._write_float(self.pv_tsub, float(cfg["tsub"]))
-                    except Exception:
-                        pass
-                if "q_dcm" in cfg:
-                    try:
-                        self.q_dcm = float(cfg["q_dcm"])
-                        self._write_float(self.pv_dcm_power, float(self.q_dcm))
-                    except Exception:
-                        pass
-                # Level dynamics tuning (optional)
-                if "lt19_fill_lps" in cfg:
-                    try:
-                        self.sim.fill_Lps_v19 = float(cfg["lt19_fill_lps"])  # [L/s]
-                    except Exception:
-                        pass
-                if "lt23_refill_rate_pctps" in cfg:
-                    try:
-                        self.sim.refill_rate_pctps = float(cfg["lt23_refill_rate_pctps"])  # [%/s]
-                    except Exception:
-                        pass
-                if "lt23_drain_rate_pctps" in cfg:
-                    try:
-                        self.sim.drain_rate_pctps = float(cfg["lt23_drain_rate_pctps"])  # [%/s]
-                    except Exception:
-                        pass
-                # 기타 모델 파라미터는 CryoCoolerSim에 직접 적용하지 않음
+                self._apply_config_with_validation(cfg)
             pvs = data.get("pvs", {}) if isinstance(data, dict) else {}
             if not isinstance(pvs, dict):
                 if self.verbose:
@@ -692,6 +885,108 @@ class PVBridge:
             if self.verbose:
                 print(f"[pv_bridge] init-config 로드 오류: {e}")
 
+    def _apply_config_with_validation(self, cfg: dict) -> None:
+        """YAML config 키를 검증/클램프하여 안전하게 적용한다."""
+        def clamp(v: float, lo: float, hi: float) -> float:
+            return max(lo, min(hi, v))
+        # Basic run params
+        if "dt" in cfg:
+            try:
+                self.dt = clamp(float(cfg["dt"]), 0.01, 5.0)
+            except Exception:
+                pass
+        if "q_dcm" in cfg:
+            try:
+                self.q_dcm = clamp(float(cfg["q_dcm"]), 0.0, 5000.0)
+            except Exception:
+                pass
+        if "tsub" in cfg:
+            try:
+                self._write_float(self.pv_tsub, float(cfg["tsub"]))
+            except Exception:
+                pass
+        # Derived runtime params (used by bridge only)
+        for k, lo, hi in (
+            ("alarm_t_high", 0.0, 1000.0),
+            ("pump_freq_on", 0.0, 80.0),
+            ("pump_freq_off", 0.0, 80.0),
+            ("heater_power_on", 0.0, 100.0),
+            ("heater_power_off", 0.0, 100.0),
+        ):
+            if k in cfg:
+                try:
+                    setattr(self, k, clamp(float(cfg[k]), lo, hi))
+                except Exception:
+                    pass
+        # Level dynamics
+        if "lt19_fill_lps" in cfg:
+            try:
+                self.sim.fill_Lps_v19 = clamp(float(cfg["lt19_fill_lps"]), 0.0, 10.0)
+            except Exception:
+                pass
+        if "lt23_refill_rate_pctps" in cfg:
+            try:
+                self.sim.refill_rate_pctps = clamp(float(cfg["lt23_refill_rate_pctps"]), 0.0, 100.0)
+            except Exception:
+                pass
+        if "lt23_drain_rate_pctps" in cfg:
+            try:
+                self.sim.drain_rate_pctps = clamp(float(cfg["lt23_drain_rate_pctps"]), 0.0, 100.0)
+            except Exception:
+                pass
+        # SubTank consumption sensitivity
+        if "lt19_base_cons_lps" in cfg:
+            try:
+                self.sim.base_cons_Lps = clamp(float(cfg["lt19_base_cons_lps"]), 0.0, 1.0)
+            except Exception:
+                pass
+        if "lt19_power_cons_lps_perW" in cfg:
+            try:
+                self.sim.cons_coeff_Lps_perW = clamp(float(cfg["lt19_power_cons_lps_perW"]), 0.0, 0.01)
+            except Exception:
+                pass
+        if "lt19_vent_gamma_lps_perLpm" in cfg:
+            try:
+                self.sim.gamma_vent_Lps_per_Lpm = clamp(float(cfg["lt19_vent_gamma_lps_perLpm"]), 0.0, 0.5)
+            except Exception:
+                pass
+        # Initial levels
+        if "lt19_init_pct" in cfg:
+            try:
+                v = clamp(float(cfg["lt19_init_pct"]), 0.0, 100.0)
+                self.sim.state.LT19 = v
+                self._write_float(self.pv_lt19, v)
+            except Exception:
+                pass
+        if "lt23_init_pct" in cfg:
+            try:
+                v = clamp(float(cfg["lt23_init_pct"]), 0.0, 100.0)
+                self.sim.state.LT23 = v
+                self._write_float(self.pv_lt23, v)
+            except Exception:
+                pass
+        # HV tank consumption sensitivity
+        if "lt23_base_cons_pctps" in cfg:
+            try:
+                self.sim.hv_base_cons_pctps = clamp(float(cfg["lt23_base_cons_pctps"]), 0.0, 100.0)
+            except Exception:
+                pass
+        if "lt23_power_cons_pctps_perW" in cfg:
+            try:
+                self.sim.hv_power_cons_pctps_perW = clamp(float(cfg["lt23_power_cons_pctps_perW"]), 0.0, 1.0)
+            except Exception:
+                pass
+        if "lt23_heater_cons_pctps_max" in cfg:
+            try:
+                self.sim.hv_heater_cons_pctps_max = clamp(float(cfg["lt23_heater_cons_pctps_max"]), 0.0, 100.0)
+            except Exception:
+                pass
+        if "lt23_vent_gamma_pctps" in cfg:
+            try:
+                self.sim.hv_vent_gamma_pctps = clamp(float(cfg["lt23_vent_gamma_pctps"]), 0.0, 100.0)
+            except Exception:
+                pass
+
 
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
@@ -700,6 +995,7 @@ def main(argv: list[str]) -> int:
         args.q_dcm,
         verbose=args.verbose,
         init_config=args.init_config,
+        log_interval=args.log_interval,
     )
     try:
         bridge.loop()

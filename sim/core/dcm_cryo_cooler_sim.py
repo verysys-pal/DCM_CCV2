@@ -45,6 +45,7 @@ class AutoKind(Enum):
     COOL_DOWN = auto()
     WARM_UP = auto()
     REFILL_HV = auto()
+    REFILL_SUB = auto()
 
 
 class CryoCoolerSim:
@@ -76,6 +77,7 @@ class CryoCoolerSim:
         self.state = state
         self.controls = controls
         self.auto: AutoKind = AutoKind.NONE
+        self.paused: bool = False
         self.stage: int = 0
         self.stage_timer: float = 0.0
         self._pulse_timer: float = 0.0
@@ -87,6 +89,11 @@ class CryoCoolerSim:
         # Defaults reflect current accelerated test tuning
         self.refill_rate_pctps: float = 10.0 / 60.0
         self.drain_rate_pctps: float = 1.0 / 60.0
+        # HV tank consumption terms (percentage per second) — adjustable via YAML through pv_bridge
+        self.hv_base_cons_pctps: float = 0.0            # base consumption when system running
+        self.hv_power_cons_pctps_perW: float = 0.0      # additional per-W power consumption
+        self.hv_heater_cons_pctps_max: float = 0.0      # additional when press control ON (scaled by heater_u)
+        self.hv_vent_gamma_pctps: float = 0.0           # additional when HV vent (V20) open (scaled by V20)
 
     @staticmethod
     def clamp(v, lo, hi):
@@ -127,10 +134,28 @@ class CryoCoolerSim:
         self.stage = 0
         self.stage_timer = 0.0
 
+    def auto_refill_subcooler(self):
+        """서브쿨러(LT19) 보충 자동 시퀀스.
+
+        간단한 정책:
+        - V19 OPEN으로 충전 시작
+        - 목표치(예: 50%) 도달 시 V19 CLOSE 후 종료
+        다른 밸브/제어는 변경하지 않음(현재 상태 유지)
+        """
+        self.auto = AutoKind.REFILL_SUB
+        self.stage = 0
+        self.stage_timer = 0.0
+
     def stop(self):
         u = self.controls
+        # 기본 상태로 복귀: 모든 밸브 CLOSE, 단 V10=100% OPEN
         u.V9 = False
         u.V11 = False
+        u.V15 = False
+        u.V19 = False
+        u.V21 = False
+        u.V17 = 0.0
+        u.V20 = 0.0
         u.V10 = 1.0
         u.pump_hz = 0.0
         u.press_ctrl_on = False
@@ -146,6 +171,9 @@ class CryoCoolerSim:
 
     def _update_auto(self, dt: float):
         u, s = self.controls, self.state
+        # HOLD 모드에서는 자동 시퀀스 진행만 일시 정지
+        if self.paused:
+            return
         if self.auto == AutoKind.NONE:
             return
         self.stage_timer += dt
@@ -264,6 +292,18 @@ class CryoCoolerSim:
                     u.press_ctrl_on = True
                     self.auto = AutoKind.NONE
                     self.stage = 0
+        elif self.auto == AutoKind.REFILL_SUB:
+            if self.stage == 0:
+                # 서브쿨러 보충 시작
+                u.V19 = True
+                self.stage += 1
+                self.stage_timer = 0.0
+            elif self.stage == 1:
+                # 목표 레벨 도달 시 종료
+                if self.state.LT19 >= 50.0:
+                    u.V19 = False
+                    self.auto = AutoKind.NONE
+                    self.stage = 0
 
     def _is_ready(self) -> bool:
         s, u = self.state, self.controls
@@ -327,11 +367,21 @@ class CryoCoolerSim:
         s.LT19 = self.clamp(s.LT19 + dLT19 * dt, 0.0, 100.0)
         if u.V15:
             s.LT23 = self.clamp(s.LT23 + float(self.refill_rate_pctps) * dt, 0.0, 100.0)
+        # Existing drain via loop vent proportional to V17
         s.LT23 = self.clamp(s.LT23 - float(self.drain_rate_pctps) * u.V17 * dt, 0.0, 100.0)
-        if s.LT19 < 30.0:
-            u.V19 = True
-        if s.LT19 > 40.0:
-            u.V19 = False
+        # Additional HV consumption: base + power + heater activity + HV vent contribution
+        hv_cons_pctps = float(self.hv_base_cons_pctps) + float(self.hv_power_cons_pctps_perW) * float(power_W)
+        if u.press_ctrl_on:
+            hv_cons_pctps += float(self.hv_heater_cons_pctps_max) * self.clamp(getattr(u, '_heater_u', 0.0), 0.0, 1.0)
+        hv_cons_pctps += float(self.hv_vent_gamma_pctps) * float(self.clamp(u.V20, 0.0, 1.0))
+        if hv_cons_pctps > 0.0:
+            s.LT23 = self.clamp(s.LT23 - hv_cons_pctps * dt, 0.0, 100.0)
+        # 자동 시퀀스 진행 중에만 LT19 자동 보충 히스테리시스 적용
+        if (self.auto != AutoKind.NONE) and (not getattr(self, 'paused', False)):
+            if s.LT19 < 80.0:
+                u.V19 = True
+            if s.LT19 > 90.0:
+                u.V19 = False
         if s.LT23 < 5.0:
             self.stop()
 

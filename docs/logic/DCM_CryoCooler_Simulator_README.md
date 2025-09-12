@@ -257,6 +257,26 @@ print(sim.state)
 - Flow vs frequency is scaled by a single anchor (`>15 L/min @ 80 Hz`).  
 - Sub‑Cooler/HV volumes and V19/V15/V20 rates are configurable constants.
 
+### 6.1 Runtime configuration (YAML)
+
+- Base: `tools/pv_init.yaml` — `config` 섹션에서 `dt,q_dcm,lt19_* ,lt23_*` 등을 지정하고, `pvs` 섹션에서 IOC PV 초기값을 시드합니다.
+- Overlay: `tools/tuning.yaml` — 존재할 경우 `pv_init.yaml` 위에 얕게 병합되어 사이트별/테스트별 튜닝을 분리 관리할 수 있습니다.
+
+### 6.2 Live‑tuning PVs (optional)
+
+IOC DB에 다음 PV들을 정의하면 브리지가 연결하여 현재 값을 게시하고, 런타임 동안 해당 값을 읽어 즉시 모델에 반영합니다.
+
+- `BL:DCM:CRYO:TUNE:LT19:FILL_LPS`
+- `BL:DCM:CRYO:TUNE:LT19:BASE_CONS_LPS`
+- `BL:DCM:CRYO:TUNE:LT19:POWER_CONS_LPS_PERW`
+- `BL:DCM:CRYO:TUNE:LT19:VENT_GAMMA_LPS_PERLPM`
+- `BL:DCM:CRYO:TUNE:LT23:REFILL_RATE_PCTPS`
+- `BL:DCM:CRYO:TUNE:LT23:DRAIN_RATE_PCTPS`
+- `BL:DCM:CRYO:TUNE:LT23:BASE_CONS_PCTPS`
+- `BL:DCM:CRYO:TUNE:LT23:POWER_CONS_PCTPS_PERW`
+- `BL:DCM:CRYO:TUNE:LT23:HEATER_CONS_PCTPS_MAX`
+- `BL:DCM:CRYO:TUNE:LT23:VENT_GAMMA_PCTPS`
+
 > All operating values, sequences and limits are based on the **Bruker Cryo‑Cooler Installation & Operation Manual** (cool‑down steps, warm‑up, auto‑refill, boiling‑point table, GUI & READY checklist). See pages around **p.14 (GUI), p.42–49 (procedures), p.43–44 (pressure/boiling), p.58 (READY)**. fileciteturn0file0
 
 ---

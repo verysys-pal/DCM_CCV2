@@ -1,0 +1,28 @@
+# Optional overlay for tuning parameters.
+# If present, pv_bridge loads this file after tools/pv_init.yaml and
+# shallow-merges `config` and `pvs` sections.
+#
+# Example keys for `config` (see tools/pv_init.yaml for descriptions):
+# config:
+#   lt19_fill_lps: 1.0
+#   lt23_refill_rate_pctps: 0.5
+#   lt23_drain_rate_pctps: 0.02
+#   lt23_base_cons_pctps: 0.05
+#   lt23_power_cons_pctps_perW: 2.0e-04
+#   lt23_heater_cons_pctps_max: 0.2
+#   lt23_vent_gamma_pctps: 0.1
+#   lt19_base_cons_lps: 0.000833
+#   lt19_power_cons_lps_perW: 1.39e-05
+#   lt19_vent_gamma_lps_perLpm: 0.004/60
+#
+# You can also seed or override PV values here (merged with pv_init.yaml):
+# pvs:
+#   BL:DCM:CRYO:TEMP:SETPOINT: 80.0
+#   BL:DCM:CRYO:DCM:POWER: 200.0
+
+# config:
+#   # Put your site-specific tuning values here
+
+# pvs:
+#   # Optional: PV seeds/overrides
+

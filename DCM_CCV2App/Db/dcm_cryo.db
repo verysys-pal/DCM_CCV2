@@ -22,19 +22,21 @@ record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
     field(TWST, "STOP")
     field(THST, "HOLD")
     field(FRST, "RESUME")
-    field(FVST, "EMERGENCY_STOP")
+    field(FVST, "OFF")
     field(SXST, "RESET")
 }
 
 # Select Mode command
 record(mbbo, "BL:DCM:CRYO:CMD:MODE") {
-    field(ZRST, "NONE")          # 0
-    field(ONST, "PURGE")         # 1
-    field(TWST, "READY")         # 2
-    field(THST, "Cool-Down")     # 3
-    field(FRST, "Warm-up")       # 4
-    field(FVST, "Refill ON")     # 5
-    field(SXST, "Refill OFF")    # 6
+    field(ZRST, "NONE")            # 0
+    field(ONST, "PURGE")           # 1
+    field(TWST, "READY")           # 2
+    field(THST, "Cool-Down")       # 3
+    field(FRST, "Warm-up")         # 4
+    field(FVST, "Refill HV ON")    # 5
+    field(SXST, "Refill HV OFF")   # 6
+    field(SVST, "Refill SUB ON")   # 7
+    field(EIST, "Refill SUB OFF")  # 8
 }
 
 record(ai,  "BL:DCM:CRYO:TEMP:T5") {
@@ -73,9 +75,11 @@ record(ai,  "BL:DCM:CRYO:TEMP:VENTHT") {
 }
 
 # DCM power readback (fixed 100 W in simulator)
-record(ai,  "BL:DCM:CRYO:DCM:POWER") {
+record(ao,  "BL:DCM:CRYO:DCM:POWER") {
     field(EGU,  "W")
     field(PREC, "1")
+    field(DRVL, "0")
+    field(DRVH, "1000")
     field(LOPR, "0")
     field(HOPR, "1000")
 }
@@ -272,6 +276,22 @@ record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT1") {
     field(NELM, "2048")
 }
 record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT3") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:FLOW:FT18") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:FLOW:V17") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:FLOW:V10") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:PUMP:FREQ") {
     field(FTVL, "DOUBLE")
     field(NELM, "2048")
 }

@@ -12,7 +12,7 @@ stateDiagram-v2
   RUN --> HOLD: CMD.HOLD
   HOLD --> RUN: CMD.RESUME
   any --> WARMUP: CMD.WARMUP
-  any --> SAFE_SHUTDOWN: CMD.EMERGENCY_STOP
+  any --> OFF: CMD.OFF
   SAFE_SHUTDOWN --> OFF: CMD.RESET
   WARMUP --> OFF: Tch >= (Tamb - precool_band)
 

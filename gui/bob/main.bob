@@ -15,7 +15,7 @@
   <widget type="rectangle" version="2.0.0">
     <name>Rectangle</name>
     <x>10</x>
-    <y>675</y>
+    <y>700</y>
     <width>850</width>
     <height>165</height>
     <line_width>2</line_width>
@@ -32,7 +32,7 @@
     <name>Picture_1</name>
     <file>../assets/Cryocooler_image4.jpg</file>
     <x>10</x>
-    <y>60</y>
+    <y>70</y>
     <width>850</width>
     <height>615</height>
   </widget>
@@ -67,7 +67,7 @@
     <name>T6Value</name>
     <pv_name>$(P)TEMP:T6</pv_name>
     <x>770</x>
-    <y>101</y>
+    <y>111</y>
     <width>50</width>
     <font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
@@ -83,7 +83,7 @@
     <name>PT1Value</name>
     <pv_name>$(P)PRESS:PT1</pv_name>
     <x>40</x>
-    <y>170</y>
+    <y>180</y>
     <width>60</width>
     <font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
@@ -99,7 +99,7 @@
     <name>PT3Value</name>
     <pv_name>$(P)PRESS:PT3</pv_name>
     <x>273</x>
-    <y>363</y>
+    <y>373</y>
     <width>40</width>
     <height>15</height>
     <font>
@@ -116,7 +116,7 @@
     <name>PT3Label</name>
     <text>Bar</text>
     <x>282</x>
-    <y>378</y>
+    <y>388</y>
     <width>30</width>
     <height>15</height>
     <horizontal_alignment>2</horizontal_alignment>
@@ -125,7 +125,7 @@
     <name>LT19Value</name>
     <pv_name>$(P)LEVEL:LT19</pv_name>
     <x>60</x>
-    <y>405</y>
+    <y>415</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -142,7 +142,7 @@
     <name>LT23Value</name>
     <pv_name>$(P)LEVEL:LT23</pv_name>
     <x>332</x>
-    <y>288</y>
+    <y>298</y>
     <width>45</width>
     <height>15</height>
     <font>
@@ -161,7 +161,7 @@
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>617</x>
-    <y>215</y>
+    <y>225</y>
     <width>30</width>
     <height>30</height>
     <tooltip>$(pv_name)
@@ -173,7 +173,7 @@ $(actions)</tooltip>
     <name>FT18Value</name>
     <pv_name>$(P)FLOW:FT18</pv_name>
     <x>720</x>
-    <y>368</y>
+    <y>378</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -189,7 +189,7 @@ $(actions)</tooltip>
     <name>FT18Label</name>
     <text>L/min</text>
     <x>720</x>
-    <y>383</y>
+    <y>393</y>
     <width>40</width>
     <height>15</height>
   </widget>
@@ -197,7 +197,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1</name>
     <text>Pressure transmitter</text>
     <x>61</x>
-    <y>142</y>
+    <y>152</y>
     <width>119</width>
     <font>
       <font family="Malgun Gothic" style="REGULAR" size="12.0">
@@ -259,7 +259,7 @@ $(actions)</tooltip>
     <name>T5Value</name>
     <pv_name>$(P)TEMP:T5</pv_name>
     <x>40</x>
-    <y>100</y>
+    <y>110</y>
     <width>60</width>
     <font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
@@ -278,7 +278,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>676</x>
-    <y>286</y>
+    <y>296</y>
     <width>30</width>
     <height>30</height>
     <rotation>90.0</rotation>
@@ -294,7 +294,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>494</x>
-    <y>283</y>
+    <y>293</y>
     <width>30</width>
     <height>30</height>
     <rotation>90.0</rotation>
@@ -310,7 +310,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>431</x>
-    <y>283</y>
+    <y>293</y>
     <width>30</width>
     <height>30</height>
     <rotation>90.0</rotation>
@@ -326,7 +326,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>235</x>
-    <y>283</y>
+    <y>293</y>
     <width>30</width>
     <height>30</height>
     <rotation>90.0</rotation>
@@ -342,7 +342,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>162</x>
-    <y>283</y>
+    <y>293</y>
     <width>30</width>
     <height>30</height>
     <rotation>90.0</rotation>
@@ -358,7 +358,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>120</x>
-    <y>225</y>
+    <y>235</y>
     <width>30</width>
     <height>30</height>
     <tooltip>$(pv_name)
@@ -370,7 +370,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_2</name>
     <text>inlet Temperature</text>
     <x>61</x>
-    <y>70</y>
+    <y>80</y>
     <width>119</width>
     <font>
       <font family="Malgun Gothic" style="REGULAR" size="12.0">
@@ -381,7 +381,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_3</name>
     <text>outlet Temperature</text>
     <x>706</x>
-    <y>70</y>
+    <y>80</y>
     <width>119</width>
     <font>
       <font family="Malgun Gothic" style="REGULAR" size="12.0">
@@ -392,7 +392,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_5</name>
     <text>DCM LN2 supply valve</text>
     <x>61</x>
-    <y>265</y>
+    <y>275</y>
     <width>80</width>
     <height>40</height>
     <font>
@@ -406,7 +406,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_6</name>
     <text>Pressure transmitter</text>
     <x>265</x>
-    <y>405</y>
+    <y>415</y>
     <width>125</width>
     <height>15</height>
     <font>
@@ -418,7 +418,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_7</name>
     <text>Heater vessel pressure control valve</text>
     <x>480</x>
-    <y>162</y>
+    <y>172</y>
     <width>90</width>
     <height>48</height>
     <font>
@@ -430,7 +430,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_9</name>
     <text>DCM (closed loop) Pressure control valve</text>
     <x>580</x>
-    <y>162</y>
+    <y>172</y>
     <width>127</width>
     <height>42</height>
     <font>
@@ -442,7 +442,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_8</name>
     <text>Flow transmitter</text>
     <x>720</x>
-    <y>398</y>
+    <y>408</y>
     <width>125</width>
     <height>15</height>
     <font>
@@ -457,7 +457,7 @@ $(actions)</tooltip>
       <symbol>symbols/valve_close.svg</symbol>
     </symbols>
     <x>452</x>
-    <y>603</y>
+    <y>613</y>
     <width>30</width>
     <height>30</height>
     <tooltip>$(pv_name)
@@ -469,7 +469,7 @@ $(actions)</tooltip>
     <name>V17 Flow</name>
     <pv_name>$(P)FLOW:V17</pv_name>
     <x>611</x>
-    <y>196</y>
+    <y>206</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -486,7 +486,7 @@ $(actions)</tooltip>
     <name>FT18Value_2</name>
     <pv_name>$(P)PUMP:FREQ</pv_name>
     <x>338</x>
-    <y>510</y>
+    <y>520</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -503,8 +503,8 @@ $(actions)</tooltip>
     <x>881</x>
     <y>70</y>
     <width>499</width>
-    <height>263</height>
-    <title>Temperature</title>
+    <height>200</height>
+    <title>Temperature (T5, T6)</title>
     <title_font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
       </font>
@@ -524,7 +524,7 @@ $(actions)</tooltip>
         <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
         </font>
       </scale_font>
-      <visible>true</visible>
+      <visible>false</visible>
     </x_axis>
     <y_axes>
       <y_axis>
@@ -559,23 +559,6 @@ $(actions)</tooltip>
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="255" green="0" blue="0">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>4</point_size>
-        <visible>true</visible>
-      </trace>
-      <trace>
-        <name>T5</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:TEMP:T5</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
           <color red="0" green="0" blue="255">
           </color>
         </color>
@@ -593,7 +576,7 @@ $(actions)</tooltip>
         <axis>0</axis>
         <trace_type>1</trace_type>
         <color>
-          <color red="0" green="128" blue="0">
+          <color red="255" green="0" blue="0">
           </color>
         </color>
         <line_width>2</line_width>
@@ -607,10 +590,10 @@ $(actions)</tooltip>
   <widget type="xyplot" version="3.0.0">
     <name>PressureTrendChart</name>
     <x>881</x>
-    <y>350</y>
+    <y>270</y>
     <width>499</width>
-    <height>263</height>
-    <title>Pressure</title>
+    <height>200</height>
+    <title>Pressure (PT1, PT3)</title>
     <title_font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
       </font>
@@ -630,7 +613,7 @@ $(actions)</tooltip>
         <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
         </font>
       </scale_font>
-      <visible>true</visible>
+      <visible>false</visible>
     </x_axis>
     <y_axes>
       <y_axis>
@@ -693,10 +676,99 @@ $(actions)</tooltip>
       </trace>
     </traces>
   </widget>
+  <widget type="xyplot" version="3.0.0">
+    <name>FlowTrendChart</name>
+    <x>881</x>
+    <y>670</y>
+    <width>499</width>
+    <height>210</height>
+    <title>Flow &amp; Pump</title>
+    <title_font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </title_font>
+    <x_axis>
+      <title>Time (s)</title>
+      <autoscale>true</autoscale>
+      <log_scale>false</log_scale>
+      <minimum>0.0</minimum>
+      <maximum>300.0</maximum>
+      <show_grid>true</show_grid>
+      <title_font>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </title_font>
+      <scale_font>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </scale_font>
+      <visible>true</visible>
+    </x_axis>
+    <y_axes>
+      <y_axis>
+        <title>Flow (L/min) / Freq (Hz)</title>
+        <autoscale>true</autoscale>
+        <log_scale>false</log_scale>
+        <minimum>0.0</minimum>
+        <maximum>100.0</maximum>
+        <show_grid>true</show_grid>
+        <title_font>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
+        </title_font>
+        <scale_font>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
+        </scale_font>
+        <on_right>false</on_right>
+        <visible>true</visible>
+        <color>
+          <color name="Text" red="0" green="0" blue="0">
+          </color>
+        </color>
+      </y_axis>
+    </y_axes>
+    <traces>
+      <trace>
+        <name>FT18</name>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:FLOW:FT18</y_pv>
+        <err_pv></err_pv>
+        <axis>0</axis>
+        <trace_type>1</trace_type>
+        <color>
+          <color red="255" green="127" blue="0">
+          </color>
+        </color>
+        <line_width>2</line_width>
+        <line_style>0</line_style>
+        <point_type>0</point_type>
+        <point_size>10</point_size>
+        <visible>true</visible>
+      </trace>
+      <trace>
+        <name>Pump Hz</name>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:PUMP:FREQ</y_pv>
+        <err_pv></err_pv>
+        <axis>0</axis>
+        <trace_type>1</trace_type>
+        <color>
+          <color red="128" green="128" blue="0">
+          </color>
+        </color>
+        <line_width>2</line_width>
+        <line_style>0</line_style>
+        <point_type>0</point_type>
+        <point_size>10</point_size>
+        <visible>true</visible>
+      </trace>
+    </traces>
+  </widget>
   <widget type="group" version="3.0.0">
     <name>SystemStatus</name>
     <x>20</x>
-    <y>690</y>
+    <y>715</y>
     <width>243</width>
     <height>140</height>
     <style>3</style>
@@ -804,7 +876,7 @@ $(actions)</tooltip>
   <widget type="group" version="3.0.0">
     <name>ControlButtons</name>
     <x>275</x>
-    <y>690</y>
+    <y>715</y>
     <width>267</width>
     <height>140</height>
     <style>3</style>
@@ -831,6 +903,28 @@ $(actions)</tooltip>
       <horizontal_alignment>1</horizontal_alignment>
       <vertical_alignment>1</vertical_alignment>
       <tooltip>현재 메인 상태 표시</tooltip>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>StopButton_1</name>
+      <actions>
+        <action type="write_pv">
+          <description>시스템 OFF</description>
+          <pv_name>$(P)CMD:MAIN</pv_name>
+          <value>5</value>
+        </action>
+      </actions>
+      <text>OFF</text>
+      <x>186</x>
+      <y>51</y>
+      <width>70</width>
+      <rules>
+        <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
+          <exp bool_exp="pv0==1">
+            <expression></expression>
+          </exp>
+        </rule>
+      </rules>
+      <tooltip>안전 정지 시퀀스 실행</tooltip>
     </widget>
   </widget>
   <widget type="action_button" version="3.0.0">
@@ -859,7 +953,7 @@ $(actions)</tooltip>
   <widget type="group" version="3.0.0">
     <name>SystemStatus_1</name>
     <x>881</x>
-    <y>633</y>
+    <y>920</y>
     <width>379</width>
     <height>180</height>
     <style>3</style>
@@ -932,7 +1026,7 @@ $(actions)</tooltip>
     <name>V10 Flow</name>
     <pv_name>$(P)FLOW:V10</pv_name>
     <x>448</x>
-    <y>560</y>
+    <y>570</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -949,7 +1043,7 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V17:CMD</pv_name>
     <label></label>
     <x>614</x>
-    <y>258</y>
+    <y>268</y>
     <width>30</width>
   </widget>
   <widget type="slide_button" version="2.0.0">
@@ -957,7 +1051,7 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V20:CMD</pv_name>
     <label></label>
     <x>512</x>
-    <y>303</y>
+    <y>313</y>
     <width>30</width>
   </widget>
   <widget type="slide_button" version="2.0.0">
@@ -965,7 +1059,7 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
     <label></label>
     <x>450</x>
-    <y>303</y>
+    <y>313</y>
     <width>30</width>
   </widget>
   <widget type="slide_button" version="2.0.0">
@@ -973,7 +1067,7 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V11:CMD</pv_name>
     <label></label>
     <x>692</x>
-    <y>303</y>
+    <y>313</y>
     <width>30</width>
   </widget>
   <widget type="slide_button" version="2.0.0">
@@ -981,7 +1075,7 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
     <label></label>
     <x>253</x>
-    <y>303</y>
+    <y>313</y>
     <width>30</width>
   </widget>
   <widget type="slide_button" version="2.0.0">
@@ -989,7 +1083,7 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V9:CMD</pv_name>
     <label></label>
     <x>135</x>
-    <y>305</y>
+    <y>315</y>
     <width>30</width>
   </widget>
   <widget type="slide_button" version="2.0.0">
@@ -997,14 +1091,14 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V10:CMD</pv_name>
     <label></label>
     <x>482</x>
-    <y>577</y>
+    <y>587</y>
     <width>30</width>
   </widget>
   <widget type="label" version="2.0.0">
     <name>PressureTransmitterLabel1_15</name>
     <text>Filling Level</text>
     <x>45</x>
-    <y>335</y>
+    <y>345</y>
     <width>71</width>
     <height>15</height>
     <font>
@@ -1016,7 +1110,7 @@ $(actions)</tooltip>
     <name>PressureTransmitterLabel1_16</name>
     <text>Bypass Valve</text>
     <x>433</x>
-    <y>540</y>
+    <y>550</y>
     <width>71</width>
     <height>15</height>
     <font>
@@ -1027,7 +1121,7 @@ $(actions)</tooltip>
   <widget type="group" version="3.0.0">
     <name>Group</name>
     <x>765</x>
-    <y>127</y>
+    <y>137</y>
     <width>90</width>
     <height>48</height>
     <style>3</style>
@@ -1058,7 +1152,7 @@ $(actions)</tooltip>
   <widget type="group" version="3.0.0">
     <name>Group_1</name>
     <x>313</x>
-    <y>306</y>
+    <y>316</y>
     <width>90</width>
     <height>48</height>
     <style>3</style>
@@ -1089,7 +1183,7 @@ $(actions)</tooltip>
   <widget type="group" version="3.0.0">
     <name>Group_2</name>
     <x>35</x>
-    <y>355</y>
+    <y>365</y>
     <width>90</width>
     <height>48</height>
     <style>3</style>
@@ -1119,9 +1213,9 @@ $(actions)</tooltip>
   </widget>
   <widget type="tank" version="2.0.0">
     <name>Tank</name>
-    <pv_name>BL:DCM:CRYO:PRESS:PT3</pv_name>
+    <pv_name>$(P)LEVEL:LT23</pv_name>
     <x>392</x>
-    <y>315</y>
+    <y>325</y>
     <width>9</width>
     <height>155</height>
     <scale_visible>false</scale_visible>
@@ -1131,7 +1225,7 @@ $(actions)</tooltip>
     <name>Tank_1</name>
     <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
     <x>126</x>
-    <y>445</y>
+    <y>455</y>
     <width>10</width>
     <height>185</height>
     <scale_visible>false</scale_visible>
@@ -1142,14 +1236,14 @@ $(actions)</tooltip>
     <pv_name>BL:DCM:CRYO:VALVE:V21:CMD</pv_name>
     <label></label>
     <x>72</x>
-    <y>205</y>
+    <y>215</y>
     <width>30</width>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>T5Value_1</name>
     <pv_name>$(P)TEMP:SUBCOOLER</pv_name>
     <x>220</x>
-    <y>506</y>
+    <y>516</y>
     <width>60</width>
     <font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
@@ -1165,7 +1259,7 @@ $(actions)</tooltip>
     <name>LT19Value_1</name>
     <pv_name>$(P)DCM:POWER</pv_name>
     <x>424</x>
-    <y>142</y>
+    <y>152</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -1178,11 +1272,19 @@ $(actions)</tooltip>
     <vertical_alignment>1</vertical_alignment>
     <border_width>1</border_width>
   </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>DCMPowerEntry</name>
+    <pv_name>$(P)DCM:POWER</pv_name>
+    <x>480</x>
+    <y>148</y>
+    <width>80</width>
+    <tooltip>Set DCM heat load (W)</tooltip>
+  </widget>
   <widget type="label" version="2.0.0">
     <name>PressureTransmitterLabel1_23</name>
     <text>Power(W)</text>
     <x>366</x>
-    <y>142</y>
+    <y>152</y>
     <width>78</width>
     <height>15</height>
     <font>
@@ -1193,7 +1295,7 @@ $(actions)</tooltip>
   <widget type="group" version="3.0.0">
     <name>ControlButtons_1</name>
     <x>560</x>
-    <y>690</y>
+    <y>715</y>
     <width>286</width>
     <height>140</height>
     <style>3</style>
@@ -1221,12 +1323,43 @@ $(actions)</tooltip>
       <vertical_alignment>1</vertical_alignment>
       <tooltip>현재 메인 상태 표시</tooltip>
     </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>RefillButton_1</name>
+      <actions>
+        <action type="write_pv">
+          <description>Refill On : SubCooler</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>7</value>
+        </action>
+        <action type="write_pv">
+          <description>Refill Off : SubCooler</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>8</value>
+        </action>
+      </actions>
+      <text>Refill-SC</text>
+      <x>196</x>
+      <y>91</y>
+      <width>80</width>
+      <background_color>
+        <color red="200" green="255" blue="200">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="EnableWhenSafe" prop_id="enabled" out_exp="false">
+          <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
+          <pv_name>BL:DCM:CRYO:SAFETY:INTERLOCK</pv_name>
+          <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+        </rule>
+      </rules>
+      <tooltip>$(actions)</tooltip>
+    </widget>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>V10 Flow_1</name>
     <pv_name>$(P)TEMP:VENTHT</pv_name>
     <x>781</x>
-    <y>590</y>
+    <y>600</y>
     <width>50</width>
     <height>15</height>
     <font>
@@ -1249,7 +1382,7 @@ $(actions)</tooltip>
     </actions>
     <text>HOLD</text>
     <x>283</x>
-    <y>781</y>
+    <y>806</y>
     <width>70</width>
     <rules>
       <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
@@ -1260,30 +1393,11 @@ $(actions)</tooltip>
     </rules>
     <tooltip>현재 상태 유지(홀드)</tooltip>
   </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>EmergencyButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>비상 정지</description>
-        <pv_name>$(P)CMD:MAIN</pv_name>
-        <value>5</value>
-      </action>
-    </actions>
-    <text>E-STOP</text>
-    <x>461</x>
-    <y>741</y>
-    <width>70</width>
-    <background_color>
-      <color red="200" green="77" blue="0">
-      </color>
-    </background_color>
-    <tooltip>즉시 비상 정지</tooltip>
-  </widget>
   <widget type="label" version="2.0.0">
     <name>ControlTitle</name>
     <text>System Control</text>
     <x>283</x>
-    <y>701</y>
+    <y>726</y>
     <width>170</width>
     <height>25</height>
     <font>
@@ -1303,7 +1417,7 @@ $(actions)</tooltip>
     </actions>
     <text>RESUME</text>
     <x>375</x>
-    <y>781</y>
+    <y>806</y>
     <width>70</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1325,7 +1439,7 @@ $(actions)</tooltip>
     </actions>
     <text>RESET</text>
     <x>461</x>
-    <y>781</y>
+    <y>806</y>
     <width>70</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1347,7 +1461,7 @@ $(actions)</tooltip>
     </actions>
     <text>START</text>
     <x>283</x>
-    <y>741</y>
+    <y>766</y>
     <width>70</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1369,7 +1483,7 @@ $(actions)</tooltip>
     </actions>
     <text>STOP</text>
     <x>375</x>
-    <y>741</y>
+    <y>766</y>
     <width>70</width>
     <rules>
       <rule name="EnableWhenRunning" prop_id="enabled" out_exp="true">
@@ -1391,7 +1505,7 @@ $(actions)</tooltip>
     </actions>
     <text>Cool-Down</text>
     <x>570</x>
-    <y>781</y>
+    <y>806</y>
     <width>80</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1406,24 +1520,19 @@ $(actions)</tooltip>
     <name>RefillButton</name>
     <actions>
       <action type="write_pv">
-        <description>Start Circulation Pump</description>
+        <description>Refill On : Heater</description>
         <pv_name>$(P)CMD:MODE</pv_name>
         <value>5</value>
       </action>
       <action type="write_pv">
-        <description>Open LN2 Supply Valve V15</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
-        <value>1</value>
-      </action>
-      <action type="write_pv">
-        <description>Open LN2 Tank Valve V19</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
-        <value>1</value>
+        <description>Refill Off : Heater</description>
+        <pv_name>$(P)CMD:MODE</pv_name>
+        <value>6</value>
       </action>
     </actions>
-    <text>Refill</text>
+    <text>Refill-HV</text>
     <x>756</x>
-    <y>741</y>
+    <y>766</y>
     <width>80</width>
     <background_color>
       <color red="200" green="255" blue="200">
@@ -1438,42 +1547,11 @@ $(actions)</tooltip>
     </rules>
     <tooltip>$(actions)</tooltip>
   </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>RefillCloseButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>Stop Circulation Pump</description>
-        <pv_name>$(P)CMD:MODE</pv_name>
-        <value>6</value>
-      </action>
-      <action type="write_pv">
-        <description>Close LN2 Supply Valve V15</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V15:CMD</pv_name>
-        <value>0</value>
-      </action>
-      <action type="write_pv">
-        <description>Close LN2 Tank Valve V19</description>
-        <pv_name>BL:DCM:CRYO:VALVE:V19:CMD</pv_name>
-        <value>0</value>
-      </action>
-    </actions>
-    <text>Refill
-Close</text>
-    <x>756</x>
-    <y>771</y>
-    <width>80</width>
-    <height>40</height>
-    <background_color>
-      <color red="220" green="220" blue="220">
-      </color>
-    </background_color>
-    <tooltip>$(actions)</tooltip>
-  </widget>
   <widget type="label" version="2.0.0">
     <name>ControlTitle_2</name>
     <text>Select Mode</text>
     <x>570</x>
-    <y>701</y>
+    <y>726</y>
     <width>160</width>
     <height>25</height>
     <font>
@@ -1493,7 +1571,7 @@ Close</text>
     </actions>
     <text>PURGE</text>
     <x>570</x>
-    <y>741</y>
+    <y>766</y>
     <width>80</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1515,7 +1593,7 @@ Close</text>
     </actions>
     <text>READY</text>
     <x>662</x>
-    <y>741</y>
+    <y>766</y>
     <width>80</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1537,7 +1615,7 @@ Close</text>
     </actions>
     <text>Warm-up</text>
     <x>662</x>
-    <y>781</y>
+    <y>806</y>
     <width>80</width>
     <rules>
       <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
@@ -1547,5 +1625,94 @@ Close</text>
       </rule>
     </rules>
     <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+  </widget>
+  <widget type="xyplot" version="3.0.0">
+    <name>FlowTrendChart_1</name>
+    <x>881</x>
+    <y>470</y>
+    <width>499</width>
+    <height>200</height>
+    <title>Flow (V10, V17)</title>
+    <title_font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </title_font>
+    <x_axis>
+      <title>Time (s)</title>
+      <autoscale>true</autoscale>
+      <log_scale>false</log_scale>
+      <minimum>0.0</minimum>
+      <maximum>300.0</maximum>
+      <show_grid>true</show_grid>
+      <title_font>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </title_font>
+      <scale_font>
+        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+        </font>
+      </scale_font>
+      <visible>false</visible>
+    </x_axis>
+    <y_axes>
+      <y_axis>
+        <title>Valve open (%)</title>
+        <autoscale>true</autoscale>
+        <log_scale>false</log_scale>
+        <minimum>0.0</minimum>
+        <maximum>100.0</maximum>
+        <show_grid>true</show_grid>
+        <title_font>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
+        </title_font>
+        <scale_font>
+          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+          </font>
+        </scale_font>
+        <on_right>false</on_right>
+        <visible>true</visible>
+        <color>
+          <color name="Text" red="0" green="0" blue="0">
+          </color>
+        </color>
+      </y_axis>
+    </y_axes>
+    <traces>
+      <trace>
+        <name>Flow V10</name>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:FLOW:V10</y_pv>
+        <err_pv></err_pv>
+        <axis>0</axis>
+        <trace_type>1</trace_type>
+        <color>
+          <color red="0" green="0" blue="255">
+          </color>
+        </color>
+        <line_width>2</line_width>
+        <line_style>0</line_style>
+        <point_type>0</point_type>
+        <point_size>10</point_size>
+        <visible>true</visible>
+      </trace>
+      <trace>
+        <name>Flow V17</name>
+        <x_pv>$(P)HIST:TIME</x_pv>
+        <y_pv>$(P)HIST:FLOW:V17</y_pv>
+        <err_pv></err_pv>
+        <axis>0</axis>
+        <trace_type>1</trace_type>
+        <color>
+          <color red="0" green="128" blue="0">
+          </color>
+        </color>
+        <line_width>2</line_width>
+        <line_style>0</line_style>
+        <point_type>0</point_type>
+        <point_size>10</point_size>
+        <visible>true</visible>
+      </trace>
+    </traces>
   </widget>
 </display>
