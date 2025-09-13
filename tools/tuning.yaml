@@ -22,8 +22,8 @@
 
 config:
   # Level dynamics (optional tuning)
-  lt19_fill_lps: 1.2              # [L/s] Subcooler fill flow when V19 OPEN
-  lt23_refill_rate_pctps: 1.2     # [%/s] HV refill rate when V15 OPEN
+  lt19_fill_lps: 1.5              # [L/s] Subcooler fill flow when V19 OPEN
+  lt23_refill_rate_pctps: 1.5     # [%/s] HV refill rate when V15 OPEN
   lt23_drain_rate_pctps: 0.0167   # [%/s] HV drain rate proportional to V17
 
   # HV tank (LT23) consumption sensitivity (percentage per second)
@@ -31,7 +31,7 @@ config:
   # - lt23_power_cons_pctps_perW: 전력 1 W당 추가 소비율 [%/(s·W)]
   # - lt23_heater_cons_pctps_max: 압력제어(히터) 최대동작 시 추가 소비율 상한 [%/s]
   # - lt23_vent_gamma_pctps: HV 벤트(V20) 개방 시 추가 소비율 계수(개도 비율에 비례) [%/s]
-  lt23_base_cons_pctps: 0.1
+  lt23_base_cons_pctps: 0.01
   lt23_power_cons_pctps_perW: 0.001
   lt23_heater_cons_pctps_max: 0.3
 

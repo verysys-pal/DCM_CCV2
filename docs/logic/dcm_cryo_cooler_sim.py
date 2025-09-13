@@ -143,7 +143,7 @@ class CryoCoolerSim:
                     self._pulse_state = not self._pulse_state
                     self._pulse_timer = 0.0
                 u.V20 = 1.0 if self._pulse_state else 0.0
-                if s.LT23 >= 90.0:
+                if s.LT23 >= 85.0:
                     u.V15 = False; u.V20 = 0.0
                     self.stage += 1; self.stage_timer = 0.0
             elif self.stage == 2:
@@ -152,7 +152,7 @@ class CryoCoolerSim:
                     self.stage += 1; self.stage_timer = 0.0
             elif self.stage == 3:
                 u.V17 = 0.35; u.V11 = True
-                if s.T6 < 90.0:
+                if s.T6 < 85.0:
                     self.stage += 1; self.stage_timer = 0.0
             elif self.stage == 4:
                 u.V17 = 0.0
@@ -174,11 +174,7 @@ class CryoCoolerSim:
                     if s.LT23 >= 45.0:
                         u.V15 = False; u.V20 = 0.0; u.press_ctrl_on = True
                 else:
-                    u.V17 = 0.0
-                    if self._is_ready():
-                        self.state.mode = 'READY'
-                        self.auto = AutoKind.NONE
-                        self.stage = 0; self.stage_timer = 0.0
+                    u.V17 = 0.0                    
         elif self.auto == AutoKind.WARM_UP:
             if self.stage == 0:
                 u.V9 = False; u.V11 = False; u.V10 = 1.0

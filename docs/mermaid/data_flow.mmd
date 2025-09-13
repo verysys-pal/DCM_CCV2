@@ -1,28 +1,22 @@
-%%{init: {"theme":"base","themeVariables":{
-"background":"#ffffff",
-"primaryTextColor":"#111111"
-}}}%%
-
-
-%% High-level data flow (IOC ↔ Bridge ↔ Simulator ↔ GUI)
+%%{init: {"theme":"base","themeVariables":{"background":"#ffffff","primaryTextColor":"#111111"}}}%%
 flowchart LR
-  %% IOC and DB
+  %% IOC 및 DB
   subgraph IOC[EPICS IOC]
     STCMD[iocBoot/iocDCM_CCV2/st.cmd]
-    DB[(db/dcm_cryo.db)]
-    HIST["BL:DCM:CRYO:HIST:*(waveforms)"]
+    DB["Record DB<br/>(db/dcm_cryo.db)"]
+    HIST["History waveforms<br/>BL:DCM:CRYO:HIST:*(waveforms)"]
   end
 
-  %% Bridge and optional logics
+  %% 브리지와 선택 로직
   subgraph Bridge[PV Bridge]
     BRIDGE[pv_bridge.py]
     OPER["sim.logic.operating (optional)"]
     ILK["sim.logic.interlock (optional)"]
   end
 
-  %% Simulator core
+  %% 시뮬레이터 코어
   subgraph Sim[Simulator]
-    MODEL[sim.core.model.CryoPlant]
+    MODEL["sim.core.CryoCoolerSim"]
   end
 
   %% GUI
@@ -30,33 +24,35 @@ flowchart LR
     BOB[gui/bob/main.bob]
   end
 
-  %% Config files
+  %% 설정 파일
   subgraph CFG[Configs]
-    INIT[tools/pv_init.yaml]
-    OPERCFG[tools/operating.yaml]
-    ILKCFG[tools/interlock.yaml]
+    INIT["PV init/seeds<br/>tools/pv_init.yaml"]
+    TUNE["Tuning overlay (optional)<br/>tools/tuning.yaml"]
+    OPERCFG["Operating params<br/>tools/operating.yaml"]
+    ILKCFG["Interlock thresholds<br/>tools/interlock.yaml"]
   end
 
-  %% Boot / load records
+  %% 부팅/레코드 로드
   STCMD --> DB
 
-  %% Config → Bridge
-  INIT -->|config + PV seeds| BRIDGE
-  OPERCFG -->|params| BRIDGE
-  ILKCFG -->|thresholds| BRIDGE
+  %% 설정 → 브리지/로직
+  INIT -->|"config + PV seeds"| BRIDGE
+  TUNE -->|"overlay merge &#40;config/pvs&#41;"| BRIDGE
+  OPERCFG -.->|"load params"| OPER
+  ILKCFG -.->|"load thresholds"| ILK
 
-  %% IOC ↔ Bridge (directions annotated)
-  DB -->|"commands, setpoints, inputs \n(e.g., SUBCOOLER.TEMP, FT18)"| BRIDGE
+  %% IOC ↔ 브리지
+  DB -->|"commands, setpoints, inputs<br/>(e.g., SUBCOOLER.TEMP, FT18, PT3:SP, DCM:POWER)"| BRIDGE
   BRIDGE -->|"temperatures, pressures, flows, status/state, alarms"| DB
   BRIDGE -->|"history arrays"| HIST
 
-  %% Bridge ↔ Simulator
-  BRIDGE <--> MODEL
+  %% 브리지 ↔ 시뮬레이터
+  BRIDGE <-->|"simulation step/state exchange"| MODEL
 
-  %% Optional external logics used by Bridge
-  BRIDGE -.->|state transition| OPER
-  BRIDGE -.->|severity/safety| ILK
+  %% 브리지에서 사용하는 선택 로직
+  BRIDGE -.->|"state transitions"| OPER
+  BRIDGE -.->|"severity/safety"| ILK
 
   %% GUI ↔ IOC
-  BOB <--> DB
-  BOB ---- HIST
+  BOB <-->|"monitor/control"| DB
+  BOB ----|"trend view"| HIST

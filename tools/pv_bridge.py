@@ -204,6 +204,9 @@ class PVBridge:
         self._rev_state = {v: k for k, v in STATE.items()}
         self.log_interval = float(log_interval or 0.0)
         self._log_elapsed = 0.0
+        # Event tracing helpers (AUTO/Stage changes)
+        self._last_auto_name: str | None = None
+        self._last_stage: int | None = None
         # Live-tuning PV registry (connected ones only)
         self._tune_pvs: dict[str, PV] = {}
 
@@ -350,6 +353,33 @@ class PVBridge:
     def _read(self, pv: PV, default: float) -> float:
         v = pv.get(timeout=0.2)
         return float(v) if v is not None else float(default)
+
+    def _read_bool(self, pv: PV, default: bool = False) -> bool:
+        """Robust boolean read from bo/bi PVs.
+
+        Accepts numeric 0/1, numpy scalars, or enum strings like 'OPEN'/'CLOSE', 'ON'/'OFF'.
+        """
+        try:
+            v = pv.get(timeout=0.2)
+        except Exception:
+            return bool(default)
+        if v is None:
+            return bool(default)
+        # Numeric-like
+        try:
+            return int(v) != 0  # handles numpy scalars too
+        except Exception:
+            pass
+        # String-like
+        try:
+            s = str(v).strip().upper()
+            if s in ("", "0", "OFF", "CLOSE", "FALSE", "NO"):
+                return False
+            if s in ("1", "ON", "OPEN", "TRUE", "YES"):
+                return True
+        except Exception:
+            pass
+        return bool(default)
 
     def _write_int(self, pv: PV, val: int) -> None:
         pv.put(int(val), wait=False)
@@ -565,6 +595,28 @@ class PVBridge:
             self._write_int(self.pv_comp_run, comp_on)
             self.pv_comp_status.put("RUNNING" if comp_on else "OFF", wait=False)
 
+            # One-shot event logs when AUTO or STAGE changes
+            try:
+                cur_auto_name = getattr(self.sim, 'auto', None).name if getattr(self, 'sim', None) is not None else 'NA'
+                cur_stage = int(getattr(self.sim, 'stage', -1))
+                if (cur_auto_name != self._last_auto_name) or (cur_stage != self._last_stage):
+                    self._last_auto_name = cur_auto_name
+                    self._last_stage = cur_stage
+                    if self.verbose:
+                        #ts2 = datetime.now().strftime('%H:%M:%S.%f')[:-3]
+                        ts2 = datetime.now().strftime('%H:%M')
+                        print(
+                            "[event]",
+                            ts2,
+                            f"AUTO={cur_auto_name}",
+                            f"STAGE={cur_stage}",
+                            #f"T6={self.sim.state.T6:.1f}K",
+                            #f"PT1={self.sim.state.PT1:.2f}bar",
+                            #f"PT3={self.sim.state.PT3:.2f}bar",
+                        )
+            except Exception:
+                pass
+
             # Mirror valve statuses from commands
             self._mirror_status_from_sim()
             self._write_float(self.pv_v17_pos, v17_pos)
@@ -601,7 +653,7 @@ class PVBridge:
                 if self._log_elapsed >= self.log_interval:
                     self._log_elapsed = 0.0
                     try:
-                        ts = datetime.now().strftime('%H:%M:%S.%f')[:-3]
+                        ts = datetime.now().strftime('%H:%M')
                     except Exception:
                         ts = f"t={self.pv_time.get() or 0.0:.1f}s"
                     try:
@@ -612,6 +664,11 @@ class PVBridge:
                             f"MODE={int(mode_val)}",
                             f"effMODE={int(eff_mode_val)}",
                             f"STATE={self._state_name()}",
+                            f"AUTO={getattr(self.sim, 'auto', None).name if getattr(self, 'sim', None) is not None else 'NA'}",
+                            f"STAGE={int(getattr(self.sim, 'stage', -1))}",
+                            #f"V10={'OPEN' if (self.sim.controls.V10 > 0.5) else 'CLOSE'}",
+                            #f"V17={'OPEN' if (self.sim.controls.V17 > 0.5) else 'CLOSE'}",
+                            #f"V20={'OPEN' if (self.sim.controls.V20 > 0.5) else 'CLOSE'}",
                             #f"V15={'OPEN' if self.sim.controls.V15 else 'CLOSE'}",
                             #f"V19={'OPEN' if self.sim.controls.V19 else 'CLOSE'}",
                             #f"LT23={self.sim.state.LT23:.1f}%",
@@ -742,16 +799,16 @@ class PVBridge:
         if (self.sim.auto.name != 'NONE'):
             return
         try:
-            self.sim.controls.V9 = bool(int(self.pv_v9_cmd.get() or 0))
-            self.sim.controls.V11 = bool(int(self.pv_v11_cmd.get() or 0))
-            self.sim.controls.V15 = bool(int(self.pv_v15_cmd.get() or 0))
-            self.sim.controls.V19 = bool(int(self.pv_v19_cmd.get() or 0))
-            self.sim.controls.V20 = 1.0 if int(self.pv_v20_cmd.get() or 0) else 0.0
-            self.sim.controls.V17 = 1.0 if int(self.pv_v17_cmd.get() or 0) else 0.0
-            self.sim.controls.V10 = 1.0 if int(self.pv_v10_cmd.get() or 0) else 0.0
-            self.sim.controls.V21 = bool(int(self.pv_v21_cmd.get() or 0))
-            self.sim.controls.pump_hz = 60.0 if int(self.pv_pump_cmd.get() or 0) else 0.0
-            self.sim.controls.press_ctrl_on = bool(int(self.pv_heat_cmd.get() or 0))
+            self.sim.controls.V9 = self._read_bool(self.pv_v9_cmd, False)
+            self.sim.controls.V11 = self._read_bool(self.pv_v11_cmd, False)
+            self.sim.controls.V15 = self._read_bool(self.pv_v15_cmd, False)
+            self.sim.controls.V19 = self._read_bool(self.pv_v19_cmd, False)
+            self.sim.controls.V20 = 1.0 if self._read_bool(self.pv_v20_cmd, False) else 0.0
+            self.sim.controls.V17 = 1.0 if self._read_bool(self.pv_v17_cmd, False) else 0.0
+            self.sim.controls.V10 = 1.0 if self._read_bool(self.pv_v10_cmd, False) else 0.0
+            self.sim.controls.V21 = self._read_bool(self.pv_v21_cmd, False)
+            self.sim.controls.pump_hz = 60.0 if self._read_bool(self.pv_pump_cmd, False) else 0.0
+            self.sim.controls.press_ctrl_on = self._read_bool(self.pv_heat_cmd, False)
         except Exception:
             pass
 

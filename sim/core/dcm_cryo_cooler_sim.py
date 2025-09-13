@@ -188,6 +188,26 @@ class CryoCoolerSim:
             Stage 4: V17=0.0, T6 < 82 K 도달 시 다음
             Stage 5: 압력 제어 on(press_ctrl_on=True), PT3를 SP(기본 2.0 bar)로 맞추고 READY로 수렴
             """
+            # Overlay: Ensure HV auto-refill whenever LT23 is low during COOL_DOWN
+            # - Independent of stage, if LT23 < 25%, open V15 and pulse V20 to refill
+            # - Stop refilling once LT23 >= 45%
+            # - Pressure control is only enabled from stage>=5; keep it off while refilling
+            if self.state.LT23 < 25.0:
+                self.controls.V15 = True
+                # Disable pressure control while refilling at low LT23
+                if self.stage >= 5:
+                    self.controls.press_ctrl_on = False
+                self._pulse_timer += dt
+                if self._pulse_timer >= 1.0:
+                    self._pulse_state = not self._pulse_state
+                    self._pulse_timer = 0.0
+                self.controls.V20 = 1.0 if self._pulse_state else 0.0
+            elif self.controls.V15 and self.state.LT23 >= 45.0:
+                # Finish refill overlay
+                self.controls.V15 = False
+                self.controls.V20 = 0.0
+                if self.stage >= 5:
+                    self.controls.press_ctrl_on = True
             if self.stage == 0:
                 u.V10 = 0.6
                 u.pump_hz = max(u.pump_hz, 30.0)
@@ -376,12 +396,17 @@ class CryoCoolerSim:
         hv_cons_pctps += float(self.hv_vent_gamma_pctps) * float(self.clamp(u.V20, 0.0, 1.0))
         if hv_cons_pctps > 0.0:
             s.LT23 = self.clamp(s.LT23 - hv_cons_pctps * dt, 0.0, 100.0)
-        # 자동 시퀀스 진행 중에만 LT19 자동 보충 히스테리시스 적용
-        if (self.auto != AutoKind.NONE) and (not getattr(self, 'paused', False)):
-            if s.LT19 < 80.0:
-                u.V19 = True
-            if s.LT19 > 90.0:
+        # LT19 자동 보충 히스테리시스
+        # - 자동 시퀀스 중이면 유지. HOLD(paused) 상태에서도 안전을 위해 high 임계 초과 시 닫기 동작은 허용한다.
+        # - low 임계(재개방)는 일시정지 중에는 수행하지 않는다.
+        if self.auto != AutoKind.NONE:
+            # Close-on-high always (>= 90) even when paused
+            if s.LT19 >= 90.0:
                 u.V19 = False
+            # Open-on-low (< 80) only when not paused
+            if not getattr(self, 'paused', False):
+                if s.LT19 < 80.0:
+                    u.V19 = True
         if s.LT23 < 5.0:
             self.stop()
 
