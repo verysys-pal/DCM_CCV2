@@ -45,6 +45,7 @@ class OperState(IntEnum):
     WARMUP = 5
     SAFE_SHUTDOWN = 6
     ALARM = 7
+    READY = 8
 
 
 def mode_to_auto(mode: int | ModeCmd) -> AutoKind | None:

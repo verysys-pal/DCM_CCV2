@@ -9,11 +9,18 @@ record(mbbi, "BL:DCM:CRYO:STATE:MAIN") {
     field(FVST, "WARMUP")
     field(SXST, "SAFE_SHUTDOWN")
     field(SVST, "ALARM")
+    field(EIST, "READY")
     alias("BL:DCM:CRYO:STATE:CURRENT")
 }
 
 record(stringin, "BL:DCM:CRYO:STATE:TEXT") {
     field(VAL, "OFF")
+}
+
+# READY boolean for GUI LED convenience
+record(bi, "BL:DCM:CRYO:READY") {
+    field(ZNAM, "NOT_READY")
+    field(ONAM, "READY")
 }
 
 record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {

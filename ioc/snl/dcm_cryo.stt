@@ -38,6 +38,7 @@ ss mirror_state {
                 case 5: strcpy(state_txt, "WARMUP"); break;
                 case 6: strcpy(state_txt, "SAFE_SHUTDOWN"); break;
                 case 7: strcpy(state_txt, "ALARM"); break;
+                case 8: strcpy(state_txt, "READY"); break;
                 default: strcpy(state_txt, "UNKNOWN"); break;
             }
             pvPut(state_txt);

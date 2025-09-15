@@ -823,6 +823,29 @@ $(actions)</tooltip>
       </on_color>
       <tooltip>알람 활성화 상태</tooltip>
     </widget>
+    <widget type="led" version="2.0.0">
+      <name>ReadyLED</name>
+      <pv_name>$(P)READY</pv_name>
+      <x>10</x>
+      <y>132</y>
+      <off_color>
+        <color red="128" green="128" blue="128">
+        </color>
+      </off_color>
+      <on_color>
+        <color red="0" green="200" blue="0">
+        </color>
+      </on_color>
+      <tooltip>READY 조건 만족 시 녹색 점등</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ReadyLabel</name>
+      <text>READY</text>
+      <x>40</x>
+      <y>138</y>
+      <width>60</width>
+      <vertical_alignment>1</vertical_alignment>
+    </widget>
     <widget type="label" version="2.0.0">
       <name>AlarmLabel</name>
       <text>Alarm</text>

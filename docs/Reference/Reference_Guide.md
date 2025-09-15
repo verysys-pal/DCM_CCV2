@@ -69,7 +69,7 @@
 
 | PV | 타입 | 단위 | 설명 |
 |---|---|---|---|
-| `BL:DCM:CRYO:STATE:MAIN` | `mbbi` | - | 0=OFF,1=INIT,2=PRECOOL,3=RUN,4=HOLD,5=WARMUP,6=SAFE_SHUTDOWN,7=ALARM |
+| `BL:DCM:CRYO:STATE:MAIN` | `mbbi` | - | 0=OFF,1=INIT,2=PRECOOL,3=RUN,4=HOLD,5=WARMUP,6=SAFE_SHUTDOWN,7=ALARM,8=READY |
 | `BL:DCM:CRYO:CMD:MAIN` | `mbbo` | - | 0=NONE,1=START,2=STOP,3=HOLD,4=RESUME,5=OFF,6=RESET |
 | `BL:DCM:CRYO:EQUIP:COMPRESSOR` | `bo` | - | 압축기 On/Off 명령 |
 | `BL:DCM:CRYO:VALVE:V9:CMD` | `bo` | - | 퍼지 밸브 (alias: `...:PURGE:CMD`) |

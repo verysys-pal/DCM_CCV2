@@ -115,6 +115,7 @@ PV_V17_POS = "BL:DCM:CRYO:VALVE:V17"
 PV_FLOW_V17 = "BL:DCM:CRYO:FLOW:V17"
 PV_FLOW_V10 = "BL:DCM:CRYO:FLOW:V10"
 PV_DCM_POWER = "BL:DCM:CRYO:DCM:POWER"
+PV_READY = "BL:DCM:CRYO:READY"
 
 # Optional live-tuning PVs (existence optional in IOC DB)
 PV_TUNE_LT19_FILL_LPS = "BL:DCM:CRYO:TUNE:LT19:FILL_LPS"
@@ -230,6 +231,7 @@ class PVBridge:
         self.pv_lt23 = PV(PV_LT23, auto_monitor=True)
         self.pv_alarm_max = PV(PV_ALARM_MAX, auto_monitor=False)
         self.pv_safety_ilk = PV(PV_SAFETY_ILK, auto_monitor=False)
+        self.pv_ready = PV(PV_READY, auto_monitor=False)
         # Additional process PVs for plotting
         self.pv_pt1 = PV(PV_PT1, auto_monitor=False)
         self.pv_pt3 = PV(PV_PT3, auto_monitor=False)
@@ -309,6 +311,7 @@ class PVBridge:
             (PV_LT23, self.pv_lt23),
             (PV_ALARM_MAX, self.pv_alarm_max),
             (PV_SAFETY_ILK, self.pv_safety_ilk),
+            (PV_READY, self.pv_ready),
             (PV_PT3_SP, self.pv_pt3_sp),
             (PV_HIST_TIME, self.pv_hist_time),
             (PV_HIST_T5, self.pv_hist_t5),
@@ -578,6 +581,12 @@ class PVBridge:
                         tamb=getattr(self.sim, 'ambK', 280.0),
                         dt=self.dt,
                     )
+                    # READY override: 시퀀서/시뮬레이터가 READY이면 GUI 상태를 READY로 표시
+                    try:
+                        if bool(getattr(self.sim.state, 'ready', False)):
+                            new_state = OperState.READY.value
+                    except Exception:
+                        pass
                     if int(new_state) != int(self.state):
                         self.state = int(new_state)
                         self._write_int(self.pv_state, self.state)
@@ -611,6 +620,12 @@ class PVBridge:
                             #f"PT1={self.sim.state.PT1:.2f}bar",
                             #f"PT3={self.sim.state.PT3:.2f}bar",
                         )
+            except Exception:
+                pass
+
+            # Publish READY boolean for GUI LED
+            try:
+                self._write_int(self.pv_ready, 1 if bool(getattr(self.sim.state, 'ready', False)) else 0)
             except Exception:
                 pass
 

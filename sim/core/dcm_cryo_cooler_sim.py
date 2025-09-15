@@ -104,42 +104,7 @@ class CryoCoolerSim:
         return self.clamp(self.state.LT19 / 40.0, 0.0, 1.0)
 
 
-    def stop(self):
-        u = self.controls
-        # 기본 상태로 복귀: 모든 밸브 CLOSE, 단 V10=100% OPEN
-        u.V9 = False
-        u.V11 = False
-        u.V15 = False
-        u.V19 = False
-        u.V21 = False
-        u.V17 = 0.0
-        u.V20 = 0.0
-        u.V10 = 1.0
-        u.pump_hz = 0.0
-        u.press_ctrl_on = False
-        self.state.ready = False
-        self.state.mode = 'STOP'
-
-    def off(self):
-        self.stop()
-        u = self.controls
-        u.V17 = 1.0
-        u.V20 = 1.0
-        self.state.mode = 'OFF'
-
-    def _is_ready(self) -> bool:
-        s, u = self.state, self.controls
-        ready = (
-            u.V9
-            and u.V11
-            and u.pump_hz > 0.0
-            and u.press_ctrl_on
-            and abs(s.PT3 - u.press_sp_bar) < 0.05
-            and abs(s.PT1 - u.press_sp_bar) < 0.1
-            and s.LT23 > 20.0
-            and s.T5 < 80.0
-        )
-        return ready
+    # Note: stop()/off() 메서드는 제거되었습니다. Sequencer.stop()/Sequencer.off() 사용.
 
     def _update_pressures(self, dt: float):
         s, u = self.state, self.controls
@@ -204,44 +169,10 @@ class CryoCoolerSim:
         self._update_pressures(dt)
         self._update_temperatures(dt, power_W)
         self._update_levels(dt, power_W)
-        self.state.ready = self._is_ready()
         return self.state
 
 
 if __name__ == '__main__':
-    s = State(T5=280.0, T6=280.0, PT1=1.0, PT3=1.0, LT19=40.0, LT23=30.0)
-    u = Controls(
-        V9=False,
-        V11=False,
-        V19=False,
-        V15=False,
-        V21=False,
-        V10=0.6,
-        V17=0.0,
-        V20=0.0,
-        pump_hz=0.0,
-        press_ctrl_on=False,
-        press_sp_bar=2.0,
-    )
-    sim = CryoCoolerSim(s, u)
-    try:
-        from sim.logic import Sequencer
-        seq = Sequencer(sim)
-        seq.start_cool_down()
-        for t in range(0, 7200):
-            seq.update(dt=1.0)
-            sim.step(dt=1.0, power_W=300.0)
-            if sim.state.ready:
-                break
-    except Exception:
-        for t in range(0, 7200):
-            sim.step(dt=1.0, power_W=300.0)
-            if sim.state.ready:
-                break
-    print(
-        f't={t}s, mode={sim.state.mode}, ready={sim.state.ready}, '
-        f'T5={sim.state.T5:.1f}K, T6={sim.state.T6:.1f}K, '
-        f'PT1={sim.state.PT1:.2f}bar, PT3={sim.state.PT3:.2f}bar, '
-        f'LT19={sim.state.LT19:.1f}%, LT23={sim.state.LT23:.1f}%, '
-        f'FT18={sim.state.FT18:.1f} L/min'
-    )
+    # Simple smoke test removed from runtime module to keep responsibilities clear.
+    # Use tools/pv_bridge.py or dedicated tests under tests/ for validation.
+    pass
