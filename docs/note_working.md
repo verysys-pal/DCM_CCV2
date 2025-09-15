@@ -56,7 +56,7 @@
 - sim/logic/operating.py: MainCmd 열거형/전이/액션 업데이트(OFF 처리, `sim.off()` 호출)
 - sim/core/dcm_cryo_cooler_sim.py: `stop()`에서 밸브 일괄 CLOSE 로직 명확화
 - docs/Reference/Reference_Guide.md: CMD:MAIN 표/DB 예시 업데이트
-- docs/mermaid/state_machine.mmd: EMERGENCY_STOP → OFF 전이 수정
+ - docs/mermaid/state_machine.mmd: EMERGENCY_STOP → OFF 전이 수정
 
 비고
 - SAFE_SHUTDOWN 상태는 인터락/알람 경로에서만 사용(직접 명령 삭제). 추가 연결이 필요하면 추후 별도 이슈로 연계 예정.
@@ -117,7 +117,48 @@
 - PV 갱신 일관성 보완: 루프 초기화 시 `BL:DCM:CRYO:DCM:POWER`에 내부 `q_dcm` 초기값을 반영하여 HMI 표시값과 동기화
 
 변경 사항
-- 브리지 시작 후 `caget BL:DCM:CRYO:DCM:POWER`가 CLI `--q_dcm`와 일치
+ - 브리지 시작 후 `caget BL:DCM:CRYO:DCM:POWER`가 CLI `--q_dcm`와 일치
+
+
+
+2025-09-14 18:15:00 KST
+
+작업 내역
+- enum 충돌 완화: `sim/logic/commands.py`의 운영 상태 enum을 `State`→`OperState`로 리네이밍하여 `sim/core`의 `State` dataclass와 명확히 구분
+- .gitignore 보강: Python 캐시/툴링 산출물 무시 항목 추가
+- 레포 정리: 기존 캐시(`__pycache__`, `.pytest_cache`, `*.pyc`)와 빈 로그 파일 제거
+
+변경 사항
+- import 사용처 정리: `tools/pv_bridge.py`에서 `from sim.logic import OperState, MainCmd, ...`로 간소화(공개 API 사용)
+- Python 캐시 파일이 버전에 포함되지 않도록 예방
+
+수정파일
+- sim/logic/commands.py
+- tools/pv_bridge.py
+- .gitignore
+
+비고
+- 공개 API 관점에서 enum 명칭 변경은 내부 사용에 국한되어 외부 인터페이스 변화 없음. 동작 영향 없음.
+
+추가 문서/다이어그램 갱신
+- docs/mermaid/pv_map.mmd: CMD에 MODE 포함, PRESS에 PT3:SP 추가, ALARM는 MAX_SEVERITY만 표기
+- docs/mermaid/state_machine.mmd: START+MODE=WARM_UP 경로 추가, STOP은 OFF로 귀결하도록 수정
+- docs/mermaid/SystemState.mmd: EMERGENCY 표기 제거, STOP/OFF 처리/SAFE 경로 정합화
+- docs/mermaid/pv_bridge_flow.mmd: 참가자 라벨 명확화 및 START+MODE 동작 설명 보강
+
+2025-09-14 18:55:00 KST
+
+작업 내역
+- Mermaid 렌더러 호환성 개선: 하나의 파일에 여러 다이어그램이 있는 경우 파싱 오류가 발생하여 분리
+
+변경 사항
+- docs/mermaid/pv_bridge_overview.mmd: 아키텍처 플로우 하나만 유지(단일 다이어그램)
+- docs/mermaid/pv_bridge_overview_seq.mmd: 런타임 시퀀스 다이어그램 분리
+- docs/mermaid/pv_bridge_overview_class.mmd: 클래스 다이어그램 분리
+- docs/mermaid/pv_bridge_overview_io.mmd: 외부 입출력 요약 다이어그램 분리
+
+비고
+- 일부 라벨의 괄호/공백은 언더스코어 등으로 단순화하여 파서 호환성 확보
 
 수정파일
 - tools/pv_bridge.py: 루프 초기화에서 `pv_dcm_power` 초기 write 추가

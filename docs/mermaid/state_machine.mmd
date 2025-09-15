@@ -3,16 +3,17 @@
 "primaryTextColor":"#111111"
 }}}%%
 
-%% Operating state machine (Simulator)
+%% Operating state machine (Bridge + OperatingLogic)
 stateDiagram-v2
   [*] --> OFF
-  OFF --> INIT: CMD.START
+  %% START + MODE drives initial state
+  OFF --> WARMUP: START + MODE=WARM_UP
+  OFF --> INIT: START (other modes)
   INIT --> PRECOOL: after init_seconds
   PRECOOL --> RUN: Tch <= (Tsp - precool_band)
   RUN --> HOLD: CMD.HOLD
   HOLD --> RUN: CMD.RESUME
-  any --> WARMUP: CMD.WARMUP
-  any --> OFF: CMD.OFF
+  any --> OFF: CMD.STOP or CMD.OFF
   SAFE_SHUTDOWN --> OFF: CMD.RESET
   WARMUP --> OFF: Tch >= (Tamb - precool_band)
 

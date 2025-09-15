@@ -1,0 +1,63 @@
+%% Mermaid sequence diagram: pv_bridge.py ↔ OperatingLogic ↔ CryoCoolerSim ↔ EPICS PVs
+%% Shows how values flow each loop and on command changes
+
+%%{init: {
+  "theme":"base",
+  "themeVariables":{"background":"#ffffff","primaryTextColor":"#111111"
+}}}%%
+
+sequenceDiagram
+    %% Participants
+    participant IOC as EPICS IOC (PVs)
+    participant Bridge as tools/pv_bridge.py
+    participant Oper as sim/logic/operating (OperatingLogic)
+    participant Seq as sim/logic/sequencer (Sequencer)
+    participant Sim as sim/core/dcm_cryo_cooler_sim.py
+
+    %% Initial config and tuning (optional)
+    Note over Bridge,IOC: On start: load tools/pv_init.yaml + tools/tuning.yaml (optional)
+    Bridge->>IOC: Seed PVs (T5,T6,STATE,TIME, SUBCOOLER, DCM:POWER, LT19, LT23,...)
+
+    loop Every dt (bridge.loop)
+        IOC-->>Bridge: Read CMD:MAIN, CMD:MODE, TEMP:SETPOINT, PRESS:PT3:SP
+        IOC-->>Bridge: Read manual CMDs (VALVE V9/V11/V15/V17/V19/V20/V10/V21, PUMP, HEATER)
+
+        alt Command changed (START/STOP/HOLD/RESUME/OFF/RESET)
+            Bridge->>Oper: next_state(state, CMD, mode, tsp, T5, Tamb, dt)
+            Oper-->>Bridge: New state (OFF/INIT/PRECOOL/RUN/HOLD/WARMUP/...)
+            Bridge->>IOC: "Write STATE:MAIN + STATE:TEXT"
+            Note right of Bridge: START + MODE triggers auto (cool down / warm up / refill)
+            Bridge->>Oper: set_mode(mode)  %% 모드 래칭/저장
+            Bridge->>Seq: apply_mode_action(seq, cmd, mode)  %% Sequencer 시작/중지
+            Note right of Seq: Triggers auto_cool_down / warm_up / refill
+        else No command change
+            Bridge->>Bridge: Keep last state
+        end
+
+        %% Apply manual actuators when allowed
+        alt Manual allowed (Seq.auto is NONE)
+            Bridge->>Sim: Update controls from PVs
+            Note right of Sim: V9,V11,V15,V17,V19,V20,V10,V21, pump_hz, press_ctrl_on
+        else Auto sequence running (manual blocked)
+            Bridge->>Bridge: Ignore manual actuator PVs
+        end
+
+        %% Setpoints and step
+        Bridge->>Sim: controls.press_sp_bar = PV(PRESS:PT3:SP)
+        Bridge->>Seq: update(dt)
+        Bridge->>Sim: step(dt, power_W = q_dcm)
+        Sim-->>Bridge: State vars: T5,T6,PT1,PT3,FT18,LT19,LT23, ready
+
+        %% Publish process values and statuses
+        Bridge->>IOC: Write TEMP:T5, TEMP:T6, PRESS:PT1, PRESS:PT3, FLOW:FT18
+        Bridge->>IOC: Write LEVEL:LT19, LEVEL:LT23, TIME
+        Bridge->>IOC: Mirror STATUS from Sim.controls (V9,V11,V15,V17,V19,V20,V10,V21)
+        Bridge->>IOC: Write derived V17 position (%), FLOW:V17, FLOW:V10
+        Bridge->>IOC: Write PUMP:RUNNING/FREQ, HEATER:RUNNING/POWER
+        Bridge->>IOC: Update ALARM/MAX_SEVERITY and SAFETY:INTERLOCK
+        Bridge->>IOC: Append HIST:* waveforms (time, T5,T6,PT1,PT3,FT18,flow_v17,flow_v10,pump_freq)
+
+        %% Read operator heat load input (optional)
+        IOC-->>Bridge: DCM:POWER (heat load W)
+        Bridge->>Bridge: Update q_dcm
+    end

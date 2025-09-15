@@ -1,0 +1,16 @@
+%% PV Bridge — External I/O (separate file)
+
+flowchart TB
+  subgraph Inputs[External Inputs]
+    CLI["CLI: dt, q_dcm, init-config, log-interval"]
+    YAML["pv_init.yaml (config/pvs) + tuning.yaml overlay"]
+    PVIN["PV read: CMD:MAIN/MODE, TEMP:SETPOINT, PRESS:PT3:SP,<br/>VALVE:V9/V11/V15/V17/V19/V20/V10/V21:CMD, PUMP:CMD, HEATER:CMD, DCM:POWER"]
+  end
+  subgraph Outputs[External Outputs]
+    PVOUT["PV write: STATE:MAIN/TEXT, TEMP:T5/T6, PRESS:PT1/PT3,<br/>FLOW:FT18, LEVEL:LT19/LT23, TIME,<br/>VALVE:*:STATUS, V17 position/flow_v17, flow_v10,<br/>PUMP:RUNNING/FREQ, HEATER:RUNNING/POWER, ALARM:MAX_SEVERITY, SAFETY:INTERLOCK,<br/>HIST: time,T5,T6,PT1,PT3,FT18,flow_v17,flow_v10,pump_freq"]
+  end
+  Inputs --> Bridge[PVBridge]
+  Bridge --> Outputs
+
+  %% Cross link back to overall data flow
+  click Bridge "data_flow.mmd" "Open: Overall data flow"

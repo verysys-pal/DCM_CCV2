@@ -7,7 +7,6 @@ as reference material.
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
-from enum import Enum, auto
 from typing import Optional
 
 
@@ -40,14 +39,6 @@ class State:
     mode: str = 'IDLE'
 
 
-class AutoKind(Enum):
-    NONE = 0
-    COOL_DOWN = auto()
-    WARM_UP = auto()
-    REFILL_HV = auto()
-    REFILL_SUB = auto()
-
-
 class CryoCoolerSim:
     """ 
     Simple physics-inspired discrete-time simulator for a Bruker-type DCM Cryo-Cooler.
@@ -76,12 +67,7 @@ class CryoCoolerSim:
     def __init__(self, state: State, controls: Controls):
         self.state = state
         self.controls = controls
-        self.auto: AutoKind = AutoKind.NONE
-        self.paused: bool = False
-        self.stage: int = 0
-        self.stage_timer: float = 0.0
-        self._pulse_timer: float = 0.0
-        self._pulse_state: bool = False
+        # Note: Operating sequences are handled by sim.logic.sequencer.Sequencer
         # --- Tunable level dynamics (can be overridden via YAML through pv_bridge) ---
         # Subcooler (LT19) fill flow when V19 is OPEN [L/s]
         self.fill_Lps_v19: float = 1.0 / 60.0
@@ -117,34 +103,6 @@ class CryoCoolerSim:
     def _rsc(self) -> float:
         return self.clamp(self.state.LT19 / 40.0, 0.0, 1.0)
 
-    def auto_cool_down(self):
-        self.auto = AutoKind.COOL_DOWN
-        self.stage = 0
-        self.stage_timer = 0.0
-        self.state.mode = 'COOLING'
-
-    def auto_warm_up(self):
-        self.auto = AutoKind.WARM_UP
-        self.stage = 0
-        self.stage_timer = 0.0
-        self.state.mode = 'WARMUP'
-
-    def auto_refill_hv(self):
-        self.auto = AutoKind.REFILL_HV
-        self.stage = 0
-        self.stage_timer = 0.0
-
-    def auto_refill_subcooler(self):
-        """서브쿨러(LT19) 보충 자동 시퀀스.
-
-        간단한 정책:
-        - V19 OPEN으로 충전 시작
-        - 목표치(예: 50%) 도달 시 V19 CLOSE 후 종료
-        다른 밸브/제어는 변경하지 않음(현재 상태 유지)
-        """
-        self.auto = AutoKind.REFILL_SUB
-        self.stage = 0
-        self.stage_timer = 0.0
 
     def stop(self):
         u = self.controls
@@ -168,162 +126,6 @@ class CryoCoolerSim:
         u.V17 = 1.0
         u.V20 = 1.0
         self.state.mode = 'OFF'
-
-    def _update_auto(self, dt: float):
-        u, s = self.controls, self.state
-        # HOLD 모드에서는 자동 시퀀스 진행만 일시 정지
-        if self.paused:
-            return
-        if self.auto == AutoKind.NONE:
-            return
-        self.stage_timer += dt
-
-        if self.auto == AutoKind.COOL_DOWN:
-            """
-            쿨다운 시퀀스(stage) 진행 기준
-            Stage 0: 초기 purge/보충(60초 등)
-            Stage 1: HV 보충(PT3 제어 off)
-            Stage 2: V9 on, V17=1.0 유지, T6 < 200 K 도달 시 다음
-            Stage 3: V17=0.35, V11 on, T6 < 90 K 도달 시 다음
-            Stage 4: V17=0.0, T6 < 82 K 도달 시 다음
-            Stage 5: 압력 제어 on(press_ctrl_on=True), PT3를 SP(기본 2.0 bar)로 맞추고 READY로 수렴
-            """
-            # Overlay: Ensure HV auto-refill whenever LT23 is low during COOL_DOWN
-            # - Independent of stage, if LT23 < 25%, open V15 and pulse V20 to refill
-            # - Stop refilling once LT23 >= 45%
-            # - Pressure control is only enabled from stage>=5; keep it off while refilling
-            if self.state.LT23 < 25.0:
-                self.controls.V15 = True
-                # Disable pressure control while refilling at low LT23
-                if self.stage >= 5:
-                    self.controls.press_ctrl_on = False
-                self._pulse_timer += dt
-                if self._pulse_timer >= 1.0:
-                    self._pulse_state = not self._pulse_state
-                    self._pulse_timer = 0.0
-                self.controls.V20 = 1.0 if self._pulse_state else 0.0
-            elif self.controls.V15 and self.state.LT23 >= 45.0:
-                # Finish refill overlay
-                self.controls.V15 = False
-                self.controls.V20 = 0.0
-                if self.stage >= 5:
-                    self.controls.press_ctrl_on = True
-            if self.stage == 0:
-                u.V10 = 0.6
-                u.pump_hz = max(u.pump_hz, 30.0)
-                u.V17 = 0.0
-                u.V20 = 0.0
-                u.V21 = False
-                u.V9 = False
-                u.V11 = False
-                u.V19 = True
-                if self.stage_timer >= 3.0:
-                    u.V19 = False
-                    self.stage += 1
-                    self.stage_timer = 0.0
-            elif self.stage == 1:
-                u.press_ctrl_on = False
-                u.V15 = True
-                self._pulse_timer += dt
-                if self._pulse_timer >= 1.0:
-                    self._pulse_state = not self._pulse_state
-                    self._pulse_timer = 0.0
-                u.V20 = 1.0 if self._pulse_state else 0.0
-                if s.LT23 >= 90.0:
-                    u.V15 = False
-                    u.V20 = 0.0
-                    self.stage += 1
-                    self.stage_timer = 0.0
-            elif self.stage == 2:
-                u.V9 = True
-                u.V17 = 1.0
-                if s.T6 < 200.0:
-                    self.stage += 1
-                    self.stage_timer = 0.0
-            elif self.stage == 3:
-                u.V17 = 0.35
-                u.V11 = True
-                if s.T6 < 90.0:
-                    self.stage += 1
-                    self.stage_timer = 0.0
-            elif self.stage == 4:
-                u.V17 = 0.0
-                if s.T6 < 82.0:
-                    self.stage += 1
-                    self.stage_timer = 0.0
-            elif self.stage == 5:
-                u.press_ctrl_on = True
-                u.press_sp_bar = max(u.press_sp_bar, 2.0)
-                if s.LT23 > 30.0:
-                    u.V17 = 0.3
-                elif s.LT23 < 25.0:
-                    u.press_ctrl_on = False
-                    u.V15 = True
-                    self._pulse_timer += dt
-                    if self._pulse_timer >= 1.0:
-                        self._pulse_state = not self._pulse_state
-                        self._pulse_timer = 0.0
-                    u.V20 = 1.0 if self._pulse_state else 0.0
-                    if s.LT23 >= 45.0:
-                        u.V15 = False
-                        u.V20 = 0.0
-                        u.press_ctrl_on = True
-                else:
-                    u.V17 = 0.0
-                    if self._is_ready():
-                        self.state.mode = 'READY'
-                        self.auto = AutoKind.NONE
-                        self.stage = 0
-                        self.stage_timer = 0.0
-        elif self.auto == AutoKind.WARM_UP:
-            if self.stage == 0:
-                u.V9 = False
-                u.V11 = False
-                u.V10 = 1.0
-                u.V17 = 0.4
-                u.pump_hz = max(u.pump_hz, 30.0)
-                u.press_ctrl_on = False
-                if s.PT1 < 1.0:
-                    self.stage += 1
-                    self.stage_timer = 0.0
-            elif self.stage == 1:
-                u.V21 = True
-                if s.T6 >= 280.0:
-                    u.V21 = False
-                    u.V17 = 0.0
-                    self.auto = AutoKind.NONE
-                    self.stage = 0
-                    self.state.mode = 'IDLE'
-        elif self.auto == AutoKind.REFILL_HV:
-            if self.stage == 0:
-                u.press_ctrl_on = False
-                u.V15 = True
-                self.stage += 1
-                self.stage_timer = 0.0
-            elif self.stage == 1:
-                self._pulse_timer += dt
-                if self._pulse_timer >= 1.0:
-                    self._pulse_state = not self._pulse_state
-                    self._pulse_timer = 0.0
-                u.V20 = 1.0 if self._pulse_state else 0.0
-                if self.state.LT23 >= 25.0:
-                    u.V15 = False
-                    u.V20 = 0.0
-                    u.press_ctrl_on = True
-                    self.auto = AutoKind.NONE
-                    self.stage = 0
-        elif self.auto == AutoKind.REFILL_SUB:
-            if self.stage == 0:
-                # 서브쿨러 보충 시작
-                u.V19 = True
-                self.stage += 1
-                self.stage_timer = 0.0
-            elif self.stage == 1:
-                # 목표 레벨 도달 시 종료
-                if self.state.LT19 >= 50.0:
-                    u.V19 = False
-                    self.auto = AutoKind.NONE
-                    self.stage = 0
 
     def _is_ready(self) -> bool:
         s, u = self.state, self.controls
@@ -396,22 +198,9 @@ class CryoCoolerSim:
         hv_cons_pctps += float(self.hv_vent_gamma_pctps) * float(self.clamp(u.V20, 0.0, 1.0))
         if hv_cons_pctps > 0.0:
             s.LT23 = self.clamp(s.LT23 - hv_cons_pctps * dt, 0.0, 100.0)
-        # LT19 자동 보충 히스테리시스
-        # - 자동 시퀀스 중이면 유지. HOLD(paused) 상태에서도 안전을 위해 high 임계 초과 시 닫기 동작은 허용한다.
-        # - low 임계(재개방)는 일시정지 중에는 수행하지 않는다.
-        if self.auto != AutoKind.NONE:
-            # Close-on-high always (>= 90) even when paused
-            if s.LT19 >= 90.0:
-                u.V19 = False
-            # Open-on-low (< 80) only when not paused
-            if not getattr(self, 'paused', False):
-                if s.LT19 < 80.0:
-                    u.V19 = True
-        if s.LT23 < 5.0:
-            self.stop()
+        # Auto refill/stop decisions are handled by Sequencer (controller).
 
     def step(self, dt: float = 1.0, power_W: float = 0.0):
-        self._update_auto(dt)
         self._update_pressures(dt)
         self._update_temperatures(dt, power_W)
         self._update_levels(dt, power_W)
@@ -435,11 +224,20 @@ if __name__ == '__main__':
         press_sp_bar=2.0,
     )
     sim = CryoCoolerSim(s, u)
-    sim.auto_cool_down()
-    for t in range(0, 7200):
-        sim.step(dt=1.0, power_W=300.0)
-        if sim.state.ready:
-            break
+    try:
+        from sim.logic import Sequencer
+        seq = Sequencer(sim)
+        seq.start_cool_down()
+        for t in range(0, 7200):
+            seq.update(dt=1.0)
+            sim.step(dt=1.0, power_W=300.0)
+            if sim.state.ready:
+                break
+    except Exception:
+        for t in range(0, 7200):
+            sim.step(dt=1.0, power_W=300.0)
+            if sim.state.ready:
+                break
     print(
         f't={t}s, mode={sim.state.mode}, ready={sim.state.ready}, '
         f'T5={sim.state.T5:.1f}K, T6={sim.state.T6:.1f}K, '

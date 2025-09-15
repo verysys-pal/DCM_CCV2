@@ -1,0 +1,45 @@
+%% PV Bridge — Runtime sequence (separate file)
+
+sequenceDiagram
+    participant IOC as EPICS_IOC
+    participant BR as PVBridge
+    participant OP as OperatingLogic
+    participant SEQ as Sequencer
+    participant SIM as CryoCoolerSim
+
+    Note over BR,IOC: 초기화 및 시드 적용
+    BR->>IOC: seed STATE/TEXT, T5/T6, TIME, SUBCOOLER, LT19/LT23
+    BR->>BR: load operating.yaml/interlock.yaml (optional)
+    BR->>BR: apply pv_init.yaml (+ tuning overlay)
+    BR->>BR: init tuning PV registry
+
+    loop every dt
+        IOC-->>BR: read CMD:MAIN, CMD:MODE, TEMP:SETPOINT, PRESS:PT3:SP
+        IOC-->>BR: read manual commands (VALVE*, PUMP:CMD, HEATER:CMD)
+        alt command changed
+            BR->>OP: next_state(state, CMD, mode, tsp, T5, Tamb, dt)
+            OP-->>BR: new state (OperState)
+            BR->>IOC: write STATE:MAIN + STATE:TEXT
+            BR->>OP: set_mode(mode)
+            BR->>SEQ: apply_mode_action(seq, cmd, mode)
+        else no change
+            BR->>BR: keep previous state
+        end
+
+        alt auto sequence running
+            BR->>BR: ignore manual actuator PVs
+        else manual allowed
+            BR->>SIM: apply manual actuators to controls
+        end
+
+        BR->>SIM: controls.press_sp_bar = PV(PT3:SP)
+        BR->>SEQ: update(dt)
+        BR->>SIM: step(dt, power_W=q_dcm)
+        SIM-->>BR: T5,T6,PT1,PT3,FT18,LT19,LT23
+        BR->>IOC: publish process values and statuses
+        BR->>IOC: append HIST waveforms
+        IOC-->>BR: DCM:POWER (operator input)
+        BR->>BR: update q_dcm
+    end
+
+%% See also: data_flow.mmd

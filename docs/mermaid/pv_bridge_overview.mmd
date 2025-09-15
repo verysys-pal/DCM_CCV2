@@ -1,0 +1,46 @@
+%% PV Bridge (tools/pv_bridge.py) — Architecture overview
+%% Single-diagram version for renderers that require one graph per file
+
+%%{init: {
+  "theme":"base",
+  "themeVariables":{"background":"#ffffff","primaryTextColor":"#111111"
+}}}%%
+
+flowchart LR
+  subgraph Bridge[PV Bridge]
+    BR[PVBridge]
+  end
+
+  subgraph Logic[Logic]
+    OP[OperatingLogic]
+    SEQ[Sequencer]
+    ILK[InterlockLogic]
+  end
+
+  subgraph Sim[Simulator]
+    SIM[sim.core.CryoCoolerSim]
+  end
+
+  subgraph IOC[EPICS IOC]
+    PVs[(PVs)]
+  end
+
+  subgraph Cfg[Configs]
+    CLI[(CLI args: dt, q_dcm, init-config, log-interval, verbose)]
+    YAML[pv_init.yaml\n+tuning.yaml\n+operating.yaml\n+interlock.yaml]
+  end
+
+  CLI --> BR
+  YAML --> BR
+  BR <-->|read/write| PVs
+  BR <-->|controls/state| SIM
+  BR -.-> OP
+  BR -.-> ILK
+  BR -.-> SEQ
+  SEQ --> SIM
+
+  classDef group fill:#eef,stroke:#446,color:#111;
+  class Bridge,Logic,Sim,IOC,Cfg group;
+
+  %% Cross link back to overall data flow
+  click BR "data_flow.mmd" "Open: Overall data flow"

@@ -27,3 +27,14 @@ O.*/
 *.log
 .*.swp
 .DS_Store
+
+# Python caches and tooling
+__pycache__/
+.pytest_cache/
+*.pyc
+*.pyo
+.mypy_cache/
+.coverage
+.venv/
+venv/
+/.env

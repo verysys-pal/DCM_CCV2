@@ -5,19 +5,21 @@
 
 stateDiagram-v2
   [*] --> OFF
+  %% Start paths
+  OFF --> WARMUP: START(1) + MODE=WARM_UP
   OFF --> INIT: START(1)
-  INIT --> PRECOOL: START(1)/init ok
-  PRECOOL --> RUN: START(1)/precool ok
+  INIT --> PRECOOL: after init_seconds
+  PRECOOL --> RUN: near setpoint
+  %% Hold/Resume
   RUN --> HOLD: HOLD(3)
   HOLD --> RUN: RESUME(4)
-  RUN --> WARMUP: STOP(2)
-  HOLD --> WARMUP: STOP(2)
-  PRECOOL --> WARMUP: STOP(2)
+  %% Stop/Off
+  any --> OFF: STOP(2) or OFF(5)
   WARMUP --> OFF: warm reached
   
   state SAFE_SHUTDOWN
-  RUN --> SAFE_SHUTDOWN: EMERGENCY(5) or Safety
-  HOLD --> SAFE_SHUTDOWN: EMERGENCY(5) or Safety
+  RUN --> SAFE_SHUTDOWN: Safety
+  HOLD --> SAFE_SHUTDOWN: Safety
   INIT --> SAFE_SHUTDOWN: Safety
   PRECOOL --> SAFE_SHUTDOWN: Safety
   WARMUP --> SAFE_SHUTDOWN: Safety

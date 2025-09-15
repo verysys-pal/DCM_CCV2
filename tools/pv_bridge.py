@@ -67,8 +67,7 @@ except Exception as exc:  # pragma: no cover - import diagnostic
     sys.exit(2)
 
 from sim.core import CryoCoolerSim, State as SimState, Controls as SimControls
-from sim.logic.operating import OperatingLogic
-from sim.logic.interlock import InterlockLogic
+from sim.logic import OperatingLogic, InterlockLogic, Sequencer, AutoKind, MainCmd, OperState
 
 
 PV_STATE = "BL:DCM:CRYO:STATE:MAIN"
@@ -141,26 +140,10 @@ PV_HIST_FLOW_V10 = "BL:DCM:CRYO:HIST:FLOW:V10"
 PV_HIST_PUMP_FREQ = "BL:DCM:CRYO:HIST:PUMP:FREQ"
 
 
-STATE = {
-    "OFF": 0,
-    "INIT": 1,
-    "PRECOOL": 2,
-    "RUN": 3,
-    "HOLD": 4,
-    "WARMUP": 5,
-    "SAFE_SHUTDOWN": 6,
-    "ALARM": 7,
-}
+# Operating state values derived from shared enum
+STATE = {name: enum.value for name, enum in OperState.__members__.items()}
 
-CMD = {
-    "NONE": 0,
-    "START": 1,
-    "STOP": 2,
-    "HOLD": 3,
-    "RESUME": 4,
-    "OFF": 5,
-    "RESET": 6,
-}
+# Commands are compared against `MainCmd` enum values.
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
@@ -201,7 +184,6 @@ class PVBridge:
         self.heater_power_on = 30.0
         self.heater_power_off = 0.0
         self._last_transition_log = 0.0
-        self._rev_state = {v: k for k, v in STATE.items()}
         self.log_interval = float(log_interval or 0.0)
         self._log_elapsed = 0.0
         # Event tracing helpers (AUTO/Stage changes)
@@ -269,7 +251,7 @@ class PVBridge:
         self.pv_hist_pump_freq = PV(PV_HIST_PUMP_FREQ, auto_monitor=False)
 
         # Local state
-        self.state: int = STATE["OFF"]
+        self.state: int = OperState.OFF.value
         self._last_cmd_val: int = 0
         self._last_mode_val: int = 0
         # 사용자가 최근에 선택했던 유효 모드(0이 아닌 값) 기억: START 펄스와 모드 갱신 간 타이밍 이슈 보완
@@ -390,7 +372,10 @@ class PVBridge:
     def _state_name(self, s: Optional[int] = None) -> str:
         if s is None:
             s = self.state
-        return self._rev_state.get(int(s), f"UNKNOWN({s})")
+        try:
+            return OperState(int(s)).name
+        except Exception:
+            return f"UNKNOWN({s})"
 
     # 상태 전이는 OperatingLogic이 담당하므로 브리지 내 로직 없음
 
@@ -453,6 +438,12 @@ class PVBridge:
         # Optional external logic configs
         self._load_operating_interlock()
 
+        # Create sequencer/controller bound to simulator
+        try:
+            self.seq = Sequencer(self.sim)
+        except Exception:
+            self.seq = None  # fallback; should not happen
+
         # YAML 초기값 적용(있으면 기본값을 덮어씀)
         self._apply_init_from_yaml()
         # 튜닝 PV 초기화(있을 시 현재 파라메타 게시)
@@ -510,20 +501,21 @@ class PVBridge:
             if cmd_changed:
                 try:
                     if self.oper_logic is not None:
-                        self.oper_logic.apply_mode_action(self.sim, cmd_val=cmd_val, mode_val=eff_mode_val, CMD=CMD)
+                        target = self.seq if (getattr(self, 'seq', None) is not None) else self.sim
+                        self.oper_logic.apply_mode_action(target, cmd_val=cmd_val, mode_val=eff_mode_val)
                 except Exception as e:
                     if self.verbose:
                         print(f"[pv_bridge] operating.apply_mode_action error: {e}")
                 # Update hold flag from command
-                if cmd_val == CMD.get("HOLD", -1):
+                if cmd_val == MainCmd.HOLD.value:
                     self._held = True
                 elif cmd_val in (
-                    CMD.get("RESUME", -1), CMD.get("START", -1), CMD.get("STOP", -1), CMD.get("OFF", -1), CMD.get("RESET", -1)
+                    MainCmd.RESUME.value, MainCmd.START.value, MainCmd.STOP.value, MainCmd.OFF.value, MainCmd.RESET.value
                 ):
                     self._held = False
                 # STOP/OFF 직후 수동모드로 전환: 현재 강제 상태를 PV CMD에 반영해 동기화
                 try:
-                    if cmd_val in (CMD.get("STOP", -1), CMD.get("OFF", -1)):
+                    if cmd_val in (MainCmd.STOP.value, MainCmd.OFF.value):
                         self._sync_manual_cmd_pvs_from_sim()
                 except Exception:
                     pass
@@ -535,6 +527,12 @@ class PVBridge:
             # Apply PT3 setpoint from PV
             try:
                 self.sim.controls.press_sp_bar = float(self._read(self.pv_pt3_sp, default=self.sim.controls.press_sp_bar))
+            except Exception:
+                pass
+            # Update sequencer (operating controller) before physics
+            try:
+                if self.seq is not None:
+                    self.seq.update(self.dt)
             except Exception:
                 pass
             self.sim.step(self.dt, power_W=self.q_dcm)
@@ -573,7 +571,6 @@ class PVBridge:
                     new_state = self.oper_logic.next_state(
                         state=self.state,
                         STATE=STATE,
-                        CMD=CMD,
                         cmd_val=cmd_for_transition,
                         mode_val=eff_mode_val,
                         tsp=tsp,
@@ -597,8 +594,8 @@ class PVBridge:
 
             # One-shot event logs when AUTO or STAGE changes
             try:
-                cur_auto_name = getattr(self.sim, 'auto', None).name if getattr(self, 'sim', None) is not None else 'NA'
-                cur_stage = int(getattr(self.sim, 'stage', -1))
+                cur_auto_name = getattr(self.seq, 'auto', None).name if getattr(self, 'seq', None) is not None else 'NA'
+                cur_stage = int(getattr(self.seq, 'stage', -1))
                 if (cur_auto_name != self._last_auto_name) or (cur_stage != self._last_stage):
                     self._last_auto_name = cur_auto_name
                     self._last_stage = cur_stage
@@ -664,8 +661,8 @@ class PVBridge:
                             f"MODE={int(mode_val)}",
                             f"effMODE={int(eff_mode_val)}",
                             f"STATE={self._state_name()}",
-                            f"AUTO={getattr(self.sim, 'auto', None).name if getattr(self, 'sim', None) is not None else 'NA'}",
-                            f"STAGE={int(getattr(self.sim, 'stage', -1))}",
+                            f"AUTO={getattr(self.seq, 'auto', None).name if getattr(self, 'seq', None) is not None else 'NA'}",
+                            f"STAGE={int(getattr(self.seq, 'stage', -1))}",
                             #f"V10={'OPEN' if (self.sim.controls.V10 > 0.5) else 'CLOSE'}",
                             #f"V17={'OPEN' if (self.sim.controls.V17 > 0.5) else 'CLOSE'}",
                             #f"V20={'OPEN' if (self.sim.controls.V20 > 0.5) else 'CLOSE'}",
@@ -796,7 +793,10 @@ class PVBridge:
 
     def _apply_manual_actuators_if_allowed(self) -> None:
         # 수동 조작은 자동 시퀀스 진행 중이 아닐 때 허용한다.
-        if (self.sim.auto.name != 'NONE'):
+        try:
+            if (getattr(self, 'seq', None) is not None) and (self.seq.auto != AutoKind.NONE):
+                return
+        except Exception:
             return
         try:
             self.sim.controls.V9 = self._read_bool(self.pv_v9_cmd, False)
