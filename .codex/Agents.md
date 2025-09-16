@@ -62,3 +62,8 @@ YYYY-MM-DD (작성자)
 - tools/pv_bridge.py: EPICS PV 브리지
     - pyepics로 PV 읽기/쓰기, 시뮬레이터/시퀀서 구동, 운영 로직 호출.
     - CLI 인자 파싱, YAML 초기값/튜닝 적용, 히스토리 파형 게시 등 애플리케이션 계층.
+
+# 밸브 제어규칙
+- sim/core/dcm_cryo_cooler_sim.py
+- 밸브 1개 = 규칙 함수 1개의 독립 규칙(Independent Valve Rules) 구조.
+- 각 규칙은 자신의 밸브만 제어, 공통 조건은 헬퍼로 재사용.

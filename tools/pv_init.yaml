@@ -1,19 +1,6 @@
 version: 1
-config:
-  # Runtime / simulator parameters (pv_bridge/CryoCoolerSim)
-  dt: 0.1               # step time (s)
-  q_dcm: 100.0          # DCM heat load (W)
-  tsub: 77.3            # subcooler temperature (K)
-  
-
-  # Derived/aux parameters managed by pv_bridge (naming matches code)
-  alarm_t_high: 250.0
-  pump_freq_on: 30.0
-  pump_freq_off: 0.0
-  heater_power_on: 30.0
-  heater_power_off: 0.0
-
-  # Level dynamics/consumption 등 상세 튜닝 값은 tools/tuning.yaml에서 관리합니다.
+# Note: pv_bridge now ignores the 'config' section; only 'pvs' seeds are applied.
+config: {}
 
   # Operating logic parameters live in tools/operating.yaml (not used here)
 

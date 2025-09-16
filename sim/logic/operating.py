@@ -12,6 +12,7 @@ Operating logic focused on Main/Mode commands.
 """
 
 from dataclasses import dataclass
+from enum import Enum
 from .commands import MainCmd, ModeCmd, mode_to_auto
 
 
@@ -20,6 +21,24 @@ from .commands import MainCmd, ModeCmd, mode_to_auto
 This module intentionally avoids any EPICS I/O. It consumes primitive
 values and returns/acts on pure Python state to keep unit tests simple.
 """
+
+
+class ActionType(Enum):
+    NONE = "NONE"
+    START_AUTO = "START_AUTO"        # auto_name 필드 사용
+    PRESET_READY = "PRESET_READY"
+    PRESET_PURGE = "PRESET_PURGE"
+    STOP = "STOP"
+    HOLD = "HOLD"
+    RESUME = "RESUME"
+    OFF = "OFF"
+
+
+@dataclass
+class Action:
+    type: ActionType
+    auto_name: str | None = None  # COOL_DOWN | WARM_UP | REFILL_HV | REFILL_SUB
+    aux: list[str] | None = None  # e.g., ["REFILL_HETER_OFF", "REFILL_SBCOL_OFF"]
 
 
 class OperatingLogic:
@@ -60,8 +79,8 @@ class OperatingLogic:
         tamb: float,
         dt: float,
     ) -> int:
-        """MainCmd/ModeCmd 기반 상태 전이 정책.
-
+        """
+        MainCmd/ModeCmd 기반 상태 전이 정책.
         - START → INIT (Warm-up 모드에서는 WARMUP로 표시)
         - INIT (시간 경과) → PRECOOL
         - PRECOOL (T5 <= TSP - band) → RUN
@@ -118,74 +137,51 @@ class OperatingLogic:
 
         return int(state)
 
-    # 시퀀스/모드 액션 적용 (브리지가 전달하는 시뮬레이터 인스턴스를 조작)
-    def apply_mode_action(self, seq, *, cmd_val: int, mode_val: int) -> None:
-        """Drive the Sequencer (and occasionally direct control presets).
-
-        Uses centralized mapping between ModeCmd and AutoKind to keep
-        responsibilities separated and prevent drift.
+    # --- 액션 계획 API (브리지가 해석/적용) ---
+    def plan_action(self, *, cmd_val: int, mode_val: int) -> Action:
         """
-        sim = getattr(seq, 'sim', None)
+        명령/모드 입력으로부터 수행할 고수준 액션을 결정한다.
+        - 시뮬레이터/EPICS에 비의존. 브리지가 해석하여 적용한다.
+        """
         try:
             cmd = MainCmd(int(cmd_val))
         except Exception:
             cmd = MainCmd.NONE
+
+        aux: list[str] = []
+        try:
+            if int(mode_val) == ModeCmd.REFILL_HETER_OFF:
+                aux.append("REFILL_HETER_OFF")
+            elif int(mode_val) == ModeCmd.REFILL_SBCOL_OFF:
+                aux.append("REFILL_SBCOL_OFF")
+        except Exception:
+            pass
+
         if cmd is MainCmd.START:
             auto = mode_to_auto(mode_val)
             if auto is not None:
-                # Pre-sequence side effects for certain modes
-                if auto.name == 'REFILL_HV' and sim is not None:
-                    try:
-                        sim.controls.V15 = True
-                        sim.controls.press_ctrl_on = False
-                    except Exception:
-                        pass
-                # Dispatch to sequencer start methods
-                if auto.name == 'COOL_DOWN':
-                    seq.start_cool_down()
-                elif auto.name == 'WARM_UP':
-                    seq.start_warm_up()
-                elif auto.name == 'REFILL_HV':
-                    seq.start_refill_hv()
-                elif auto.name == 'REFILL_SUB':
-                    try:
-                        seq.start_refill_subcooler()
-                    except Exception:
-                        if sim is not None:
-                            sim.controls.V19 = True
-            elif int(mode_val) == ModeCmd.READY and sim is not None:
-                # Simple ready preset
-                sim.controls.V9 = True
-                sim.controls.V11 = True
-                sim.controls.V17 = 0.0
-                sim.controls.pump_hz = max(sim.controls.pump_hz, 40.0)
-                sim.controls.press_ctrl_on = True
-                sim.state.mode = 'READY'
-            elif int(mode_val) == ModeCmd.PURGE and sim is not None:
-                sim.controls.V9 = False
-                sim.controls.V11 = False
-                sim.controls.V17 = 0.4
-                sim.controls.V21 = True
-                sim.controls.pump_hz = 20.0
-                sim.state.mode = 'PURGE'
-        elif cmd is MainCmd.STOP:
-            seq.stop()
-            seq.paused = False
-        elif cmd is MainCmd.HOLD:
-            seq.hold()
-        elif cmd is MainCmd.RESUME:
-            seq.resume()
-        elif cmd is MainCmd.OFF:
-            seq.off()
-            seq.paused = False
-        # Auxiliary OFF-like modes
-        try:
-            if int(mode_val) == ModeCmd.REFILL_HETER_OFF and sim is not None:
-                sim.controls.V15 = False
-                sim.controls.V20 = 0.0
-                seq.auto = type(seq.auto).NONE
-            elif int(mode_val) == ModeCmd.REFILL_SBCOL_OFF and sim is not None:
-                sim.controls.V19 = False
-                seq.auto = type(seq.auto).NONE
-        except Exception:
-            pass
+                return Action(
+                    type=ActionType.START_AUTO,
+                    auto_name=str(auto.name),
+                    aux=aux or None,
+                )
+            # 수동 프리셋 모드
+            try:
+                if int(mode_val) == ModeCmd.READY:
+                    return Action(type=ActionType.PRESET_READY, aux=aux or None)
+                if int(mode_val) == ModeCmd.PURGE:
+                    return Action(type=ActionType.PRESET_PURGE, aux=aux or None)
+            except Exception:
+                pass
+            return Action(type=ActionType.NONE, aux=aux or None)
+
+        if cmd is MainCmd.STOP:
+            return Action(type=ActionType.STOP, aux=aux or None)
+        if cmd is MainCmd.HOLD:
+            return Action(type=ActionType.HOLD, aux=aux or None)
+        if cmd is MainCmd.RESUME:
+            return Action(type=ActionType.RESUME, aux=aux or None)
+        if cmd is MainCmd.OFF:
+            return Action(type=ActionType.OFF, aux=aux or None)
+
+        return Action(type=ActionType.NONE, aux=aux or None)

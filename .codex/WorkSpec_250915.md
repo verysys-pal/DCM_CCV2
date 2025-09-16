@@ -123,62 +123,62 @@
 
 ## 5. Update Order (권장 실행 순서)
 
-1) `rule_pump_v10_baseline()`  
-2) `rule_v9_dcm_supply()` → `rule_v11_dcm_return()`  
-3) `rule_v17_loop_vent()`  
-4) `rule_v20_hv_pulse_vent(dt)`  
-5) `rule_v15_hv_refill()`  
-6) `rule_v19_subcool_fill()`  
-7) `rule_v21_purge()`  
-8) `rule_press_heater()`  
+1) `rule_pump_v10_baseline()`
+2) `rule_v9_dcm_supply()` → `rule_v11_dcm_return()`
+3) `rule_v17_loop_vent()`
+4) `rule_v20_hv_pulse_vent(dt)`
+5) `rule_v15_hv_refill()`
+6) `rule_v19_subcool_fill()`
+7) `rule_v21_purge()`
+8) `rule_press_heater()`
 9) `sim.step(dt, power_W)` → 표시 업데이트
 
 ---
 
 ## 6. Helpers & Internal States
 
-- **모드 전환 감지**: `_last_auto`  
-- **HV**: `_hv_initial_done`, `_hv_recharge_active`, `_pulse_v20_timer`, `_pulse_v20_state`, `_hv_pulse_period=1.0s`  
-- **SC**: `_sc_initial_done`, `_sc_recharge_active`  
+- **모드 전환 감지**: `_last_auto`
+- **HV**: `_hv_initial_done`, `_hv_recharge_active`, `_pulse_v20_timer`, `_pulse_v20_state`, `_hv_pulse_period=1.0s`
+- **SC**: `_sc_initial_done`, `_sc_recharge_active`
 - **헬퍼**
-  - `_hv_refill_active(state)`  
-    - REFILL_HV: `LT23 < 90%` → True  
+  - `_hv_refill_active(state)`
+    - REFILL_HV: `LT23 < 90%` → True
     - COOL_DOWN: 초기 `LT23<90%`(90% 도달 시 완료), 재보충 `LT23<40%`(39↔41 히스테리시스)
-  - `_hv_refill_gating_ok(controls)`  
-    - COOL_DOWN 재보충 시: `V9==OPEN and V17>0 and V20 토글중`  
+  - `_hv_refill_gating_ok(controls)`
+    - COOL_DOWN 재보충 시: `V9==OPEN and V17>0 and V20 토글중`
     - REFILL_HV: 항상 True
-  - `_sc_refill_active(state)`  
+  - `_sc_refill_active(state)`
     - 초기 `LT19<90%`, 재보충 `LT19<50%`(49↔51 히스테리시스)
 
 ---
 
 ## 7. Acceptance Criteria
 
-1) **초기 HV 보충**: COOL_DOWN 진입 후 LT23<90% → V9/V17 준비, V20 펄스, V15 OPEN → LT23≥90% ⇒ V15 CLOSE, V20=0.  
-2) **HV 재보충**: COOL_DOWN 중 LT23<40%(39↔41) → 게이팅 충족 시 V15 OPEN → LT23 90% 도달 시 종료.  
-3) **REFILL_HV 모드**: LT23<90%면 V15 OPEN(게이팅 불요).  
-4) **SubCooler**: LT19 초기 90% 1회, 이후 LT19<50%(49↔51)에서 재보충.  
-5) **DCM 루프**: V9/V11이 둘 다 열리고 V21이 닫힌 경우에만 FT18>0, T6>T5(ΔT>0).  
-6) **퍼지**: V21=OPEN 시 dcm_loop_on=False, 압력 대기압 수렴, FT18≈0, 냉각·소모 정지.  
+1) **초기 HV 보충**: COOL_DOWN 진입 후 LT23<90% → V9/V17 준비, V20 펄스, V15 OPEN → LT23≥90% ⇒ V15 CLOSE, V20=0.
+2) **HV 재보충**: COOL_DOWN 중 LT23<40%(39↔41) → 게이팅 충족 시 V15 OPEN → LT23 90% 도달 시 종료.
+3) **REFILL_HV 모드**: LT23<90%면 V15 OPEN(게이팅 불요).
+4) **SubCooler**: LT19 초기 90% 1회, 이후 LT19<50%(49↔51)에서 재보충.
+5) **DCM 루프**: V9/V11이 둘 다 열리고 V21이 닫힌 경우에만 FT18>0, T6>T5(ΔT>0).
+6) **퍼지**: V21=OPEN 시 dcm_loop_on=False, 압력 대기압 수렴, FT18≈0, 냉각·소모 정지.
 7) **표시 일관성**: 모든 표시값은 `sim.step` 직후 값과 일치.
 
 ---
 
 ## 8. Test Plan (요약)
 
-- **시나리오 A — 초기 쿨다운**: LT23=30% → 초기 보충(90%) 완료 → 루프 활성 시 T5/T6 하강, FT18>0.  
-- **시나리오 B — HV 재보충**: 소비로 LT23=39% ↓ → 재보충 트리거 → 90% 도달 후 정지.  
-- **시나리오 C — SubCooler 재보충**: LT19=49% ↓ → 재보충 시작 → 90% 도달 후 정지.  
-- **시나리오 D — 퍼지**: V21=OPEN → FT18=0, ΔT→0, 압력 대기압 수렴.  
-- **경계/노이즈**: 39/41, 49/51 근처 히스테리시스 확인.  
+- **시나리오 A — 초기 쿨다운**: LT23=30% → 초기 보충(90%) 완료 → 루프 활성 시 T5/T6 하강, FT18>0.
+- **시나리오 B — HV 재보충**: 소비로 LT23=39% ↓ → 재보충 트리거 → 90% 도달 후 정지.
+- **시나리오 C — SubCooler 재보충**: LT19=49% ↓ → 재보충 시작 → 90% 도달 후 정지.
+- **시나리오 D — 퍼지**: V21=OPEN → FT18=0, ΔT→0, 압력 대기압 수렴.
+- **경계/노이즈**: 39/41, 49/51 근처 히스테리시스 확인.
 - **부하 스윕**: DCM:POWER 0→정격→상한에서 ΔT·소모율 증가 검증.
 
 ---
 
 ## 9. Non-goals & Constraints
 
-- `operating.py` 변경 금지.  
-- 새로운 물리 모델 작성 금지(물리는 `dcm_cryo_cooler_sim.py`에 위임).  
+- `operating.py` 변경 금지.
+- 새로운 물리 모델 작성 금지(물리는 `dcm_cryo_cooler_sim.py`에 위임).
 - 단계 카운터 기반 시퀀스 로직 확장 금지(규칙 기반으로 대체).
 
 ---

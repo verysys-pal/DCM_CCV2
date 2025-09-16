@@ -40,15 +40,19 @@ class State:
 
 
 class CryoCoolerSim:
-    """ 
+    """
     Simple physics-inspired discrete-time simulator for a Bruker-type DCM Cryo-Cooler.
     """
-    Q80 = 15.0                  # Max flow rate at 80Hz, L/min      
+    Q80 = 15.0                  # Max flow rate at 80Hz, L/min
     rho = 800.0                 # LN₂의 유효 밀도 [kg/m³]. 질량유량 ṁ 계산(ṁ = ρ·Q_eff/60·1e-3)에 사용.
     cp = 2000.0                 # LN₂의 유효 비열 [J/(kg·K)].열부하 반영 T6 = T5 + Power/(ṁ·c_p)에 사용.
     ambK = 280.0                # 주변 온도 [K]. 퍼지/격리 시 T5가 복귀하는 목표 온도
     delta_subcool = 6.0         # 서브쿨 여유(과냉도) [K]. T_supply = max(77, T_boil(PT1) − Δ_subcool·R_SC)에서 사용.
-    k_tau = 120.0               # 냉각 1차시정수 계수 [s·(L/min)]. τ_cool = k_tau / Q_eff. 유량이 클수록 응답 빠름.
+
+    # T5, T6 냉각속도 조정
+    k_tau = 60.0                # 냉각 속도 조정 [s·(L/min)]. τ_cool = k_tau / Q_eff. 유량이 클수록 응답 빠름.
+    cooldown_tau_factor = 2.0   # Cool-down 구간 추가 가속 계수(τ를 이 값으로 나눔)
+
     tau_warm0 = 180.0           # 퍼지/가열 시 기본 시정수 [s]. 잔냉량(LT19)·펌프에 의해 자동 가중.
     Kh = 0.5                    # HV 히터 → PT3 가압 이득 [bar/s] (@히터출력 1).
     Kc = 0.4                    # PT3 → PT1 결합 이득 [1/s]. 베셀 압력이 루프 압력으로 전달되는 정도.
@@ -56,30 +60,52 @@ class CryoCoolerSim:
     kv20 = 0.5                  # HV 벤트(V20)의 감압 계수 [1/s]. PT3를 내리는 속도.
     kv21 = 0.8                  # 퍼지(V21)가 열릴 때 루프 감압 효과 [1/s]. PT1 저감 항에 가중.
     leak = 0.02                 # HV 압력의 누설/자연감압 계수 [1/s]. PT3가 1 bar로 서서히 복귀하는 경향.
-    base_cons_Lps = 3.0 / 3600.0            # 기본 LN₂ 소비량 [L/s](≈3 L/h). 순수 유지·기본 손실.
-    cons_coeff_Lps_perW = 0.023 / 3600.0    # 열부하 100 W당 약 2.3 L/h 추가 소비 항의 계수 [(L/s)/W].
-    gamma_vent_Lps_per_Lpm = 0.004 / 60.0   # 오픈루프(벤트 경로)로 손실되는 추가 소비 계수 [(L/s)/(L/min)]. 
+
     Vsub_L = 200.0              # 서브쿨러 유효 용량 [L]. 레벨 %↔절대량 변환에 사용.
     Vhv_L = 20.0                # 히터 베셀 유효 용량 [L]. LT23 변화 속도에 영향.
     PSV_open_bar = 5.0          # 안전밸브(PSV) 작동 압력 [bar(g)]. 모델은 PSV−0.5로 클램핑.
     max_bar = 5.0               # 시뮬레이터 상 한계 압력 [bar(g)]. 수치적 안전 클램프.
 
+    # Note: Operating sequences are handled by sim.logic.sequencer.Sequencer
+    # Subcooler (LT19) fill flow when V19 is OPEN [L/s]
+    lt19_fill_lps = 10.0  # 약 1 m³/h
+
+    # Subcooler (LT19) consumption sensitivity
+    # - base_cons_Lps : 기본 LN₂ 소비량 [L/s](≈3 L/h). 순수 유지·기본 손실.
+    # - cons_coeff_Lps_perW : 전력 1 W당 추가 소비량 [L/(s·W)]. 열부하에 따른 소비 증가.
+    # - gamma_vent_Lps_per_Lpm : 오픈루프(벤트 경로)로 손실되는 추가 소비 계수 [(L/s)/(L/min)].
+    # Naming aligned with pv_bridge live-tuning expectations.
+    base_cons_Lps = 8.0 / 3600.0
+    # 열부하가 커질수록 서브쿨러(LT19) 소비가 뚜렷하게 증가하도록 계수를 상향 조정한다.
+    cons_coeff_Lps_perW = 10 / 3600.0
+    gamma_vent_Lps_per_Lpm = 0.004 / 60.0
+
+
+    # HV tank (LT23) refill/drain rates in percentage per second [%/s]
+    # [%/s] HV refill rate when V15 OPEN
+    lt23_refill_rate_pctps = 6.0
+    # [%/s] HV drain rate proportional to V17
+    lt23_drain_rate_pctps = 0.2
+
+    # HV tank (LT23) consumption sensitivity (percentage per second)
+    # - hv_base_cons_pctps: 시스템 동작 시 기본 소비율 [%/s]
+    # - hv_power_cons_pctps_perW: 전력 1 W당 추가 소비율 [%/(s·W)]
+    # - hv_heater_cons_pctps_max: 압력제어(히터) 최대동작 시 추가 소비율 상한 [%/s]
+    # - hv_vent_gamma_pctps: HV 벤트(V20) 개방 시 추가 소비율 계수(개도 비율에 비례) [%/s]
+    hv_base_cons_pctps = 0.01
+    hv_heater_cons_pctps_max = 1.0
+    hv_vent_gamma_pctps = 0.1
+    # 전력 부하는 HV 탱크(LT23)에 거의 직접적인 영향을 주지 않으므로 기본 소모만 유지한다.
+    hv_power_cons_pctps_perW = 0.0
+    
+
+
+
     def __init__(self, state: State, controls: Controls):
         self.state = state
         self.controls = controls
-        # Note: Operating sequences are handled by sim.logic.sequencer.Sequencer
-        # --- Tunable level dynamics (can be overridden via YAML through pv_bridge) ---
-        # Subcooler (LT19) fill flow when V19 is OPEN [L/s]
-        self.fill_Lps_v19: float = 1.0 / 60.0
-        # HV tank (LT23) refill/drain rates in percentage per second [%/s]
-        # Defaults reflect current accelerated test tuning
-        self.refill_rate_pctps: float = 10.0 / 60.0
-        self.drain_rate_pctps: float = 1.0 / 60.0
-        # HV tank consumption terms (percentage per second) — adjustable via YAML through pv_bridge
-        self.hv_base_cons_pctps: float = 0.0            # base consumption when system running
-        self.hv_power_cons_pctps_perW: float = 0.0      # additional per-W power consumption
-        self.hv_heater_cons_pctps_max: float = 0.0      # additional when press control ON (scaled by heater_u)
-        self.hv_vent_gamma_pctps: float = 0.0           # additional when HV vent (V20) open (scaled by V20)
+
+
 
     @staticmethod
     def clamp(v, lo, hi):
@@ -135,6 +161,12 @@ class CryoCoolerSim:
             s.T5 += (self.ambK - s.T5) / tau * dt
         elif Q_eff > 1e-6:
             tau = self.k_tau / max(Q_eff, 1e-6)
+            # Cool-down 구간에서는 추가 가속 팩터 적용
+            try:
+                if str(self.state.mode).upper().startswith('COOL'):
+                    tau = tau / max(float(self.cooldown_tau_factor), 1.0)
+            except Exception:
+                pass
             s.T5 += (T_supply_star - s.T5) / tau * dt
         else:
             tau_iso = 1200.0
@@ -147,15 +179,20 @@ class CryoCoolerSim:
         s, u = self.state, self.controls
         Q_loop, Q_eff = self.flow_loop_and_eff()
         cons_Lps = (
-            self.base_cons_Lps + self.cons_coeff_Lps_perW * power_W + self.gamma_vent_Lps_per_Lpm * max(Q_eff - Q_loop, 0.0) * 60.0
+            float(self.base_cons_Lps)
+            + float(self.cons_coeff_Lps_perW) * float(power_W)
+            + float(self.gamma_vent_Lps_per_Lpm) * max(Q_eff - Q_loop, 0.0) * 60.0
         )
-        fill_Lps = float(self.fill_Lps_v19) if u.V19 else 0.0
+        fill_Lps = float(self.lt19_fill_lps) if u.V19 else 0.0
         dLT19 = (fill_Lps - cons_Lps) / self.Vsub_L * 100.0
         s.LT19 = self.clamp(s.LT19 + dLT19 * dt, 0.0, 100.0)
+
         if u.V15:
-            s.LT23 = self.clamp(s.LT23 + float(self.refill_rate_pctps) * dt, 0.0, 100.0)
+            s.LT23 = self.clamp(s.LT23 + float(self.lt23_refill_rate_pctps) * dt, 0.0, 100.0)
+        
         # Existing drain via loop vent proportional to V17
-        s.LT23 = self.clamp(s.LT23 - float(self.drain_rate_pctps) * u.V17 * dt, 0.0, 100.0)
+        s.LT23 = self.clamp(s.LT23 - float(self.lt23_drain_rate_pctps) * u.V17 * dt, 0.0, 100.0)
+        
         # Additional HV consumption: base + power + heater activity + HV vent contribution
         hv_cons_pctps = float(self.hv_base_cons_pctps) + float(self.hv_power_cons_pctps_perW) * float(power_W)
         if u.press_ctrl_on:
