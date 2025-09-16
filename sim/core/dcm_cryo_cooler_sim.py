@@ -53,8 +53,12 @@ class CryoCoolerSim:
     k_tau = 60.0                # 냉각 속도 조정 [s·(L/min)]. τ_cool = k_tau / Q_eff. 유량이 클수록 응답 빠름.
     cooldown_tau_factor = 2.0   # Cool-down 구간 추가 가속 계수(τ를 이 값으로 나눔)
 
-    tau_warm0 = 180.0           # 퍼지/가열 시 기본 시정수 [s]. 잔냉량(LT19)·펌프에 의해 자동 가중.
-    Kh = 0.5                    # HV 히터 → PT3 가압 이득 [bar/s] (@히터출력 1).
+    # T5 가열속도 조정
+    tau_warm0 = 10.0            # 퍼지/가열 시 기본 시정수 [s]. 이전보다 빠르게 복귀하도록 절반으로 단축.
+    
+    # PT3가 2 bar까지 오르는 속도는 히터 출력이 압력에 반영되는 계수
+    Kh = 0.1                    # HV 히터 → PT3 가압 이득 [bar/s] (@히터출력 1).
+    
     Kc = 0.4                    # PT3 → PT1 결합 이득 [1/s]. 베셀 압력이 루프 압력으로 전달되는 정도.
     kv17 = 0.5                  # 루프 벤트(V17)의 감압 계수 [1/s]. PT1을 1 bar로 내리는 속도 결정.
     kv20 = 0.5                  # HV 벤트(V20)의 감압 계수 [1/s]. PT3를 내리는 속도.
@@ -75,7 +79,7 @@ class CryoCoolerSim:
     # - cons_coeff_Lps_perW : 전력 1 W당 추가 소비량 [L/(s·W)]. 열부하에 따른 소비 증가.
     # - gamma_vent_Lps_per_Lpm : 오픈루프(벤트 경로)로 손실되는 추가 소비 계수 [(L/s)/(L/min)].
     # Naming aligned with pv_bridge live-tuning expectations.
-    base_cons_Lps = 8.0 / 3600.0
+    base_cons_Lps = 300.0 / 3600.0
     # 열부하가 커질수록 서브쿨러(LT19) 소비가 뚜렷하게 증가하도록 계수를 상향 조정한다.
     cons_coeff_Lps_perW = 10 / 3600.0
     gamma_vent_Lps_per_Lpm = 0.004 / 60.0
@@ -141,8 +145,10 @@ class CryoCoolerSim:
             u._heater_u = 0.0
         dPT3 = self.Kh * u._heater_u - self.kv20 * u.V20 * max(s.PT3 - 1.0, 0.0) - self.leak * max(s.PT3 - 1.0, 0.0)
         s.PT3 = self.clamp(s.PT3 + dPT3 * dt, 0.0, self.max_bar)
+        has_loop_path = bool(u.V9 and u.V11 and u.pump_hz > 1.0)
+        coupling = self.Kc if has_loop_path else 0.0  # 공급/리턴 밸브와 펌프가 모두 활성일 때만 PT3 영향 전달
         dPT1 = (
-            self.Kc * (s.PT3 - s.PT1)
+            coupling * (s.PT3 - s.PT1)
             - self.kv17 * u.V17 * max(s.PT1 - 1.0, 0.0)
             - self.kv21 * (1.0 if u.V21 else 0.0) * max(s.PT1 - 1.0, 0.0)
         )
@@ -178,11 +184,13 @@ class CryoCoolerSim:
     def _update_levels(self, dt: float, power_W: float):
         s, u = self.state, self.controls
         Q_loop, Q_eff = self.flow_loop_and_eff()
-        cons_Lps = (
-            float(self.base_cons_Lps)
-            + float(self.cons_coeff_Lps_perW) * float(power_W)
-            + float(self.gamma_vent_Lps_per_Lpm) * max(Q_eff - Q_loop, 0.0) * 60.0
-        )
+        has_loop_flow = Q_eff > 1e-6
+        # 기본 손실(base)은 루프 유량과 무관하게 항상 적용한다.
+        cons_Lps = float(self.base_cons_Lps)
+        # 무유량(루프 격리) 시에는 열부하에 따른 추가 소비를 중단하여 레벨이 유지되도록 한다.
+        if has_loop_flow:
+            cons_Lps += float(self.cons_coeff_Lps_perW) * float(power_W)
+            cons_Lps += float(self.gamma_vent_Lps_per_Lpm) * max(Q_eff - Q_loop, 0.0) * 60.0
         fill_Lps = float(self.lt19_fill_lps) if u.V19 else 0.0
         dLT19 = (fill_Lps - cons_Lps) / self.Vsub_L * 100.0
         s.LT19 = self.clamp(s.LT19 + dLT19 * dt, 0.0, 100.0)

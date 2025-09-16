@@ -67,3 +67,5 @@ YYYY-MM-DD (작성자)
 - sim/core/dcm_cryo_cooler_sim.py
 - 밸브 1개 = 규칙 함수 1개의 독립 규칙(Independent Valve Rules) 구조.
 - 각 규칙은 자신의 밸브만 제어, 공통 조건은 헬퍼로 재사용.
+
+.codex/Agents.md 규칙들 기억할것

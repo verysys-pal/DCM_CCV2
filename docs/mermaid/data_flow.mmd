@@ -26,8 +26,7 @@ flowchart LR
 
   %% 설정 파일
   subgraph CFG[Configs]
-    INIT["PV init/seeds<br/>tools/pv_init.yaml"]
-    TUNE["Tuning overlay (optional)<br/>tools/tuning.yaml"]
+    INIT["PV init seeds<br/>tools/pv_init.yaml"]
     OPERCFG["Operating params<br/>tools/operating.yaml"]
     ILKCFG["Interlock thresholds<br/>tools/interlock.yaml"]
   end
@@ -36,8 +35,7 @@ flowchart LR
   STCMD --> DB
 
   %% 설정 → 브리지/로직
-  INIT -->|"config + PV seeds"| BRIDGE
-  TUNE -->|"overlay merge &#40;config/pvs&#41;"| BRIDGE
+  INIT -->|"apply PV seeds"| BRIDGE
   OPERCFG -.->|"load params"| OPER
   ILKCFG -.->|"load thresholds"| ILK
 
@@ -57,5 +55,5 @@ flowchart LR
   BOB <-->|"monitor/control"| DB
   BOB ----|"trend view"| HIST
 
-  %% Cross links
+  %% 교차 링크
   click BRIDGE "pv_bridge_overview.mmd" "Open: PV Bridge overview"

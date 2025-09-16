@@ -352,18 +352,18 @@ class Sequencer:
     def _hv_refill_active(self) -> bool:
         s = self.sim.state
         if self.auto == AutoKind.REFILL_HV:
-            return s.LT23 < 90.0
+            return s.LT23 < 45.0
         if self.auto == AutoKind.COOL_DOWN:
             # 초기 보충: 90% 도달 전까지 1회 활성
             if not self._hv_initial_done:
-                if s.LT23 >= 90.0:
+                if s.LT23 >= 85.0:
                     self._hv_initial_done = True
                     return False
                 return True
             # 재보충: 히스테리시스 39↔41
-            if not self._hv_recharge_active and s.LT23 < 39.0:
+            if not self._hv_recharge_active and s.LT23 < 25.0:
                 self._hv_recharge_active = True
-            if self._hv_recharge_active and s.LT23 >= 41.0:
+            if self._hv_recharge_active and s.LT23 >= 50.0:
                 self._hv_recharge_active = False
             return self._hv_recharge_active
         return False
@@ -410,7 +410,7 @@ class Sequencer:
         if self.auto == AutoKind.COOL_DOWN:
             u.pump_hz = max(u.pump_hz, 30.0)
         elif self.auto in (AutoKind.WARM_UP, AutoKind.REFILL_HV, AutoKind.REFILL_SUB):
-            u.pump_hz = 0.0
+            u.pump_hz = 1.0
 
     def rule_v10_mode(self) -> None:
         """
@@ -470,15 +470,28 @@ class Sequencer:
     def rule_v21_purge(self) -> None:
         # PURGE 제어 경로 설명:
         # - 브리지(tools/pv_bridge.py)가 OperatingLogic.plan_action 결과로
-        #   Sequencer.preset_purge()를 호출하여 직접 V21을 제어한다.
-        # - 이때 AUTO는 NONE인 프리셋 상태이므로, update()는 초기에 반환되어
-        #   본 규칙(rule_v21_purge)은 실행되지 않는다(상태를 덮어쓰지 않음).
+        #   Sequencer.preset_purge()를 호출하여 직접 V21 오버라이드를 설정한다.
+        # - AUTO가 NONE인 상태에서도 규칙이 실행되므로, 오버라이드가 없더라도
+        #   모드가 PURGE이면 기본적으로 개방한다.
         # - 자동 시퀀스 중(AUTO != NONE)에는 안전을 위해 V21을 항상 닫힘으로 유지한다.
         override = self._manual_override('V21')
         if override is not None:
             self.sim.controls.V21 = bool(override)
             return
+        # 모드가 PURGE로 표시되면 수동 프리셋 없이도 기본적으로 개방한다.
+        try:
+            mode = str(self.sim.state.mode).upper()
+        except Exception:
+            mode = ''
+
         if self.auto != AutoKind.NONE:
+            self.sim.controls.V21 = False
+            return
+
+        if mode == 'PURGE':
+            self.sim.controls.V21 = True
+        else:
+            # 수동 명령이 없고 모드가 PURGE가 아니면 안전상 닫힘 유지
             self.sim.controls.V21 = False
 
     def rule_v15_hv_refill(self) -> None:

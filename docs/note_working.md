@@ -1,4 +1,52 @@
 2025-09-16 (Codex)
+의도: READY 상태 노출과 안전 전이를 포함하도록 SystemState 다이어그램을 최신화.
+변경: READY 플래그 기반 전이, HOLD/STOP 처리, SAFE_SHUTDOWN 경로를 stateDiagram에 반영.
+수정파일: `docs/mermaid/SystemState.mmd`, `docs/note_working.md`
+비고: 문서 변경만 수행, 테스트 미실시.
+
+
+
+2025-09-16 (Codex)
+의도: 제거된 tuning.yaml 흐름에 맞춰 mermaid 다이어그램을 최신 브리지 구조로 정리.
+변경: pv_init 기반 초기화, READY 출력, 수동 CMD 재동기화 등의 흐름을 다이어그램에 반영.
+수정파일: `docs/mermaid/data_flow.mmd`, `docs/mermaid/pv_bridge_flow.mmd`, `docs/mermaid/pv_bridge_overview.mmd`, `docs/mermaid/pv_bridge_overview_class.mmd`, `docs/mermaid/pv_bridge_overview_io.mmd`, `docs/mermaid/pv_bridge_overview_seq.mmd`, `docs/note_working.md`
+비고: 문서 변경만 수행, 테스트 미실시.
+
+
+
+2025-09-16 (Codex)
+의도: PURGE/READY 프리셋 실행 후 수동 CMD PV가 즉시 상태를 반영하도록 동기화.
+변경: pv_bridge에서 PRESET_READY/PRESET_PURGE 호출 뒤 `_sync_manual_cmd_pvs_from_sim()` 실행.
+수정파일: `tools/pv_bridge.py`, `docs/note_working.md`
+비고: 프리셋 직후 수동 루프가 밸브 상태를 되돌리지 않도록 보완. 테스트 미실시.
+
+
+
+2025-09-16 (Codex)
+의도: 루프 유량이 0일 때도 기본 손실(base_cons_Lps)이 적용되도록 모델 가독성 개선.
+변경: CryoCoolerSim 소비 계산을 base+동적 항 구조로 분리해 무유량 시 base 손실 지속 보장.
+수정파일: `sim/core/dcm_cryo_cooler_sim.py`, `docs/note_working.md`
+비고: 동작상 변화 없음, 가독성/요구사항 명시화. 테스트 미실시.
+
+
+
+2025-09-16 (Codex)
+의도: 루프 유량이 0일 때 파워 변화로 서브쿨러 레벨이 감소하는 현상 방지.
+변경: CryoCoolerSim에서 Q_eff=0인 경우 LT19 소비 모델의 파워·벤트 항 비활성화.
+수정파일: `sim/core/dcm_cryo_cooler_sim.py`, `docs/note_working.md`
+비고: 기본 손실(base)만 유지하여 격리 중 레벨이 유지되도록 함. 테스트 미실시.
+
+
+
+2025-09-16 (Codex)
+의도: PURGE 모드 선택 시 V21 퍼지 밸브가 즉시 개방되도록 시나리오 점검.
+변경: Sequencer V21 규칙에서 자동 시퀀스 중 닫힘 유지, 모드가 PURGE일 때 기본 개방/그 외 닫힘으로 정리.
+수정파일: `sim/logic/sequencer.py`, `docs/note_working.md`
+비고: 수동 오버라이드가 존재하면 기존 동작 유지. 테스트는 수동 확인만 진행.
+
+
+
+2025-09-16 (Codex)
 의도: READY/HIST PV 미연결 시 반복 put로 루프 지연 발생 문제 진단 및 비연결 PV 스킵 처리.
 변경: pv_bridge PV 쓰기 헬퍼와 히스토리 게시가 연결 상태 확인 후 put하도록 조정하여 지연 완화 예정.
 수정파일: `tools/pv_bridge.py`, `docs/note_working.md`
@@ -112,6 +160,9 @@
 
 비고
 - 여전히 비정상 동작 시, MODE/MAIN/레벨 값을 주기적으로 로깅하여 타이밍 이슈를 추가 진단 예정
+
+
+
 2025-09-15 (Codex)
 의도: OperatingLogic에서 시뮬레이터 직접 조작(sim.controls) 제거, 코드 경계(순수 결정 로직) 준수. 브리지가 해석·적용할 액션 계획(plan_action)으로 분리.
 변경: `OperatingLogic.ActionType/Action` 도입 및 `plan_action()` 추가, 기존 `apply_mode_action()`의 sim 조작 제거. `tools/pv_bridge.py`에서 `plan_action()` 결과를 해석하여 시퀀서 호출 및 READY/PURGE 프리셋·AUX OFF 처리.

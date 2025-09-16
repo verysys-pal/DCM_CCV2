@@ -1,4 +1,4 @@
-%% PV Bridge — Class structure (separate file)
+%% PV Bridge — 클래스 구조 (별도 파일)
 
 classDiagram
     class PVBridge {
@@ -6,6 +6,7 @@ classDiagram
       +float q_dcm
       +bool verbose
       +float log_interval
+      +float hist_interval
       +CryoCoolerSim sim
       +Sequencer seq
       +OperatingLogic oper_logic
@@ -17,19 +18,18 @@ classDiagram
       +deque hist_pt1
       +deque hist_pt3
       +deque hist_ft18
+      +deque hist_lt19
+      +deque hist_lt23
       +deque hist_flow_v17
       +deque hist_flow_v10
       +deque hist_pump_freq
-      +dict tune_pvs
       +loop()
+      -_load_operating_interlock()
       -_apply_init_from_yaml()
-      -_apply_config_with_validation(cfg)
-      -_init_tuning_pvs()
-      -_apply_tuning_from_pvs()
       -_apply_manual_actuators_if_allowed()
       -_sync_manual_cmd_pvs_from_sim()
       -_mirror_status_from_sim()
       -_publish_history()
     }
 
-%% See also: data_flow.mmd
+%% data_flow.mmd 참고

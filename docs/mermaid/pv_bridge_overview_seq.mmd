@@ -1,4 +1,4 @@
-%% PV Bridge — Runtime sequence (separate file)
+%% PV Bridge — 런타임 시퀀스 (별도 파일)
 
 sequenceDiagram
     participant IOC as EPICS_IOC
@@ -10,8 +10,7 @@ sequenceDiagram
     Note over BR,IOC: 초기화 및 시드 적용
     BR->>IOC: seed STATE/TEXT, T5/T6, TIME, SUBCOOLER, LT19/LT23
     BR->>BR: load operating.yaml/interlock.yaml (optional)
-    BR->>BR: apply pv_init.yaml (+ tuning overlay)
-    BR->>BR: init tuning PV registry
+    BR->>BR: apply pv_init.yaml seeds
 
     loop every dt
         IOC-->>BR: read CMD:MAIN, CMD:MODE, TEMP:SETPOINT, PRESS:PT3:SP
@@ -22,6 +21,7 @@ sequenceDiagram
             BR->>IOC: write STATE:MAIN + STATE:TEXT
             BR->>OP: set_mode(mode)
             BR->>SEQ: apply_mode_action(seq, cmd, mode)
+            Note right of BR: PRESET/STOP/OFF 후 CMD PV를 시퀀서 상태로 동기화
         else no change
             BR->>BR: keep previous state
         end
@@ -37,9 +37,10 @@ sequenceDiagram
         BR->>SIM: step(dt, power_W=q_dcm)
         SIM-->>BR: T5,T6,PT1,PT3,FT18,LT19,LT23
         BR->>IOC: publish process values and statuses
+        BR->>IOC: publish READY indicator
         BR->>IOC: append HIST waveforms
         IOC-->>BR: DCM:POWER (operator input)
         BR->>BR: update q_dcm
     end
 
-%% See also: data_flow.mmd
+%% data_flow.mmd 참고

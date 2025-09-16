@@ -557,8 +557,16 @@ class PVBridge:
                                 self.seq.start_refill_subcooler()
                         elif action.type.name == "PRESET_READY" and self.seq is not None:
                             self.seq.preset_ready()
+                            try:
+                                self._sync_manual_cmd_pvs_from_sim()
+                            except Exception:
+                                pass
                         elif action.type.name == "PRESET_PURGE" and self.seq is not None:
                             self.seq.preset_purge()
+                            try:
+                                self._sync_manual_cmd_pvs_from_sim()
+                            except Exception:
+                                pass
                         elif action.type.name == "STOP" and self.seq is not None:
                             self.seq.stop()
                             self.seq.paused = False

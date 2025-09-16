@@ -3,10 +3,10 @@
 **Purpose**: This repository provides a **physics‑inspired discrete‑time simulator** of a Bruker‑type LN₂ **DCM Cryo‑Cooler** for operator/HMI logic prototyping, controls development, and interlock testing.
 
 The model captures:
-- Sub‑Cooler (LT19), Heater Vessel (LT23) with **HV heater‑based pressure control** (PT3 → PT1 coupling)  
-- Pump frequency → **flow** (FT18) with **throttle V10** and **line valves V9/V11**  
-- **Temperature dynamics** (T5 supply, T6 return) incl. boiling‑point vs pressure  
-- **Automatic procedures**: **Cool‑down**, **Warm‑up**, **HV Auto‑Refill**  
+- Sub‑Cooler (LT19), Heater Vessel (LT23) with **HV heater‑based pressure control** (PT3 → PT1 coupling)
+- Pump frequency → **flow** (FT18) with **throttle V10** and **line valves V9/V11**
+- **Temperature dynamics** (T5 supply, T6 return) incl. boiling‑point vs pressure
+- **Automatic procedures**: **Cool‑down**, **Warm‑up**, **HV Auto‑Refill**
 - **Stop/Off** safety behavior and **READY** conditions
 
 > GUI mapping aligns with *Figure 2 “GUI interface layout”*; operating steps & setpoints are taken from the manual’s expert/operator procedures, pressure/boiling‑point table, and readiness checklist. fileciteturn0file0
@@ -18,15 +18,15 @@ The model captures:
 - 정의:
     - 사용자가 개입하지 않아도 루프와 DCM을 안전하게 극저온 상태로 내리고, 압력·레벨을 맞춘 뒤 System Ready 신호를 만들도록 밸브/펌프/히터 압력제어를 순차 실행하는 자동 시퀀스. (
 - 선행 조건(요지):
-    1. LN₂ 공급 연결, 
-    2. Sub-Cooler 최소 15%(Auto-refill ON 권장), 
-    3. 루프·전송라인 건식 N₂ 퍼지 완료. 
+    1. LN₂ 공급 연결,
+    2. Sub-Cooler 최소 15%(Auto-refill ON 권장),
+    3. 루프·전송라인 건식 N₂ 퍼지 완료.
 - 자동 동작(핵심 단계/목표값):
-    1. 배기(VENT) 파이프 히터 ON, 
+    1. 배기(VENT) 파이프 히터 ON,
     2. Heater Vessel(LT23) 충전
-    3. 소비자(DCM) ≈78 K까지 냉각, 
+    3. DCM Load ≈78 K까지 냉각,
     4. HV 적정 레벨(대략 25–30%)로 조정
-    5. 압력제어 ON(권장 2 bar) 및 안정화, 
+    5. 압력제어 ON(권장 2 bar) 및 안정화,
     6. Ready 출력.
 - 자동 시퀀스는 수동 절차의 논리를 그대로 내장:
     - T6<200 K 에서 V17≈35% & V11=OPEN,
@@ -41,9 +41,9 @@ The model captures:
 - 선행 조건(요지):
     - 루프가 정상 운전 중이며 V21 퍼지 포트에 건식 N₂(>1 bar) 연결.
 - 자동 동작(핵심 단계/목표값):
-    1. V9/V11 CLOSE(소비자 격리), 
-    2. V17 일부 개방(압력 완화), 
-    3. PT1<1 bar가 되면 V21 OPEN(건식 N₂ 퍼지 시작), 
+    1. V9/V11 CLOSE(소비자 격리),
+    2. V17 일부 개방(압력 완화),
+    3. PT1<1 bar가 되면 V21 OPEN(건식 N₂ 퍼지 시작),
     4. T6=280 K 도달까지 퍼지·가열 지속.
 - 주의:
     - V21에 N₂가 연결되지 않으면 액체 질소가 배출될 수 있으므로 반드시 연결 후 실행.
@@ -54,7 +54,7 @@ The model captures:
 ### 1. 내용
 
 - 신호/액츄에이터 맵핑:
-    - `T5,T6,PT1,PT3,LT19,LT23,FT18` 
+    - `T5,T6,PT1,PT3,LT19,LT23,FT18`
     ↔ `V9,V11,V10,V17,V19,V15,V20,V21,pump_hz,press_ctrl_on,press_sp_bar`
 - 지배관계
     - 유량: `Q = 15*(Hz/80)*(0.4+0.6*V10)`
@@ -93,9 +93,9 @@ The model captures:
         - `T5`는 `T_supply*`로 1차 지연, `T6`는 열부하/질량유량으로 계산.
         - `LT19`/`LT23` 동역학과 오픈루프 패널티(벤트 유량 기여) 포함.
     - 자동 절차 내장
-        
+
         `auto_cool_down()`, `auto_warm_up()`, `auto_refill_hv()`가 HMI 절차를 단계 상태(`stage`)로 실행.
-        
+
     - 인터락/안전
         - HV 저레벨 `<5%` → 자동 Stop.
         - `PT1,PT3 ≤ PSV−0.5 bar`.
@@ -104,49 +104,49 @@ The model captures:
 ### 3. 온도·유량 모델 (V11 영향 포함)
 
 1. 유량(루프)
-    
+
     $$
     Q\,[L/min]=\underbrace{15\cdot\frac{\mathrm{Hz}}{80}\cdot(0.4+0.6\,V10)}_{\text{펌프/스로틀}}\cdot \mathbf{1}_{(V9=OPEN)}\cdot \mathbf{1}_{(V11=OPEN)}
     $$
-    
+
     - FT18=Q (측정 표시), V11=Close면 0.
 2. 서브쿨러 냉원 여유와 T5
-    
+
     $$
     T_{\text{supply}}=\max\big(77,\;T_{boil}(PT1)-\Delta_{\text{sub}}\cdot R_{SC}\big),\quad R_{SC}=f(LT19)
     $$
-    
+
     - `R_SC∈[0,1]` (예: `R_SC=clip(LT19/40%,0,1)`), **LT19↓ → 냉각여유↓**.
 3. T5 동역학
     - **루프 냉각(C2)**:
-        
+
         $$
         \displaystyle \frac{dT5}{dt}=\frac{T_{\text{supply}}-T5}{\tau_c},\;\tau_c=\frac{k_\tau}{\max(Q,Q_{min})}
         $$
-        
-    - **오픈루프 냉각(C1)**: 위 식과 동일하되 
+
+    - **오픈루프 냉각(C1)**: 위 식과 동일하되
     **유효 유량** `Q_eff = 15*(Hz/80)*(0.4+0.6V10)*1_{V9}*1_{(V11\text{ or }V17)}` 사용
     (=V11이 닫혀도 V17이 열려있으면 유량 경로 존재).
     - **퍼지/가열(C4)**:
-        
+
         $$
         \displaystyle \frac{dT5}{dt}=\frac{T_{amb}-T5}{\tau_{warm}}
         $$
-        
+
         - τ는 V21, 냉원잔량 (LT19, Hz)에 따라 가변)
 4. T6 계산
-    
+
     $$
     T6=T5+\frac{P_{DCM}}{\dot m c_p}+ \Delta T_{\text{loss}},\quad \dot m\propto Q_{\text{eff}}
     $$
-    
+
     - 전이점 **200K/90K/82K**에서 밸브·압력제어 단계 전환.
 5. LT19(서브쿨러) 소모
-    
+
     $$
     \frac{dLT19}{dt}=\frac{+Fill(V19)-\big(Base+0.023\,P_{DCM}+ \gamma\,Q_{\text{vent}}\big)}{V_{SC}}\cdot100
     $$
-    
+
     - Open loop  (C1)에선 배기관 유량 $Q_{\text{vent}}$ 가 추가 소모를 만든다고 모델링(계수 `γ` 튜닝).
     - Base≈3 L/h, 0.023 L/h/100 W.
 
@@ -159,21 +159,21 @@ The model captures:
 ## 1) Signals & Actuators (HMI ↔ Simulator)
 
 **Sensors**
-- `T5 [K]` – supply temperature  
-- `T6 [K]` – return temperature (phase‑in/version setpoints use 200K/90K/82K)  
-- `PT1 [bar(g)]` – closed‑loop pressure  
-- `PT3 [bar(g)]` – **Heater Vessel internal pressure** (controlled by HV heater)  
-- `LT19 [%]` – Sub‑Cooler level (recommended 30–40, high alarm 94)  
-- `LT23 [%]` – Heater Vessel level (nominal 25–30, `<5%` triggers Stop)  
+- `T5 [K]` – supply temperature
+- `T6 [K]` – return temperature (phase‑in/version setpoints use 200K/90K/82K)
+- `PT1 [bar(g)]` – closed‑loop pressure
+- `PT3 [bar(g)]` – **Heater Vessel internal pressure** (controlled by HV heater)
+- `LT19 [%]` – Sub‑Cooler level (recommended 30–40, high alarm 94)
+- `LT23 [%]` – Heater Vessel level (nominal 25–30, `<5%` triggers Stop)
 - `FT18 [L/min]` – loop flow (downstream of **V11**)
 
 **Valves / actuators**
-`V9` (Forward), `V11` (Return), `V10` (Throttle 0–1), `V17` (Loop vent 0–1),  
-`V19` (Sub‑Cooler fill), `V15` (HV fill), `V20` (HV vent 0–1), `V21` (Purge On/Off),  
+`V9` (Forward), `V11` (Return), `V10` (Throttle 0–1), `V17` (Loop vent 0–1),
+`V19` (Sub‑Cooler fill), `V15` (HV fill), `V20` (HV vent 0–1), `V21` (Purge On/Off),
 `pump_hz` (0–80 Hz), `press_ctrl_on` & `press_sp_bar` (HV pressure setpoint).
 
-**READY condition (summary)**  
-`V9 & V11 OPEN ∧ Pump ON ∧ PressureCtrl ON ∧ |PT3−SP|<δ ∧ |PT1−SP|<δ ∧ LT23>20% ∧ T5<80K`.  
+**READY condition (summary)**
+`V9 & V11 OPEN ∧ Pump ON ∧ PressureCtrl ON ∧ |PT3−SP|<δ ∧ |PT1−SP|<δ ∧ LT23>20% ∧ T5<80K`.
 (“System ready” checklist.) fileciteturn0file0
 
 ---
@@ -181,19 +181,19 @@ The model captures:
 ## 2) Governing Relationships (discrete‑time)
 
 ### 2.1 Flow & Throttle
-- `Q[L/min] = 15*(pump_hz/80)*(0.4 + 0.6*V10)` gated by `V9` and **`V11`** for **FT18**.  
+- `Q[L/min] = 15*(pump_hz/80)*(0.4 + 0.6*V10)` gated by `V9` and **`V11`** for **FT18**.
 - **Open‑loop** during initial cool‑down (`V11` closed, `V17` open): an **effective** flow `Q_eff` is used for thermal transport but **FT18≈0**. Max flow @ 80 Hz >15 L/min (device spec). fileciteturn0file0
 
 ### 2.2 Pressure & Boiling‑point
-- LN₂ boiling point vs overpressure (0–5 bar) is taken from the table (77–96 K). We use a linear fit:  
-  `T_boil(PT1) ≈ 77 + 3.8·PT1` for 0–5 bar.  
+- LN₂ boiling point vs overpressure (0–5 bar) is taken from the table (77–96 K). We use a linear fit:
+  `T_boil(PT1) ≈ 77 + 3.8·PT1` for 0–5 bar.
 - **HV heater** raises **PT3**; loop pressure **PT1** follows via coupling (restricted by vents **V17/V21**). **HV vent V20** relieves PT3. Recommended loop SP ≈ **2 bar** (≥ needed +1 bar). fileciteturn0file0
 
 ### 2.3 Temperatures
-- Target supply `T_supply* = max(77, T_boil(PT1) − Δ_subcool·R_SC)` where `R_SC∈[0,1]` scales with Sub‑Cooler level (LT19).  
-- Dynamics (first‑order):  
-  - Cooling: `dT5/dt = (T_supply* − T5)/τ_cool`, `τ_cool ∝ 1/Q_eff`  
-  - Purge/warm: `dT5/dt = (T_amb − T5)/τ_warm` with `τ_warm` slowed by remaining cold reserve (LT19, pump).  
+- Target supply `T_supply* = max(77, T_boil(PT1) − Δ_subcool·R_SC)` where `R_SC∈[0,1]` scales with Sub‑Cooler level (LT19).
+- Dynamics (first‑order):
+  - Cooling: `dT5/dt = (T_supply* − T5)/τ_cool`, `τ_cool ∝ 1/Q_eff`
+  - Purge/warm: `dT5/dt = (T_amb − T5)/τ_warm` with `τ_warm` slowed by remaining cold reserve (LT19, pump).
   - Return: `T6 = T5 + Power/(ṁ·c_p)` with `ṁ∝Q_eff`.
 
 ### 2.4 Levels
@@ -204,12 +204,12 @@ The model captures:
 ## 3) Automatic Procedures
 
 ### 3.1 Auto Cool‑down (staged)
-1. `V10=60%`, pump `30 Hz`; purge supply (`V19` short).  
-2. Fill HV to ~90% (`V15` + `V20` pulse).  
-3. `V9 OPEN`, `V17=100%` → wait for `T6<200K`.  
-4. `V17→35%`, `V11 OPEN` → wait for `T6<90K`.  
-5. `V17→0%` → wait for `T6<82K`.  
-6. Pressure control **ON**, `SP≈2 bar`; adjust HV to 25–30% (by brief vent or refill).  
+1. `V10=60%`, pump `30 Hz`; purge supply (`V19` short).
+2. Fill HV to ~90% (`V15` + `V20` pulse).
+3. `V9 OPEN`, `V17=100%` → wait for `T6<200K`.
+4. `V17→35%`, `V11 OPEN` → wait for `T6<90K`.
+5. `V17→0%` → wait for `T6<82K`.
+6. Pressure control **ON**, `SP≈2 bar`; adjust HV to 25–30% (by brief vent or refill).
 7. When READY conditions meet, signal **READY**. fileciteturn0file0
 
 ### 3.2 Auto Warm‑up
@@ -222,7 +222,7 @@ The model captures:
 
 ## 4) State Machine
 
-`{IDLE, COOLING, READY, WARMUP, STOP, OFF}`  
+`{IDLE, COOLING, READY, WARMUP, STOP, OFF}`
 Transitions follow the steps above; **Stop (<1 s)** closes V9/V11, sets V10=100%, Pump OFF, PressureCtrl OFF; **Off (≥2 s)** additionally opens V17/V20 for safe depressurization. fileciteturn0file0
 
 ---
@@ -253,8 +253,8 @@ print(sim.state)
 
 ## 6) Assumptions & Tuning
 
-- Linearized `T_boil(PT1)` in 0–5 bar range; volumes, heat capacities and coupling gains (`Kh, Kc, k_tau, Kp, Ki`) are **tunable**.  
-- Flow vs frequency is scaled by a single anchor (`>15 L/min @ 80 Hz`).  
+- Linearized `T_boil(PT1)` in 0–5 bar range; volumes, heat capacities and coupling gains (`Kh, Kc, k_tau, Kp, Ki`) are **tunable**.
+- Flow vs frequency is scaled by a single anchor (`>15 L/min @ 80 Hz`).
 - Sub‑Cooler/HV volumes and V19/V15/V20 rates are configurable constants.
 
 ### 6.1 Runtime configuration (YAML)

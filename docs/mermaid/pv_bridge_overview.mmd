@@ -1,5 +1,5 @@
-%% PV Bridge (tools/pv_bridge.py) — Architecture overview
-%% Single-diagram version for renderers that require one graph per file
+%% PV Bridge (tools/pv_bridge.py) — 아키텍처 개요
+%% 단일 그래프 렌더러 호환 버전
 
 %%{init: {
   "theme":"base",
@@ -26,8 +26,8 @@ flowchart LR
   end
 
   subgraph Cfg[Configs]
-    CLI[(CLI args: dt, q_dcm, init-config, log-interval, verbose)]
-    YAML[pv_init.yaml\n+tuning.yaml\n+operating.yaml\n+interlock.yaml]
+    CLI[(CLI args: dt, q_dcm, init-config, log-interval, hist-interval, verbose)]
+    YAML["pv_init.yaml<br/>operating.yaml (optional)<br/>interlock.yaml (optional)"]
   end
 
   CLI --> BR
@@ -42,5 +42,5 @@ flowchart LR
   classDef group fill:#eef,stroke:#446,color:#111;
   class Bridge,Logic,Sim,IOC,Cfg group;
 
-  %% Cross link back to overall data flow
+  %% data_flow.mmd로 이동하는 하이퍼링크
   click BR "data_flow.mmd" "Open: Overall data flow"

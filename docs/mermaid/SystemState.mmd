@@ -5,22 +5,29 @@
 
 stateDiagram-v2
   [*] --> OFF
-  %% Start paths
+  %% 시작 경로
   OFF --> WARMUP: START(1) + MODE=WARM_UP
   OFF --> INIT: START(1)
-  INIT --> PRECOOL: after init_seconds
-  PRECOOL --> RUN: near setpoint
-  %% Hold/Resume
+  INIT --> PRECOOL: init_seconds elapsed
+  PRECOOL --> RUN: T5 <= TSP - precool_band
+  %% READY 표출 (시뮬레이터 ready 플래그)
+  INIT --> READY: ready flag true
+  PRECOOL --> READY: ready flag true
+  RUN --> READY: ready flag true
+  READY --> RUN: ready flag cleared
+  %% 보류/재개
   RUN --> HOLD: HOLD(3)
+  READY --> HOLD: HOLD(3)
   HOLD --> RUN: RESUME(4)
-  %% Stop/Off
+  %% 정지/전원 OFF
   any --> OFF: STOP(2) or OFF(5)
   WARMUP --> OFF: warm reached
-  
+  %% 안전 전이
   state SAFE_SHUTDOWN
-  RUN --> SAFE_SHUTDOWN: Safety
-  HOLD --> SAFE_SHUTDOWN: Safety
   INIT --> SAFE_SHUTDOWN: Safety
   PRECOOL --> SAFE_SHUTDOWN: Safety
+  RUN --> SAFE_SHUTDOWN: Safety
+  READY --> SAFE_SHUTDOWN: Safety
+  HOLD --> SAFE_SHUTDOWN: Safety
   WARMUP --> SAFE_SHUTDOWN: Safety
   SAFE_SHUTDOWN --> OFF: RESET(6)=ACK_ALARM

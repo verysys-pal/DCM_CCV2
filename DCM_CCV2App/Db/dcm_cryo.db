@@ -9,7 +9,6 @@ record(mbbi, "BL:DCM:CRYO:STATE:MAIN") {
     field(FVST, "WARMUP")
     field(SXST, "SAFE_SHUTDOWN")
     field(SVST, "ALARM")
-    field(EIST, "READY")
     alias("BL:DCM:CRYO:STATE:CURRENT")
 }
 
@@ -33,7 +32,7 @@ record(mbbo, "BL:DCM:CRYO:CMD:MAIN") {
     field(SXST, "RESET")
 }
 
-# Select Mode command
+# Select Mode command (used by GUI and pv_bridge)
 record(mbbo, "BL:DCM:CRYO:CMD:MODE") {
     field(ZRST, "NONE")            # 0
     field(ONST, "PURGE")           # 1
@@ -46,6 +45,16 @@ record(mbbo, "BL:DCM:CRYO:CMD:MODE") {
     field(EIST, "Refill SUB OFF")  # 8
 }
 
+record(ai,  "BL:DCM:CRYO:TEMP:COLDHEAD") {
+    field(EGU,  "K")
+    field(PREC, "2")
+    field(LOPR, "0")
+    field(HOPR, "350")
+    field(HIGH, "280")
+    field(HIHI, "300")
+    field(HSV,  "MINOR")
+    field(HHSV, "MAJOR")
+}
 record(ai,  "BL:DCM:CRYO:TEMP:T5") {
     field(EGU,  "K")
     field(PREC, "2")
@@ -73,7 +82,7 @@ record(ai,  "BL:DCM:CRYO:TEMP:SUBCOOLER") {
     field(HOPR, "350")
 }
 
-# Vent pipe heater temperature
+# Vent pipe heater temperature (display only)
 record(ai,  "BL:DCM:CRYO:TEMP:VENTHT") {
     field(EGU,  "K")
     field(PREC, "1")
@@ -204,7 +213,7 @@ record(ai,  "BL:DCM:CRYO:TIME") {
 # Level transmitters
 record(ai,  "BL:DCM:CRYO:LEVEL:LT19") {
     field(EGU,  "%")
-    field(PREC, "1")
+    field(PREC, "5")
     field(LOPR, "0")
     field(HOPR, "100")
     field(LOLO, "5")
@@ -218,7 +227,7 @@ record(ai,  "BL:DCM:CRYO:LEVEL:LT19") {
 }
 record(ai,  "BL:DCM:CRYO:LEVEL:LT23") {
     field(EGU,  "%")
-    field(PREC, "1")
+    field(PREC, "5")
     field(LOPR, "0")
     field(HOPR, "100")
     field(LOLO, "5")
@@ -270,6 +279,10 @@ record(waveform, "BL:DCM:CRYO:HIST:TIME") {
     field(FTVL, "DOUBLE")
     field(NELM, "2048")
 }
+record(waveform, "BL:DCM:CRYO:HIST:TEMP:COLDHEAD") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
 record(waveform, "BL:DCM:CRYO:HIST:TEMP:T5") {
     field(FTVL, "DOUBLE")
     field(NELM, "2048")
@@ -287,6 +300,14 @@ record(waveform, "BL:DCM:CRYO:HIST:PRESS:PT3") {
     field(NELM, "2048")
 }
 record(waveform, "BL:DCM:CRYO:HIST:FLOW:FT18") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:LEVEL:LT19") {
+    field(FTVL, "DOUBLE")
+    field(NELM, "2048")
+}
+record(waveform, "BL:DCM:CRYO:HIST:LEVEL:LT23") {
     field(FTVL, "DOUBLE")
     field(NELM, "2048")
 }
@@ -370,4 +391,89 @@ record(bi,  "BL:DCM:CRYO:VALVE:V21:STATUS") {
 record(bo,  "BL:DCM:CRYO:VALVE:V21:CMD") {
     field(ZNAM, "CLOSE")
     field(ONAM, "OPEN")
+}
+
+# --- Tuning PVs (optional; used by pv_bridge for live parameter updates) ---
+# SubCooler (LT19) tuning
+record(ao,  "BL:DCM:CRYO:TUNE:LT19:FILL_LPS") {
+    field(EGU,  "L/s")
+    field(PREC, "4")
+    field(DRVL, "0")
+    field(DRVH, "10")
+    field(LOPR, "0")
+    field(HOPR, "10")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT19:BASE_CONS_LPS") {
+    field(EGU,  "L/s")
+    field(PREC, "6")
+    field(DRVL, "0")
+    field(DRVH, "1")
+    field(LOPR, "0")
+    field(HOPR, "1")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT19:POWER_CONS_LPS_PERW") {
+    field(EGU,  "(L/s)/W")
+    field(PREC, "8")
+    field(DRVL, "0")
+    field(DRVH, "0.01")
+    field(LOPR, "0")
+    field(HOPR, "0.01")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT19:VENT_GAMMA_LPS_PERLPM") {
+    field(EGU,  "(L/s)/(L/min)")
+    field(PREC, "6")
+    field(DRVL, "0")
+    field(DRVH, "0.5")
+    field(LOPR, "0")
+    field(HOPR, "0.5")
+}
+
+# HV tank (LT23) tuning
+record(ao,  "BL:DCM:CRYO:TUNE:LT23:REFILL_RATE_PCTPS") {
+    field(EGU,  "%/s")
+    field(PREC, "4")
+    field(DRVL, "0")
+    field(DRVH, "100")
+    field(LOPR, "0")
+    field(HOPR, "100")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT23:DRAIN_RATE_PCTPS") {
+    field(EGU,  "%/s")
+    field(PREC, "4")
+    field(DRVL, "0")
+    field(DRVH, "100")
+    field(LOPR, "0")
+    field(HOPR, "100")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT23:BASE_CONS_PCTPS") {
+    field(EGU,  "%/s")
+    field(PREC, "4")
+    field(DRVL, "0")
+    field(DRVH, "100")
+    field(LOPR, "0")
+    field(HOPR, "100")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT23:POWER_CONS_PCTPS_PERW") {
+    field(EGU,  "%/(s·W)")
+    field(PREC, "6")
+    field(DRVL, "0")
+    field(DRVH, "1")
+    field(LOPR, "0")
+    field(HOPR, "1")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT23:HEATER_CONS_PCTPS_MAX") {
+    field(EGU,  "%/s")
+    field(PREC, "4")
+    field(DRVL, "0")
+    field(DRVH, "100")
+    field(LOPR, "0")
+    field(HOPR, "100")
+}
+record(ao,  "BL:DCM:CRYO:TUNE:LT23:VENT_GAMMA_PCTPS") {
+    field(EGU,  "%/s")
+    field(PREC, "4")
+    field(DRVL, "0")
+    field(DRVH, "100")
+    field(LOPR, "0")
+    field(HOPR, "100")
 }
