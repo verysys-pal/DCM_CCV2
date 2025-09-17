@@ -1,0 +1,41 @@
+classDiagram
+    class Controls {
+        +bool V9
+        +bool V11
+        +bool V19
+        +bool V15
+        +bool V21
+        +float V10
+        +float V17
+        +float V20
+        +float pump_hz
+        +bool press_ctrl_on
+        +float press_sp_bar
+        -float _heater_u
+    }
+    class State {
+        +float T5
+        +float T6
+        +float PT1
+        +float PT3
+        +float LT19
+        +float LT23
+        +float FT18
+        +bool ready
+        +str mode
+    }
+    class CryoCoolerSim {
+        +step(dt, power_W)
+        -_update_pressures(dt)
+        -_update_temperatures(dt, power_W)
+        -_update_levels(dt, power_W)
+        -flow_loop_and_eff()
+        -_flow_base()
+        -_rsc()
+        +T_boil(pt_bar)
+        +clamp(v, lo, hi)
+    }
+    Controls --> CryoCoolerSim : injects
+    State --> CryoCoolerSim : injects
+    CryoCoolerSim --> State : updates
+    CryoCoolerSim ..> Controls : updates heater
