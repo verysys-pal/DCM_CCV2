@@ -682,7 +682,7 @@ $(actions)</tooltip>
     <y>670</y>
     <width>499</width>
     <height>210</height>
-    <title>Flow &amp; Pump</title>
+    <title>Tank Level (LT19, LT23)</title>
     <title_font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
       </font>
@@ -706,7 +706,7 @@ $(actions)</tooltip>
     </x_axis>
     <y_axes>
       <y_axis>
-        <title>Flow (L/min) / Freq (Hz)</title>
+        <title>Level (%)</title>
         <autoscale>true</autoscale>
         <log_scale>false</log_scale>
         <minimum>0.0</minimum>
@@ -730,9 +730,9 @@ $(actions)</tooltip>
     </y_axes>
     <traces>
       <trace>
-        <name>FT18</name>
+        <name>LT19</name>
         <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:FLOW:FT18</y_pv>
+        <y_pv>$(P)HIST:LEVEL:LT19</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -747,9 +747,9 @@ $(actions)</tooltip>
         <visible>true</visible>
       </trace>
       <trace>
-        <name>Pump Hz</name>
+        <name>LT23</name>
         <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:PUMP:FREQ</y_pv>
+        <y_pv>$(P)HIST:LEVEL:LT23</y_pv>
         <err_pv></err_pv>
         <axis>0</axis>
         <trace_type>1</trace_type>
@@ -822,29 +822,6 @@ $(actions)</tooltip>
         </color>
       </on_color>
       <tooltip>알람 활성화 상태</tooltip>
-    </widget>
-    <widget type="led" version="2.0.0">
-      <name>ReadyLED</name>
-      <pv_name>$(P)READY</pv_name>
-      <x>10</x>
-      <y>132</y>
-      <off_color>
-        <color red="128" green="128" blue="128">
-        </color>
-      </off_color>
-      <on_color>
-        <color red="0" green="200" blue="0">
-        </color>
-      </on_color>
-      <tooltip>READY 조건 만족 시 녹색 점등</tooltip>
-    </widget>
-    <widget type="label" version="2.0.0">
-      <name>ReadyLabel</name>
-      <text>READY</text>
-      <x>40</x>
-      <y>138</y>
-      <width>60</width>
-      <vertical_alignment>1</vertical_alignment>
     </widget>
     <widget type="label" version="2.0.0">
       <name>AlarmLabel</name>
@@ -1347,6 +1324,103 @@ $(actions)</tooltip>
       <tooltip>현재 메인 상태 표시</tooltip>
     </widget>
     <widget type="action_button" version="3.0.0">
+      <name>WarmupButton_2</name>
+      <actions>
+        <action type="write_pv">
+          <description>MODE : Ready</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>2</value>
+        </action>
+      </actions>
+      <text>READY</text>
+      <x>200</x>
+      <y>91</y>
+      <width>80</width>
+      <rules>
+        <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+          <exp bool_exp="pv0==0">
+            <expression></expression>
+          </exp>
+        </rule>
+      </rules>
+      <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>WarmupButton_1</name>
+      <actions>
+        <action type="write_pv">
+          <description>MODE : PURGE</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>1</value>
+        </action>
+      </actions>
+      <text>PURGE</text>
+      <x>200</x>
+      <y>51</y>
+      <width>80</width>
+      <rules>
+        <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+          <exp bool_exp="pv0==0">
+            <expression></expression>
+          </exp>
+        </rule>
+      </rules>
+      <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>WarmupButton</name>
+      <actions>
+        <action type="write_pv">
+          <description>MODE : Cool Down</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>3</value>
+        </action>
+      </actions>
+      <text>Cool-Down</text>
+      <x>102</x>
+      <y>51</y>
+      <width>80</width>
+      <rules>
+        <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
+          <exp bool_exp="pv0==0">
+            <expression></expression>
+          </exp>
+        </rule>
+      </rules>
+      <tooltip>웜업(가열) 시퀀스 실행</tooltip>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>RefillButton</name>
+      <actions>
+        <action type="write_pv">
+          <description>Refill On : Heater</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>5</value>
+        </action>
+        <action type="write_pv">
+          <description>Refill Off : Heater</description>
+          <pv_name>$(P)CMD:MODE</pv_name>
+          <value>6</value>
+        </action>
+      </actions>
+      <text>Refill-HV</text>
+      <x>10</x>
+      <y>51</y>
+      <width>80</width>
+      <background_color>
+        <color red="200" green="255" blue="200">
+        </color>
+      </background_color>
+      <rules>
+        <rule name="EnableWhenSafe" prop_id="enabled" out_exp="false">
+          <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
+          <pv_name>BL:DCM:CRYO:SAFETY:INTERLOCK</pv_name>
+          <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
+        </rule>
+      </rules>
+      <tooltip>$(actions)</tooltip>
+    </widget>
+    <widget type="action_button" version="3.0.0">
       <name>RefillButton_1</name>
       <actions>
         <action type="write_pv">
@@ -1361,7 +1435,7 @@ $(actions)</tooltip>
         </action>
       </actions>
       <text>Refill-SC</text>
-      <x>196</x>
+      <x>10</x>
       <y>91</y>
       <width>80</width>
       <background_color>
@@ -1517,59 +1591,6 @@ $(actions)</tooltip>
     </rules>
     <tooltip>안전 정지 시퀀스 실행</tooltip>
   </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>WarmupButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>MODE : Cool Down</description>
-        <pv_name>$(P)CMD:MODE</pv_name>
-        <value>3</value>
-      </action>
-    </actions>
-    <text>Cool-Down</text>
-    <x>570</x>
-    <y>806</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==0">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>RefillButton</name>
-    <actions>
-      <action type="write_pv">
-        <description>Refill On : Heater</description>
-        <pv_name>$(P)CMD:MODE</pv_name>
-        <value>5</value>
-      </action>
-      <action type="write_pv">
-        <description>Refill Off : Heater</description>
-        <pv_name>$(P)CMD:MODE</pv_name>
-        <value>6</value>
-      </action>
-    </actions>
-    <text>Refill-HV</text>
-    <x>756</x>
-    <y>766</y>
-    <width>80</width>
-    <background_color>
-      <color red="200" green="255" blue="200">
-      </color>
-    </background_color>
-    <rules>
-      <rule name="EnableWhenSafe" prop_id="enabled" out_exp="false">
-        <pv_name>BL:DCM:CRYO:ALARM:ACTIVE</pv_name>
-        <pv_name>BL:DCM:CRYO:SAFETY:INTERLOCK</pv_name>
-        <pv_name>BL:DCM:CRYO:LEVEL:LT19</pv_name>
-      </rule>
-    </rules>
-    <tooltip>$(actions)</tooltip>
-  </widget>
   <widget type="label" version="2.0.0">
     <name>ControlTitle_2</name>
     <text>Select Mode</text>
@@ -1582,50 +1603,6 @@ $(actions)</tooltip>
       </font>
     </font>
     <vertical_alignment>1</vertical_alignment>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>WarmupButton_1</name>
-    <actions>
-      <action type="write_pv">
-        <description>MODE : PURGE</description>
-        <pv_name>$(P)CMD:MODE</pv_name>
-        <value>1</value>
-      </action>
-    </actions>
-    <text>PURGE</text>
-    <x>570</x>
-    <y>766</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==0">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
-  </widget>
-  <widget type="action_button" version="3.0.0">
-    <name>WarmupButton_2</name>
-    <actions>
-      <action type="write_pv">
-        <description>MODE : Ready</description>
-        <pv_name>$(P)CMD:MODE</pv_name>
-        <value>2</value>
-      </action>
-    </actions>
-    <text>READY</text>
-    <x>662</x>
-    <y>766</y>
-    <width>80</width>
-    <rules>
-      <rule name="EnableWhenNotRunning" prop_id="enabled" out_exp="true">
-        <exp bool_exp="pv0==0">
-          <expression></expression>
-        </exp>
-      </rule>
-    </rules>
-    <tooltip>웜업(가열) 시퀀스 실행</tooltip>
   </widget>
   <widget type="action_button" version="3.0.0">
     <name>WarmupButton_3</name>
@@ -1737,5 +1714,24 @@ $(actions)</tooltip>
         <visible>true</visible>
       </trace>
     </traces>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>ReadyLED</name>
+    <pv_name>$(P)READY</pv_name>
+    <x>45</x>
+    <y>536</y>
+    <off_color>
+      <color red="128" green="128" blue="128">
+      </color>
+    </off_color>
+    <tooltip>READY 조건 만족 시 녹색 점등</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>ReadyLabel</name>
+    <text>READY</text>
+    <x>32</x>
+    <y>516</y>
+    <width>60</width>
+    <vertical_alignment>1</vertical_alignment>
   </widget>
 </display>
