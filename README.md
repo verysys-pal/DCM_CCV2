@@ -112,3 +112,6 @@ python -m tests.tools.runner --plan tests/scenarios/normal_start.yaml
 프로젝트의 설계, 개발, 사용법에 대한 더 상세한 정보는 아래 문서들을 참고하세요.
 
 - [**개발 가이드**](./docs/development_guide.md): 빌드, 실행, 테스트, 기여 방법에 대한 상세 절차를 안내합니다.
+
+## DeepWiki
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/verysys-pal/DCM_CCV2)
