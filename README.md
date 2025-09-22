@@ -112,14 +112,6 @@ python -m tests.tools.runner --plan tests/scenarios/normal_start.yaml
 프로젝트의 설계, 개발, 사용법에 대한 더 상세한 정보는 아래 문서들을 참고하세요.
 
 - [**개발 가이드**](./docs/development_guide.md): 빌드, 실행, 테스트, 기여 방법에 대한 상세 절차를 안내합니다.
-- [**참조 가이드**](./docs/Reference/Reference_Guide.md): PV 명명 규칙, 상태기계, 시나리오 등 프로젝트의 핵심 요구사항을 정의합니다.
-
-### 아키텍처 다이어그램
-
-프로젝트의 상세 아키텍처와 상태기계 다이어그램은 아래 링크에서 확인할 수 있습니다.
-
-- [**시스템 아키텍처**](./docs/diagrams/system_architecture.mmd): 전체 시스템의 구성 요소와 상호작용을 보여주는 다이어그램입니다.
-- [**상태기계 다이어그램**](./docs/diagrams/state_machine.mmd): 제어 로직의 핵심 상태 전이를 정의한 다이어그램입니다.
 
 ## DeepWiki
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/verysys-pal/DCM_CCV2)
