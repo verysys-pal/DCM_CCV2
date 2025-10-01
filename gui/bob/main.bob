@@ -204,57 +204,6 @@ $(actions)</tooltip>
       </font>
     </font>
   </widget>
-  <widget type="label" version="2.0.0">
-    <name>LevelTransmitterLabel</name>
-    <text>Level transmitter</text>
-    <x>560</x>
-    <y>1350</y>
-    <width>150</width>
-    <font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </font>
-    <foreground_color>
-      <color red="0" green="0" blue="255">
-      </color>
-    </foreground_color>
-  </widget>
-  <widget type="label" version="2.0.0">
-    <name>PressureTransmitterLabel2</name>
-    <text>Pressure transmitter</text>
-    <x>560</x>
-    <y>1480</y>
-    <width>150</width>
-    <font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </font>
-    <foreground_color>
-      <color red="0" green="0" blue="255">
-      </color>
-    </foreground_color>
-  </widget>
-  <widget type="label" version="2.0.0">
-    <name>PumpControlLabel</name>
-    <text>Pump control</text>
-    <x>710</x>
-    <y>1510</y>
-  </widget>
-  <widget type="label" version="2.0.0">
-    <name>LevelTransmitterBottomLabel</name>
-    <text>Level transmitter</text>
-    <x>830</x>
-    <y>1510</y>
-    <width>150</width>
-    <font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </font>
-    <foreground_color>
-      <color red="0" green="0" blue="255">
-      </color>
-    </foreground_color>
-  </widget>
   <widget type="textupdate" version="2.0.0">
     <name>T5Value</name>
     <pv_name>$(P)TEMP:T5</pv_name>
@@ -498,273 +447,6 @@ $(actions)</tooltip>
     <horizontal_alignment>1</horizontal_alignment>
     <border_width>1</border_width>
   </widget>
-  <widget type="xyplot" version="3.0.0">
-    <name>TrendChart</name>
-    <x>881</x>
-    <y>70</y>
-    <width>499</width>
-    <height>200</height>
-    <title>Temperature (T5, T6)</title>
-    <title_font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </title_font>
-    <x_axis>
-      <title>Time (s)</title>
-      <autoscale>true</autoscale>
-      <log_scale>false</log_scale>
-      <minimum>0.0</minimum>
-      <maximum>300.0</maximum>
-      <show_grid>true</show_grid>
-      <title_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </title_font>
-      <scale_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </scale_font>
-      <visible>false</visible>
-    </x_axis>
-    <y_axes>
-      <y_axis>
-        <title>Temperature (K)</title>
-        <autoscale>true</autoscale>
-        <log_scale>false</log_scale>
-        <minimum>0.0</minimum>
-        <maximum>300.0</maximum>
-        <show_grid>true</show_grid>
-        <title_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </title_font>
-        <scale_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </scale_font>
-        <on_right>false</on_right>
-        <visible>true</visible>
-        <color>
-          <color name="Text" red="0" green="0" blue="0">
-          </color>
-        </color>
-      </y_axis>
-    </y_axes>
-    <traces>
-      <trace>
-        <name>T5</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:TEMP:T5</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="0" green="0" blue="255">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>4</point_size>
-        <visible>true</visible>
-      </trace>
-      <trace>
-        <name>T6</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:TEMP:T6</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="255" green="0" blue="0">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>4</point_size>
-        <visible>true</visible>
-      </trace>
-    </traces>
-  </widget>
-  <widget type="xyplot" version="3.0.0">
-    <name>PressureTrendChart</name>
-    <x>881</x>
-    <y>270</y>
-    <width>499</width>
-    <height>200</height>
-    <title>Pressure (PT1, PT3)</title>
-    <title_font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </title_font>
-    <x_axis>
-      <title>Time (s)</title>
-      <autoscale>true</autoscale>
-      <log_scale>false</log_scale>
-      <minimum>0.0</minimum>
-      <maximum>300.0</maximum>
-      <show_grid>true</show_grid>
-      <title_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </title_font>
-      <scale_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </scale_font>
-      <visible>false</visible>
-    </x_axis>
-    <y_axes>
-      <y_axis>
-        <title>Pressure (bar)</title>
-        <autoscale>true</autoscale>
-        <log_scale>false</log_scale>
-        <minimum>0.0</minimum>
-        <maximum>2.0</maximum>
-        <show_grid>true</show_grid>
-        <title_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </title_font>
-        <scale_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </scale_font>
-        <on_right>false</on_right>
-        <visible>true</visible>
-        <color>
-          <color name="Text" red="0" green="0" blue="0">
-          </color>
-        </color>
-      </y_axis>
-    </y_axes>
-    <traces>
-      <trace>
-        <name>PT1</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:PRESS:PT1</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="255" green="0" blue="255">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>4</point_size>
-        <visible>true</visible>
-      </trace>
-      <trace>
-        <name>PT3</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:PRESS:PT3</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="255" green="165" blue="0">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>4</point_size>
-        <visible>true</visible>
-      </trace>
-    </traces>
-  </widget>
-  <widget type="xyplot" version="3.0.0">
-    <name>FlowTrendChart</name>
-    <x>881</x>
-    <y>670</y>
-    <width>499</width>
-    <height>210</height>
-    <title>Tank Level (LT19, LT23)</title>
-    <title_font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </title_font>
-    <x_axis>
-      <title>Time (s)</title>
-      <autoscale>true</autoscale>
-      <log_scale>false</log_scale>
-      <minimum>0.0</minimum>
-      <maximum>300.0</maximum>
-      <show_grid>true</show_grid>
-      <title_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </title_font>
-      <scale_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </scale_font>
-      <visible>true</visible>
-    </x_axis>
-    <y_axes>
-      <y_axis>
-        <title>Level (%)</title>
-        <autoscale>true</autoscale>
-        <log_scale>false</log_scale>
-        <minimum>0.0</minimum>
-        <maximum>100.0</maximum>
-        <show_grid>true</show_grid>
-        <title_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </title_font>
-        <scale_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </scale_font>
-        <on_right>false</on_right>
-        <visible>true</visible>
-        <color>
-          <color name="Text" red="0" green="0" blue="0">
-          </color>
-        </color>
-      </y_axis>
-    </y_axes>
-    <traces>
-      <trace>
-        <name>LT19</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:LEVEL:LT19</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="255" green="127" blue="0">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>10</point_size>
-        <visible>true</visible>
-      </trace>
-      <trace>
-        <name>LT23</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:LEVEL:LT23</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="128" green="128" blue="0">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>10</point_size>
-        <visible>true</visible>
-      </trace>
-    </traces>
-  </widget>
   <widget type="group" version="3.0.0">
     <name>SystemStatus</name>
     <x>20</x>
@@ -952,7 +634,7 @@ $(actions)</tooltip>
   </widget>
   <widget type="group" version="3.0.0">
     <name>SystemStatus_1</name>
-    <x>881</x>
+    <x>166</x>
     <y>920</y>
     <width>379</width>
     <height>180</height>
@@ -1626,95 +1308,6 @@ $(actions)</tooltip>
     </rules>
     <tooltip>웜업(가열) 시퀀스 실행</tooltip>
   </widget>
-  <widget type="xyplot" version="3.0.0">
-    <name>FlowTrendChart_1</name>
-    <x>881</x>
-    <y>470</y>
-    <width>499</width>
-    <height>200</height>
-    <title>Flow (V10, V17)</title>
-    <title_font>
-      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
-      </font>
-    </title_font>
-    <x_axis>
-      <title>Time (s)</title>
-      <autoscale>true</autoscale>
-      <log_scale>false</log_scale>
-      <minimum>0.0</minimum>
-      <maximum>300.0</maximum>
-      <show_grid>true</show_grid>
-      <title_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </title_font>
-      <scale_font>
-        <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-        </font>
-      </scale_font>
-      <visible>false</visible>
-    </x_axis>
-    <y_axes>
-      <y_axis>
-        <title>Valve open (%)</title>
-        <autoscale>true</autoscale>
-        <log_scale>false</log_scale>
-        <minimum>0.0</minimum>
-        <maximum>100.0</maximum>
-        <show_grid>true</show_grid>
-        <title_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </title_font>
-        <scale_font>
-          <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
-          </font>
-        </scale_font>
-        <on_right>false</on_right>
-        <visible>true</visible>
-        <color>
-          <color name="Text" red="0" green="0" blue="0">
-          </color>
-        </color>
-      </y_axis>
-    </y_axes>
-    <traces>
-      <trace>
-        <name>Flow V10</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:FLOW:V10</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="0" green="0" blue="255">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>10</point_size>
-        <visible>true</visible>
-      </trace>
-      <trace>
-        <name>Flow V17</name>
-        <x_pv>$(P)HIST:TIME</x_pv>
-        <y_pv>$(P)HIST:FLOW:V17</y_pv>
-        <err_pv></err_pv>
-        <axis>0</axis>
-        <trace_type>1</trace_type>
-        <color>
-          <color red="0" green="128" blue="0">
-          </color>
-        </color>
-        <line_width>2</line_width>
-        <line_style>0</line_style>
-        <point_type>0</point_type>
-        <point_size>10</point_size>
-        <visible>true</visible>
-      </trace>
-    </traces>
-  </widget>
   <widget type="led" version="2.0.0">
     <name>ReadyLED</name>
     <pv_name>$(P)READY</pv_name>
@@ -1733,5 +1326,412 @@ $(actions)</tooltip>
     <y>516</y>
     <width>60</width>
     <vertical_alignment>1</vertical_alignment>
+  </widget>
+  <widget type="databrowser" version="2.0.0">
+    <name>Data Browser_1</name>
+    <x>1240</x>
+    <y>280</y>
+    <width>0</width>
+    <height>0</height>
+  </widget>
+  <widget type="tabs" version="2.0.0">
+    <name>Tabs</name>
+    <tabs>
+      <tab>
+        <name>Tab 1</name>
+        <children>
+          <widget type="xyplot" version="3.0.0">
+            <name>TrendChart</name>
+            <x>9</x>
+            <y>12</y>
+            <width>480</width>
+            <height>185</height>
+            <title>Temperature (T5, T6)</title>
+            <title_font>
+              <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+              </font>
+            </title_font>
+            <x_axis>
+              <title>Time (s)</title>
+              <autoscale>true</autoscale>
+              <log_scale>false</log_scale>
+              <minimum>0.0</minimum>
+              <maximum>300.0</maximum>
+              <show_grid>true</show_grid>
+              <title_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </title_font>
+              <scale_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </scale_font>
+              <visible>false</visible>
+            </x_axis>
+            <y_axes>
+              <y_axis>
+                <title>Temperature (K)</title>
+                <autoscale>true</autoscale>
+                <log_scale>false</log_scale>
+                <minimum>0.0</minimum>
+                <maximum>300.0</maximum>
+                <show_grid>true</show_grid>
+                <title_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </title_font>
+                <scale_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </scale_font>
+                <on_right>false</on_right>
+                <visible>true</visible>
+                <color>
+                  <color name="Text" red="0" green="0" blue="0">
+                  </color>
+                </color>
+              </y_axis>
+            </y_axes>
+            <traces>
+              <trace>
+                <name>T5</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:TEMP:T5</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="0" green="0" blue="255">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>4</point_size>
+                <visible>true</visible>
+              </trace>
+              <trace>
+                <name>T6</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:TEMP:T6</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="255" green="0" blue="0">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>4</point_size>
+                <visible>true</visible>
+              </trace>
+            </traces>
+          </widget>
+          <widget type="xyplot" version="3.0.0">
+            <name>PressureTrendChart</name>
+            <x>9</x>
+            <y>196</y>
+            <width>480</width>
+            <height>185</height>
+            <title>Pressure (PT1, PT3)</title>
+            <title_font>
+              <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+              </font>
+            </title_font>
+            <x_axis>
+              <title>Time (s)</title>
+              <autoscale>true</autoscale>
+              <log_scale>false</log_scale>
+              <minimum>0.0</minimum>
+              <maximum>300.0</maximum>
+              <show_grid>true</show_grid>
+              <title_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </title_font>
+              <scale_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </scale_font>
+              <visible>false</visible>
+            </x_axis>
+            <y_axes>
+              <y_axis>
+                <title>Pressure (bar)</title>
+                <autoscale>true</autoscale>
+                <log_scale>false</log_scale>
+                <minimum>0.0</minimum>
+                <maximum>2.0</maximum>
+                <show_grid>true</show_grid>
+                <title_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </title_font>
+                <scale_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </scale_font>
+                <on_right>false</on_right>
+                <visible>true</visible>
+                <color>
+                  <color name="Text" red="0" green="0" blue="0">
+                  </color>
+                </color>
+              </y_axis>
+            </y_axes>
+            <traces>
+              <trace>
+                <name>PT1</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:PRESS:PT1</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="255" green="0" blue="255">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>4</point_size>
+                <visible>true</visible>
+              </trace>
+              <trace>
+                <name>PT3</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:PRESS:PT3</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="255" green="165" blue="0">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>4</point_size>
+                <visible>true</visible>
+              </trace>
+            </traces>
+          </widget>
+          <widget type="xyplot" version="3.0.0">
+            <name>FlowTrendChart_1</name>
+            <x>9</x>
+            <y>385</y>
+            <width>480</width>
+            <height>185</height>
+            <title>Flow (V10, V17)</title>
+            <title_font>
+              <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+              </font>
+            </title_font>
+            <x_axis>
+              <title>Time (s)</title>
+              <autoscale>true</autoscale>
+              <log_scale>false</log_scale>
+              <minimum>0.0</minimum>
+              <maximum>300.0</maximum>
+              <show_grid>true</show_grid>
+              <title_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </title_font>
+              <scale_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </scale_font>
+              <visible>false</visible>
+            </x_axis>
+            <y_axes>
+              <y_axis>
+                <title>Valve open (%)</title>
+                <autoscale>true</autoscale>
+                <log_scale>false</log_scale>
+                <minimum>0.0</minimum>
+                <maximum>100.0</maximum>
+                <show_grid>true</show_grid>
+                <title_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </title_font>
+                <scale_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </scale_font>
+                <on_right>false</on_right>
+                <visible>true</visible>
+                <color>
+                  <color name="Text" red="0" green="0" blue="0">
+                  </color>
+                </color>
+              </y_axis>
+            </y_axes>
+            <traces>
+              <trace>
+                <name>Flow V10</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:FLOW:V10</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="0" green="0" blue="255">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>10</point_size>
+                <visible>true</visible>
+              </trace>
+              <trace>
+                <name>Flow V17</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:FLOW:V17</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="0" green="128" blue="0">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>10</point_size>
+                <visible>true</visible>
+              </trace>
+            </traces>
+          </widget>
+          <widget type="xyplot" version="3.0.0">
+            <name>FlowTrendChart</name>
+            <x>9</x>
+            <y>568</y>
+            <width>480</width>
+            <height>185</height>
+            <title>Tank Level (LT19, LT23)</title>
+            <title_font>
+              <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+              </font>
+            </title_font>
+            <x_axis>
+              <title>Time (s)</title>
+              <autoscale>true</autoscale>
+              <log_scale>false</log_scale>
+              <minimum>0.0</minimum>
+              <maximum>300.0</maximum>
+              <show_grid>true</show_grid>
+              <title_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </title_font>
+              <scale_font>
+                <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                </font>
+              </scale_font>
+              <visible>true</visible>
+            </x_axis>
+            <y_axes>
+              <y_axis>
+                <title>Level (%)</title>
+                <autoscale>true</autoscale>
+                <log_scale>false</log_scale>
+                <minimum>0.0</minimum>
+                <maximum>100.0</maximum>
+                <show_grid>true</show_grid>
+                <title_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </title_font>
+                <scale_font>
+                  <font name="Default" family="Liberation Sans" style="REGULAR" size="14.0">
+                  </font>
+                </scale_font>
+                <on_right>false</on_right>
+                <visible>true</visible>
+                <color>
+                  <color name="Text" red="0" green="0" blue="0">
+                  </color>
+                </color>
+              </y_axis>
+            </y_axes>
+            <traces>
+              <trace>
+                <name>LT19</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:LEVEL:LT19</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="255" green="127" blue="0">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>10</point_size>
+                <visible>true</visible>
+              </trace>
+              <trace>
+                <name>LT23</name>
+                <x_pv>$(P)HIST:TIME</x_pv>
+                <y_pv>$(P)HIST:LEVEL:LT23</y_pv>
+                <err_pv></err_pv>
+                <axis>0</axis>
+                <trace_type>1</trace_type>
+                <color>
+                  <color red="128" green="128" blue="0">
+                  </color>
+                </color>
+                <line_width>2</line_width>
+                <line_style>0</line_style>
+                <point_type>0</point_type>
+                <point_size>10</point_size>
+                <visible>true</visible>
+              </trace>
+            </traces>
+          </widget>
+        </children>
+      </tab>
+      <tab>
+        <name>Tab 2</name>
+        <children>
+          <widget type="databrowser" version="2.0.0">
+            <name>Data Browser_5</name>
+            <file>DataBrowser/03_DCM_TEMP.plt</file>
+            <x>9</x>
+            <y>14</y>
+            <width>480</width>
+            <height>270</height>
+          </widget>
+          <widget type="databrowser" version="2.0.0">
+            <name>Data Browser_3</name>
+            <file>DataBrowser/02_DCM_PRESS.plt</file>
+            <x>9</x>
+            <y>249</y>
+            <width>480</width>
+            <height>270</height>
+          </widget>
+          <widget type="databrowser" version="2.0.0">
+            <name>Data Browser_4</name>
+            <file>DataBrowser/01_DCM_LEVEL.plt</file>
+            <x>9</x>
+            <y>486</y>
+            <width>480</width>
+            <height>270</height>
+          </widget>
+        </children>
+      </tab>
+    </tabs>
+    <x>880</x>
+    <y>70</y>
+    <width>500</width>
+    <height>795</height>
+    <active_tab>1</active_tab>
   </widget>
 </display>
